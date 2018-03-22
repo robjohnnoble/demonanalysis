@@ -349,31 +349,31 @@ create_plots_batch <- function(input_dir, output_dir, pars, final_values) {
   if(N != length(final_values)) stop("Unequal lengths of pars and final_values.")
   
   if(N == 1) for(a in 0:final_values[1]) {
-    if(final_error_message(input_dir) == "Exit code 0") 
-      plot_all_images(input_dir, output_dir, make_file_name(input_dir, pars, a), file_type = "png")
+    if(final_error_message(make_dir(input_dir, pars, a)) == "Exit code 0") 
+      plot_all_images(input_dir, output_dir, make_file_name(pars, a), file_type = "png")
   }
   
   if(N == 2) for(a in 0:final_values[1]) for(b in 0:final_values[2]) {
-    if(final_error_message(input_dir) == "Exit code 0") 
-      plot_all_images(input_dir, output_dir, make_file_name(input_dir, pars, c(a, b)), file_type = "png")
+    if(final_error_message(make_dir(input_dir, pars, c(a, b))) == "Exit code 0") 
+      plot_all_images(input_dir, output_dir, make_file_name(pars, c(a, b)), file_type = "png")
   }
   
   if(N == 3) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
     for(c in 0:final_values[3]) {
-      if(final_error_message(input_dir) == "Exit code 0") 
-        plot_all_images(input_dir, output_dir, make_file_name(input_dir, pars, c(a, b, c)), file_type = "png")
+      if(final_error_message(make_dir(input_dir, pars, c(a, b, c))) == "Exit code 0") 
+        plot_all_images(input_dir, output_dir, make_file_name(pars, c(a, b, c)), file_type = "png")
     }
   
   if(N == 4) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
     for(c in 0:final_values[3]) for(d in 0:final_values[4]) {
-      if(final_error_message(input_dir) == "Exit code 0") 
-        plot_all_images(input_dir, output_dir, make_file_name(input_dir, pars, c(a, b, c, d)), file_type = "png")
+      if(final_error_message(make_dir(input_dir, pars, c(a, b, c, d))) == "Exit code 0") 
+        plot_all_images(input_dir, output_dir, make_file_name(pars, c(a, b, c, d)), file_type = "png")
     }
   
   if(N == 5) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
     for(c in 0:final_values[3]) for(d in 0:final_values[4]) for(e in 0:final_values[5]) {
-      if(final_error_message(input_dir) == "Exit code 0") 
-        plot_all_images(input_dir, output_dir, make_file_name(input_dir, pars, c(a, b, c, d, e)), file_type = "png")
+      if(final_error_message(make_dir(input_dir, pars, c(a, b, c, d, e))) == "Exit code 0") 
+        plot_all_images(input_dir, output_dir, make_file_name(pars, c(a, b, c, d, e)), file_type = "png")
     }
 }
 
