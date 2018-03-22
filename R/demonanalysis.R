@@ -318,4 +318,63 @@ plot_mutation_waves <- function(df) {
   for(i in start_ind:end_ind) lines(df[ , i][[1]] ~ df$Generation)
 }
 
+make_dir <- function(input_dir, pars, indices) {
+  if(length(indices) != length(final_values)) stop("Unequal lengths of indices and final_values.")
+  for(i in 1:length(pars)) input_dir <- paste0(input_dir, "/", pars[i], "_", indices[i])
+  input_dir <- paste0(input_dir, "/")
+  return(input_dir)
+}
+
+make_file_name <- function(pars, indices) {
+  if(length(indices) != length(final_values)) stop("Unequal lengths of indices and final_values.")
+  name <- "plot"
+  for(i in 1:length(pars)) name <- paste0(name, "_", pars[i], indices[i])
+  name <- paste0(name, ".png")
+  return(name)
+}
+
+final_generation <- function(input_dir) {
+  res <- read_lines(paste0(input_dir, "\output.dat"))
+  val <- strsplit(res[length(res)], "\t") # split the last line into a list of strings
+  return(val[[1]][1])
+}
+
+final_error_message <- function(input_dir) {
+  res <- read_lines(paste0(input_dir, "\error_log.dat"))
+  return(res[length(res)-1])
+}
+
+create_plots_batch <- function(input_dir, output_dir, pars, final_values) {
+  N <- length(pars)
+  if(N != length(final_values)) stop("Unequal lengths of pars and final_values.")
+  
+  if(N == 1) for(a in 0:final_values[1]) {
+    if(final_error_message(input_dir) == "Exit code 0") 
+      plot_all_images(input_dir, output_dir, make_file_name(input_dir, pars, a), file_type = "png")
+  }
+  
+  if(N == 2) for(a in 0:final_values[1]) for(b in 0:final_values[2]) {
+    if(final_error_message(input_dir) == "Exit code 0") 
+      plot_all_images(input_dir, output_dir, make_file_name(input_dir, pars, c(a, b)), file_type = "png")
+  }
+  
+  if(N == 3) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
+    for(c in 0:final_values[3]) {
+      if(final_error_message(input_dir) == "Exit code 0") 
+        plot_all_images(input_dir, output_dir, make_file_name(input_dir, pars, c(a, b, c)), file_type = "png")
+    }
+  
+  if(N == 4) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
+    for(c in 0:final_values[3]) for(d in 0:final_values[4]) {
+      if(final_error_message(input_dir) == "Exit code 0") 
+        plot_all_images(input_dir, output_dir, make_file_name(input_dir, pars, c(a, b, c, d)), file_type = "png")
+    }
+  
+  if(N == 5) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
+    for(c in 0:final_values[3]) for(d in 0:final_values[4]) for(e in 0:final_values[5]) {
+      if(final_error_message(input_dir) == "Exit code 0") 
+        plot_all_images(input_dir, output_dir, make_file_name(input_dir, pars, c(a, b, c, d, e)), file_type = "png")
+    }
+}
+
 
