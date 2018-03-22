@@ -42,6 +42,7 @@ image_df_from_grid_file <- function(file, trim = -1) {
 #' @export
 #' @import readr
 #' @import dplyr
+#' @import ggmuller
 #' 
 #' @examples
 #' Muller_df <- muller_df_from_file("data/driver_phylo.dat")
