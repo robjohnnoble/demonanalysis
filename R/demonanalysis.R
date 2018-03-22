@@ -334,14 +334,14 @@ make_file_name <- function(pars, indices) {
 }
 
 final_generation <- function(input_dir) {
-  res <- read_lines(paste0(input_dir, "\output.dat"))
+  res <- read_lines(paste0(input_dir, "/output.dat"))
   val <- strsplit(res[length(res)], "\t") # split the last line into a list of strings
   return(val[[1]][1])
 }
 
 final_error_message <- function(input_dir) {
-  res <- read_lines(paste0(input_dir, "\error_log.dat"))
-  return(res[length(res)-1])
+  res <- read_lines(paste0(input_dir, "/error_log.dat"))
+  return(res[length(res)])
 }
 
 create_plots_batch <- function(input_dir, output_dir, pars, final_values) {
