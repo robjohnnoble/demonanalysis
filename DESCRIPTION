@@ -1,0 +1,10 @@
+Package: demonanalysis
+Title: Analysis and plotting of demon data
+Version: 0.0.1
+Authors@R: person("Robert", "Noble", email = "robjohnnoble@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-8057-4252"))
+Description: Analyse and plot data created by demon (deme-based oncology model).
+Depends:
+    R (>= 3.2.0)
+Imports: dplyr (>= 0.7.0), ggplot2, ggmuller, readr, gridExtra
+Suggests: RColorBrewer, knitr, rmarkdown
+RoxygenNote: 6.0.1
