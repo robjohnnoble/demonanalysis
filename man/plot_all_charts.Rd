@@ -4,17 +4,17 @@
 \alias{plot_all_charts}
 \title{Plot a set of charts representing allele frequencies and genotype sizes}
 \usage{
-plot_all_charts(path, output_dir = NA, output_filename = "plot",
-  file_type = "png")
+plot_all_charts(path, output_filename = "charts", file_type = "png",
+  output_dir = NA)
 }
 \arguments{
 \item{path}{folder containing the input files}
 
-\item{output_dir}{folder in which to save the image file; if NA then plots are displayed on screen instead}
-
 \item{output_filename}{name of output image file}
 
 \item{file_type}{either "pdf" or "png" (other values default to "pdf")}
+
+\item{output_dir}{folder in which to save the image file; if NA then plots are displayed on screen instead}
 }
 \value{
 plot displyed on screen

@@ -2,9 +2,9 @@
 % Please edit documentation in R/demonanalysis.R
 \name{create_plots_batch}
 \alias{create_plots_batch}
-\title{Create a plot for every simulation in a batch}
+\title{Create image files for every simulation in a batch}
 \usage{
-create_plots_batch(input_dir, output_dir, pars, final_values)
+create_plots_batch(input_dir, output_dir, pars, final_values, type = "plot")
 }
 \arguments{
 \item{input_dir}{base input directory name}
@@ -14,12 +14,14 @@ create_plots_batch(input_dir, output_dir, pars, final_values)
 \item{pars}{vector of parameter names}
 
 \item{final_values}{vector of largest parameter values, of same length as pars}
+
+\item{type}{what type of images to create: "plot" or "chart" or c("plot", "chart")}
 }
 \value{
 a set of image files
 }
 \description{
-Create a plot for every simulation in a batch
+Create image files for every simulation in a batch
 }
 \examples{
 

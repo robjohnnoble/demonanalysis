@@ -4,19 +4,19 @@
 \alias{plot_all_images}
 \title{Create a set of grid and Muller plots}
 \usage{
-plot_all_images(path, trim = -1, output_dir = NA,
-  output_filename = "plot", file_type = "png")
+plot_all_images(path, output_filename = "plot", file_type = "png",
+  output_dir = NA, trim = -1)
 }
 \arguments{
 \item{path}{folder containing the input files}
 
-\item{trim}{how many rows and columns to remove from grids; if trim < 0 (default) then all rows and columns containing NA are removed}
-
-\item{output_dir}{folder in which to save the image file; if NA then plots are displayed on screen instead}
-
 \item{output_filename}{name of output image file}
 
 \item{file_type}{either "pdf" or "png" (other values default to "pdf")}
+
+\item{output_dir}{folder in which to save the image file; if NA then plots are displayed on screen instead}
+
+\item{trim}{how many rows and columns to remove from grids; if trim < 0 (default) then all rows and columns containing NA are removed}
 }
 \value{
 either an image file or a plot displyed on screen

@@ -4,9 +4,11 @@
 \alias{make_image_file_name}
 \title{Create an image file name including parameter names and values}
 \usage{
-make_image_file_name(pars, indices)
+make_image_file_name(prefix, pars, indices)
 }
 \arguments{
+\item{prefix}{prefix for file name}
+
 \item{pars}{vector of parameter names}
 
 \item{indices}{vector of parameter values, of same length as pars}
@@ -18,5 +20,5 @@ file name
 Create an image file name including parameter names and values
 }
 \examples{
-make_image_file_name(c("migration_edge_only", "mu_driver_birth", "seed"), rep(0,3))
+make_image_file_name("plot", c("migration_edge_only", "mu_driver_birth", "seed"), rep(0,3))
 }
