@@ -174,7 +174,7 @@ plot_all_images <- function(path, output_filename = "plot", file_type = "png", o
 plot_allele_hist <- function(df) {
   plot(log10(density) ~ qlogis(frequency), data = df, 
        xaxt = "n", yaxt = "n", 
-       xlim = c(qlogis(1E-4), qlogis(0.9999)), 
+       xlim = c(qlogis(1E-6), qlogis(0.9999)), 
        ylim = c(-4, 6),
        xlab = "allele frequency", ylab = "density")
   xshort <- c(1E-4, 1E-2, 0.5, 0.99, 0.9999)
