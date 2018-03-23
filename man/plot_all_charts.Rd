@@ -4,7 +4,7 @@
 \alias{plot_all_charts}
 \title{Plot a set of charts representing allele frequencies and genotype sizes}
 \usage{
-plot_all_charts(path, output_filename = "charts", file_type = "png",
+plot_all_charts(path, output_filename = "chart", file_type = "png",
   output_dir = NA)
 }
 \arguments{
