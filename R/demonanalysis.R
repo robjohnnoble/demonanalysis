@@ -201,7 +201,7 @@ plot_allele_hist <- function(df) {
 #' plot_allele_cum_dist(output_allele_cum_dist)
 plot_allele_cum_dist <- function(df) {
   plot(cumulative_count ~ inverse_frequency, data = df,
-       xlim = c(0, 100), 
+       xlim = c(0, 100), ylim = c(0, 500), 
        xlab = "inverse allele frequency", ylab = "cumulative count")
 }
 
