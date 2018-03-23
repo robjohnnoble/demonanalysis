@@ -50,7 +50,7 @@ muller_df_from_file <- function(file) {
   phylo <- read_delim(file, "\t", escape_double = FALSE, trim_ws = TRUE)
   phylo <- filter(phylo, CellsPerSample == -1)
   edges <- get_edges(phylo)
-  if(dim(edges)[1] == 0) return(NA)
+  if(dim(edges)[1] == 0) edges <- NA
   pop_df <- get_population_df(phylo)
   pop_df <- pop_df %>% mutate(col_index = pop_df$Identity)
   pop_df$col_index[pop_df$col_index > 0] <- pop_df$col_index[pop_df$col_index > 0] %% 25 + 1
