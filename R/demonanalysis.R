@@ -110,7 +110,7 @@ grid_plot <- function(image_df, palette, discrete = FALSE, add_legend = FALSE, l
 #' 
 #' @examples
 #' plot_all_images("data")
-plot_all_images <- function(path, trim = -1, output_dir = NA, output_filename = "plot", file_type = "png") {
+plot_all_images <- function(path, output_filename = "plot", file_type = "png", output_dir = NA, trim = -1) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
   
   Muller_df <- muller_df_from_file(paste0(path, "driver_phylo.dat"))
@@ -409,14 +409,14 @@ create_plots_batch <- function(input_dir, output_dir, pars, final_values) {
     full_dir <- make_dir(input_dir, pars, a)
     file_name <- make_image_file_name(pars, a)
     msg <- final_error_message(full_dir)
-    if(!is.null(msg)) if(msg == "Exit code 0") plot_all_images(full_dir, output_dir, file_name, file_type = "png")
+    if(!is.null(msg)) if(msg == "Exit code 0") plot_all_images(full_dir, file_name, "png", output_dir)
   }
   
   if(N == 2) for(a in 0:final_values[1]) for(b in 0:final_values[2]) {
     full_dir <- make_dir(input_dir, pars, c(a, b))
     file_name <- make_image_file_name(pars, c(a, b))
     msg <- final_error_message(full_dir)
-    if(!is.null(msg)) if(msg == "Exit code 0") plot_all_images(full_dir, output_dir, file_name, file_type = "png")
+    if(!is.null(msg)) if(msg == "Exit code 0") plot_all_images(full_dir, file_name, "png", output_dir)
   }
   
   if(N == 3) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
@@ -424,7 +424,7 @@ create_plots_batch <- function(input_dir, output_dir, pars, final_values) {
       full_dir <- make_dir(input_dir, pars, c(a, b, c))
       file_name <- make_image_file_name(pars, c(a, b, c))
       msg <- final_error_message(full_dir)
-      if(!is.null(msg)) if(msg == "Exit code 0") plot_all_images(full_dir, output_dir, file_name, file_type = "png")
+      if(!is.null(msg)) if(msg == "Exit code 0") plot_all_images(full_dir, file_name, "png", output_dir)
     }
   
   if(N == 4) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
@@ -432,7 +432,7 @@ create_plots_batch <- function(input_dir, output_dir, pars, final_values) {
       full_dir <- make_dir(input_dir, pars, c(a, b, c, d))
       file_name <- make_image_file_name(pars, c(a, b, c, d))
       msg <- final_error_message(full_dir)
-      if(!is.null(msg)) if(msg == "Exit code 0") plot_all_images(full_dir, output_dir, file_name, file_type = "png")
+      if(!is.null(msg)) if(msg == "Exit code 0") plot_all_images(full_dir, file_name, "png", output_dir)
     }
   
   if(N == 5) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
@@ -440,7 +440,7 @@ create_plots_batch <- function(input_dir, output_dir, pars, final_values) {
       full_dir <- make_dir(input_dir, pars, c(a, b, c, d, e))
       file_name <- make_image_file_name(pars, c(a, b, c, d, e))
       msg <- final_error_message(full_dir)
-      if(!is.null(msg)) if(msg == "Exit code 0") plot_all_images(full_dir, output_dir, file_name, file_type = "png")
+      if(!is.null(msg)) if(msg == "Exit code 0") plot_all_images(full_dir, file_name, "png", output_dir)
     }
 }
 
