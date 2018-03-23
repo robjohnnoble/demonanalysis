@@ -357,7 +357,7 @@ make_dir <- function(input_dir, pars, indices) {
 #' @export
 #' 
 #' @examples
-#' make_image_file_name("plot_", c("migration_edge_only", "mu_driver_birth", "seed"), rep(0,3))
+#' make_image_file_name("plot", c("migration_edge_only", "mu_driver_birth", "seed"), rep(0,3))
 make_image_file_name <- function(prefix, pars, indices) {
   if(length(indices) != length(pars)) stop("Unequal lengths of indices and pars.")
   name <- prefix
@@ -419,14 +419,14 @@ create_plots_batch <- function(input_dir, output_dir, pars, final_values) {
   
   if(N == 1) for(a in 0:final_values[1]) {
     full_dir <- make_dir(input_dir, pars, a)
-    file_name <- make_image_file_name("plot_", pars, a)
+    file_name <- make_image_file_name("plot", pars, a)
     msg <- final_error_message(full_dir)
     if(!identical(msg, character(0))) if(msg == "Exit code 0") plot_all_images(full_dir, file_name, "png", output_dir)
   }
   
   if(N == 2) for(a in 0:final_values[1]) for(b in 0:final_values[2]) {
     full_dir <- make_dir(input_dir, pars, c(a, b))
-    file_name <- make_image_file_name("plot_", pars, c(a, b))
+    file_name <- make_image_file_name("plot", pars, c(a, b))
     msg <- final_error_message(full_dir)
     if(!identical(msg, character(0))) if(msg == "Exit code 0") plot_all_images(full_dir, file_name, "png", output_dir)
   }
@@ -434,7 +434,7 @@ create_plots_batch <- function(input_dir, output_dir, pars, final_values) {
   if(N == 3) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
     for(c in 0:final_values[3]) {
       full_dir <- make_dir(input_dir, pars, c(a, b, c))
-      file_name <- make_image_file_name("plot_", pars, c(a, b, c))
+      file_name <- make_image_file_name("plot", pars, c(a, b, c))
       msg <- final_error_message(full_dir)
       if(!identical(msg, character(0))) if(msg == "Exit code 0") plot_all_images(full_dir, file_name, "png", output_dir)
     }
@@ -442,7 +442,7 @@ create_plots_batch <- function(input_dir, output_dir, pars, final_values) {
   if(N == 4) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
     for(c in 0:final_values[3]) for(d in 0:final_values[4]) {
       full_dir <- make_dir(input_dir, pars, c(a, b, c, d))
-      file_name <- make_image_file_name("plot_", pars, c(a, b, c, d))
+      file_name <- make_image_file_name("plot", pars, c(a, b, c, d))
       msg <- final_error_message(full_dir)
       if(!identical(msg, character(0))) if(msg == "Exit code 0") plot_all_images(full_dir, file_name, "png", output_dir)
     }
@@ -450,7 +450,7 @@ create_plots_batch <- function(input_dir, output_dir, pars, final_values) {
   if(N == 5) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
     for(c in 0:final_values[3]) for(d in 0:final_values[4]) for(e in 0:final_values[5]) {
       full_dir <- make_dir(input_dir, pars, c(a, b, c, d, e))
-      file_name <- make_image_file_name("plot_", pars, c(a, b, c, d, e))
+      file_name <- make_image_file_name("plot", pars, c(a, b, c, d, e))
       msg <- final_error_message(full_dir)
       if(!identical(msg, character(0))) if(msg == "Exit code 0") plot_all_images(full_dir, file_name, "png", output_dir)
     }
