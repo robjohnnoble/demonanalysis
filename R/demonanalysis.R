@@ -112,6 +112,7 @@ grid_plot <- function(image_df, palette, discrete = FALSE, add_legend = FALSE, l
 #' plot_all_images("data")
 plot_all_images <- function(path, output_filename = "plot", file_type = "png", output_dir = NA, trim = -1) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
+  if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
   Muller_df <- muller_df_from_file(paste0(path, "driver_phylo.dat"))
   if(class(Muller_df) != "data.frame") return(NA)
@@ -281,8 +282,9 @@ plot_first_inc_moment <- function(hist) {
 #' 
 #' @examples
 #' plot_all_charts("data")
-plot_all_charts <- function(path, output_dir = NA, output_filename = "plot", file_type = "png") {
+plot_all_charts <- function(path, output_dir = NA, output_filename = "charts", file_type = "png") {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
+  if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
   output_allele_hist <- read_delim(paste0(path, "output_allele_hist.dat"), "\t", trim_ws = TRUE)
   output_allele_cum_dist <- read_delim(paste0(path, "output_allele_cum_dist.dat"), "\t", trim_ws = TRUE)
@@ -336,6 +338,8 @@ plot_mutation_waves <- function(df) {
 #' @examples
 #' make_dir("my_dir", c("migration_edge_only", "mu_driver_birth", "seed"), rep(0,3))
 make_dir <- function(input_dir, pars, indices) {
+  if(substr(input_dir, nchar(input_dir), nchar(input_dir)) == "/") input_dir <- substr(input_dir, 1, nchar(input_dir) - 1)
+  
   if(length(indices) != length(pars)) stop("Unequal lengths of indices and pars.")
   for(i in 1:length(pars)) input_dir <- paste0(input_dir, "/", pars[i], "_", indices[i])
   input_dir <- paste0(input_dir, "/")
@@ -344,6 +348,7 @@ make_dir <- function(input_dir, pars, indices) {
 
 #' Create an image file name including parameter names and values
 #' 
+#' @param prefix prefix for file name
 #' @param pars vector of parameter names
 #' @param indices vector of parameter values, of same length as pars
 #' 
@@ -352,12 +357,11 @@ make_dir <- function(input_dir, pars, indices) {
 #' @export
 #' 
 #' @examples
-#' make_image_file_name(c("migration_edge_only", "mu_driver_birth", "seed"), rep(0,3))
-make_image_file_name <- function(pars, indices) {
+#' make_image_file_name("plot_", c("migration_edge_only", "mu_driver_birth", "seed"), rep(0,3))
+make_image_file_name <- function(prefix, pars, indices) {
   if(length(indices) != length(pars)) stop("Unequal lengths of indices and pars.")
-  name <- "plot"
+  name <- prefix
   for(i in 1:length(pars)) name <- paste0(name, "_", pars[i], indices[i])
-  name <- paste0(name, ".png")
   return(name)
 }
 
@@ -372,6 +376,8 @@ make_image_file_name <- function(pars, indices) {
 #' @examples
 #' final_generation("data")
 final_generation <- function(input_dir) {
+  if(substr(input_dir, nchar(input_dir), nchar(input_dir)) == "/") input_dir <- substr(input_dir, 1, nchar(input_dir) - 1)
+  
   res <- read_lines(paste0(input_dir, "/output.dat"))
   val <- strsplit(res[length(res)], "\t") # split the last line into a list of strings
   return(val[[1]][1])
@@ -388,6 +394,8 @@ final_generation <- function(input_dir) {
 #' @examples
 #' final_error_message("data")
 final_error_message <- function(input_dir) {
+  if(substr(input_dir, nchar(input_dir), nchar(input_dir)) == "/") input_dir <- substr(input_dir, 1, nchar(input_dir) - 1)
+  
   res <- read_lines(paste0(input_dir, "/error_log.dat"))
   return(res[length(res)])
 }
@@ -411,14 +419,14 @@ create_plots_batch <- function(input_dir, output_dir, pars, final_values) {
   
   if(N == 1) for(a in 0:final_values[1]) {
     full_dir <- make_dir(input_dir, pars, a)
-    file_name <- make_image_file_name(pars, a)
+    file_name <- make_image_file_name("plot_", pars, a)
     msg <- final_error_message(full_dir)
     if(!is.null(msg)) if(msg == "Exit code 0") plot_all_images(full_dir, file_name, "png", output_dir)
   }
   
   if(N == 2) for(a in 0:final_values[1]) for(b in 0:final_values[2]) {
     full_dir <- make_dir(input_dir, pars, c(a, b))
-    file_name <- make_image_file_name(pars, c(a, b))
+    file_name <- make_image_file_name("plot_", pars, c(a, b))
     msg <- final_error_message(full_dir)
     if(!is.null(msg)) if(msg == "Exit code 0") plot_all_images(full_dir, file_name, "png", output_dir)
   }
@@ -426,7 +434,7 @@ create_plots_batch <- function(input_dir, output_dir, pars, final_values) {
   if(N == 3) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
     for(c in 0:final_values[3]) {
       full_dir <- make_dir(input_dir, pars, c(a, b, c))
-      file_name <- make_image_file_name(pars, c(a, b, c))
+      file_name <- make_image_file_name("plot_", pars, c(a, b, c))
       msg <- final_error_message(full_dir)
       if(!is.null(msg)) if(msg == "Exit code 0") plot_all_images(full_dir, file_name, "png", output_dir)
     }
@@ -434,7 +442,7 @@ create_plots_batch <- function(input_dir, output_dir, pars, final_values) {
   if(N == 4) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
     for(c in 0:final_values[3]) for(d in 0:final_values[4]) {
       full_dir <- make_dir(input_dir, pars, c(a, b, c, d))
-      file_name <- make_image_file_name(pars, c(a, b, c, d))
+      file_name <- make_image_file_name("plot_", pars, c(a, b, c, d))
       msg <- final_error_message(full_dir)
       if(!is.null(msg)) if(msg == "Exit code 0") plot_all_images(full_dir, file_name, "png", output_dir)
     }
@@ -442,7 +450,7 @@ create_plots_batch <- function(input_dir, output_dir, pars, final_values) {
   if(N == 5) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
     for(c in 0:final_values[3]) for(d in 0:final_values[4]) for(e in 0:final_values[5]) {
       full_dir <- make_dir(input_dir, pars, c(a, b, c, d, e))
-      file_name <- make_image_file_name(pars, c(a, b, c, d, e))
+      file_name <- make_image_file_name("plot_", pars, c(a, b, c, d, e))
       msg <- final_error_message(full_dir)
       if(!is.null(msg)) if(msg == "Exit code 0") plot_all_images(full_dir, file_name, "png", output_dir)
     }
