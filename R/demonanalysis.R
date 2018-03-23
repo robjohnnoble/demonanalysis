@@ -265,7 +265,7 @@ plot_first_inc_moment <- function(hist) {
   }
   mom <- sapply(hist$mids, first_inc_moment, counts = hist$density, sizes = hist$mids)
   plot(mom ~ hist$mids, log = "y", 
-       xlim = c(0, 1E4), 
+       xlim = c(0, 1E4), ylim = c(1E-3, 1), 
        xlab = "genotype size", ylab = "first incomplete moment")
 }
 
