@@ -242,6 +242,7 @@ get_genotype_sizes_hist <- function(file) {
 #' plot_genotype_sizes_hist(hist1)
 plot_genotype_sizes_hist <- function(hist) {
   plot(hist$density / sum(hist$density) ~ hist$mids, log = "y", 
+       xlim = c(0, 1E5), ylim = c(1E-5, 1), 
        xlab = "genotype size", ylab = "frequency")
 }
 
@@ -264,6 +265,7 @@ plot_first_inc_moment <- function(hist) {
   }
   mom <- sapply(hist$mids, first_inc_moment, counts = hist$density, sizes = hist$mids)
   plot(mom ~ hist$mids, log = "y", 
+       xlim = c(0, 1E5), ylim = c(0, 1), 
        xlab = "genotype size", ylab = "first incomplete moment")
 }
 
