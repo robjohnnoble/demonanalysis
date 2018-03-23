@@ -400,7 +400,7 @@ final_error_message <- function(input_dir) {
   return(res[length(res)])
 }
 
-#' Create a plot for every simulation in a batch
+#' Create grids and Muller plots for every simulation in a batch
 #' 
 #' @param input_dir base input directory name
 #' @param output_dir output directory name

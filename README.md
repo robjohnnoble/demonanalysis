@@ -19,6 +19,15 @@ library(devtools)
 install("/cluster/work/bewi/members/lebidm_nobelr/demonanalysis")
 ```
 
+### Launch R on Euler
+
+```
+module load new
+module load r/3.4.0
+R
+setwd("/cluster/work/bewi/members/lebidm_nobelr/demon")
+```
+
 ### Basic usage
 
 ``` r
@@ -31,3 +40,13 @@ final_values <- c(1, 1, 9) # maximum values of the parameters that were varied
 
 create_plots_batch(input_dir, output_dir, pars, final_values) # create the plots
 ```
+
+### Copy plots from Euler
+
+```
+cd /Users/rnoble/Documents/MontpellierDocuments/Models/Demon/EulerPlots
+
+scp -r rnoble@euler.ethz.ch:/cluster/work/bewi/members/lebidm_nobelr/demon/plots/* ./
+```
+
+
