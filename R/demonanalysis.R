@@ -207,7 +207,7 @@ plot_allele_cum_dist <- function(df) {
        xlab = "inverse allele frequency", ylab = "cumulative count")
   subplot(plot(cumulative_count ~ inverse_frequency, data = df, 
                xlim = c(0, 10), ylim = c(0, 50), xlab = "", ylab = "", type = "l"), 
-          x = 20, y = 500, vadj = 1, hadj = 0, size = c(0.5, 0.5))
+          x = 10, y = 500, vadj = 1, hadj = 0, size = c(1, 1))
 }
 
 #' Get a histogram of genotype sizes

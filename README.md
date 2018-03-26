@@ -38,7 +38,7 @@ output_dir <- "plots/Mar20_Batch1" # folder to receive image files
 pars <- c("migration_edge_only", "mu_driver_birth", "seed") # parameters that were varied within the batch
 final_values <- c(1, 1, 9) # maximum values of the parameters that were varied
 
-create_plots_batch(input_dir, output_dir, pars, final_values) # create the plots
+create_plots_batch(input_dir, output_dir, pars, final_values, type = "chart") # create the plots
 ```
 
 ### Copy plots from Euler
