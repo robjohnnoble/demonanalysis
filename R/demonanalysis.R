@@ -195,14 +195,19 @@ plot_allele_hist <- function(df) {
 #' 
 #' @export
 #' 
+#' @import TeachingDemos
+#' 
 #' @examples
 #' library(readr)
 #' output_allele_cum_dist <- read_delim("data/output_allele_cum_dist.dat", "\t", trim_ws = TRUE)
 #' plot_allele_cum_dist(output_allele_cum_dist)
 plot_allele_cum_dist <- function(df) {
   plot(cumulative_count ~ inverse_frequency, data = df,
-       xlim = c(0, 100), ylim = c(0, 500), 
+       xlim = c(0, 100), ylim = c(0, 500), type = "l", 
        xlab = "inverse allele frequency", ylab = "cumulative count")
+  subplot(plot(cumulative_count ~ inverse_frequency, data = df, 
+               xlim = c(0, 10), ylim = c(0, 50), xlab = "", ylab = "", type = "l"), 
+          x = 20, y = 500, vadj = 1, hadj = 0, size = c(0.5, 0.5))
 }
 
 #' Get a histogram of genotype sizes
