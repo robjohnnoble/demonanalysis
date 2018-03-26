@@ -143,7 +143,7 @@ plot_all_images <- function(path, output_filename = "plot", file_type = "png", o
   image_df <- image_df_from_grid_file(paste0(path, "output_popgrid.dat"), trim)
   g4 <- grid_plot(image_df, add_legend = TRUE, legend_title = "Population")
   
-  print("Created all plots")
+  print(paste0("Created all plots for file ", output_filename))
   
   if(!is.na(output_dir)) {
     if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1000, height = 1000, res = 100)
@@ -207,7 +207,7 @@ plot_allele_cum_dist <- function(df) {
        xlab = "inverse allele frequency", ylab = "cumulative count")
   subplot(plot(cumulative_count ~ inverse_frequency, data = df, 
                xlim = c(0, 10), ylim = c(0, 50), xlab = "", ylab = "", type = "l"), 
-          x = 15, y = 500, vadj = 1, hadj = 0, size = c(0.75, 0.75))
+          x = 12, y = 500, vadj = 1, hadj = 0, size = c(0.75, 0.75))
 }
 
 #' Get a histogram of genotype sizes
@@ -298,11 +298,13 @@ plot_all_charts <- function(path, output_filename = "chart", file_type = "png", 
   hist1 <- get_genotype_sizes_hist(paste0(path, "genotypes.dat"))
   
   if(!is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 700, height = 800, res = 100)
-    else pdf(paste0(output_dir,output_filename,".pdf"), width = 7, height = 8)
+    if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 600, height = 600, res = 100)
+    else pdf(paste0(output_dir,output_filename,".pdf"), width = 6, height = 6)
   }
   
   par(mfrow = c(2, 2))
+  par(mgp = c(2.2, 1, 0))
+  par(mar = c(3.8, 3.8, 0.8, 0.8))
   
   plot_allele_hist(output_allele_hist)
   plot_allele_cum_dist(output_allele_cum_dist)
