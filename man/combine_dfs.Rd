@@ -2,7 +2,7 @@
 % Please edit documentation in R/sweepmetrics.R
 \name{combine_dfs}
 \alias{combine_dfs}
-\title{Add parameter value columns to an output dataframe}
+\title{Add columns to an output dataframe, containing parameter values and diversity metrics}
 \usage{
 combine_dfs(full_dir, res = data.frame())
 }
@@ -15,7 +15,7 @@ combine_dfs(full_dir, res = data.frame())
 the same dataframe with additional columns
 }
 \description{
-Add parameter value columns to an output dataframe
+Add columns to an output dataframe, containing parameter values and diversity metrics
 }
 \examples{
 combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))

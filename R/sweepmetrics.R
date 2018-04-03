@@ -239,7 +239,7 @@ add_columns <- function(df) {
   return(df)
 }
 
-#' Add parameter value columns to an output dataframe
+#' Add columns to an output dataframe, containing parameter values and diversity metrics
 #' 
 #' @param full_dir base input directory name
 #' @param res dataframe to which the result will be appended (default is an empty dataframe)
@@ -247,6 +247,7 @@ add_columns <- function(df) {
 #' @return the same dataframe with additional columns
 #' 
 #' @importFrom readr read_delim
+#' @importFrom dplyr bind_cols
 #' 
 #' @export
 #' 
@@ -256,13 +257,18 @@ combine_dfs <- function(full_dir, res = data.frame()) {
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
   file1 <- paste0(full_dir, "/parameters.dat")
   file2 <- paste0(full_dir, "/output.dat")
+  file3 <- paste0(full_dir, "/output_diversities.dat")
   
   df1 <- read_delim(file1, "\t")
   df2 <- read_delim(file2, "\t")
+  df3 <- read_delim(file3, "\t")
   
   df2 <- add_columns(df2)
   
-  return(rbind(res, cbind(df1, df2)))
+  temp <- cbind(df1, df2)
+  temp <- merge(temp, df3, by = "Generation", all = TRUE)
+  
+  return(rbind(res, temp))
 }
 
 #' Create a composite dataframe by combining data for every simulation in a batch
