@@ -11,6 +11,9 @@ geno_dist(pop_df, generation = NA)
 
 \item{generation}{Generation at which to get frequencies (default NA corresponds to final generation)}
 }
+\value{
+vector of genotype frequencies
+}
 \description{
 Get genotype frequencies in increasing order of size
 }

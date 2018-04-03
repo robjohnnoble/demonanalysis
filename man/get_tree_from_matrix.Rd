@@ -9,6 +9,9 @@ get_tree_from_matrix(matrix)
 \arguments{
 \item{matrix}{square matrix}
 }
+\value{
+An object of class phylo.
+}
 \description{
 Get a "phylo" object from a relatedness matrix
 }

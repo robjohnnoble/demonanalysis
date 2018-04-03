@@ -2,15 +2,18 @@
 % Please edit documentation in R/sweepmetrics.R
 \name{ancestry}
 \alias{ancestry}
-\title{Get the ancestry of a genotype}
+\title{Get the ancestry of each genotype}
 \usage{
 ancestry(edges)
 }
 \arguments{
 \item{edges}{Dataframe comprising an adjacency matrix, with column names "Parent" and "Identity"}
 }
+\value{
+Dataframe listing the ancestors of each genotype (one row per Identity value).
+}
 \description{
-Get the ancestry of a genotype
+Get the ancestry of each genotype
 }
 \examples{
 library(dplyr)

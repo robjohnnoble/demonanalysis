@@ -13,6 +13,9 @@ dominant(anc, pop_subdf, threshold)
 
 \item{threshold}{Number between 0 and 1; a genotype must exceed this frequency to be considered dominant}
 }
+\value{
+Identity of the dominant genotype.
+}
 \description{
 Find the latest-occurring mutation shared by at least a threshold proportion of cells
 }

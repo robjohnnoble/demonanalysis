@@ -19,6 +19,8 @@ reflect_on_diagonal <- function(matrix) {
 #' 
 #' @param matrix square matrix
 #' 
+#' @return An object of class phylo.
+#' 
 #' @export
 #' @importFrom ape plot.phylo
 #' @importFrom ape njs
@@ -35,9 +37,11 @@ get_tree_from_matrix <- function(matrix) {
   return(njs(as.dist(matrix))) # create tree object
 }
 
-#' Get the ancestry of a genotype
+#' Get the ancestry of each genotype
 #' 
 #' @param edges Dataframe comprising an adjacency matrix, with column names "Parent" and "Identity"
+#' 
+#' @return Dataframe listing the ancestors of each genotype (one row per Identity value).
 #' 
 #' @export
 #' @importFrom ggmuller find_start_node
@@ -78,6 +82,8 @@ ancestry <- function(edges) {
 #' @param pop_subdf Dataframe with column names "Identity" and "Population"
 #' @param threshold Number between 0 and 1; a genotype must exceed this frequency to be considered dominant
 #' 
+#' @return Identity of the dominant genotype.
+#' 
 #' @export
 #' @import dplyr
 #' 
@@ -106,11 +112,13 @@ dominant <- function(anc, pop_subdf, threshold) {
   return(res)
 }
 
-#' Find generations at which sweeps (or at least partial sweeps) occur
+#' Find generations at which sweeps (or at least partial sweeps) occurred
 #' 
 #' @param phylo Dataframe containing phylogeny
 #' @param threshold Number between 0 and 1; a genotype must exceed this frequency to be considered dominant
 #' @param min_pop Genotypes with populations smaller than this size will be removed before analysis (default 0)
+#' 
+#' @return Vector of generations at which (partial) sweeps occurred.
 #' 
 #' @export
 #' @import dplyr
@@ -120,7 +128,7 @@ dominant <- function(anc, pop_subdf, threshold) {
 #' @examples
 #' library(dplyr)
 #' phylo <- filter(driver_phylo, CellsPerSample == -1)
-#' sweep_times(phylo, threshold = 0.9)
+#' sweep_times(phylo, threshold = 0.1)
 sweep_times <- function(phylo, threshold, min_pop = 0) {
   pop_df <- get_population_df(phylo)
   pop_df <- filter(pop_df, Population > min_pop)
@@ -142,6 +150,9 @@ sweep_times <- function(phylo, threshold, min_pop = 0) {
 #' @param lag_type Either "generations" or "proportions" (default "generations")
 #' @param breaks Number of breaks (used only if lag_type = "proportions"; default 10)
 #' @param lag_gens Number of generations between  (used only if lag_type = "generations"; default 500)
+#' 
+#' @return For each generation g in pop_df, the output vector quantifies the change in genotype frequencies 
+#' compared to generation g - lag_gens (by summing the squares of the differences).
 #' 
 #' @export
 #' @import dplyr
@@ -186,6 +197,8 @@ sweep_sequence <- function(pop_df, lag_type = "generations", breaks = 10, lag_ge
 #' 
 #' @param pop_df Dataframe with column names "Identity", "Population" and "Generation"
 #' @param generation Generation at which to get frequencies (default NA corresponds to final generation)
+#' 
+#' @return vector of genotype frequencies
 #' 
 #' @export
 #' @import dplyr

@@ -2,7 +2,7 @@
 % Please edit documentation in R/sweepmetrics.R
 \name{sweep_times}
 \alias{sweep_times}
-\title{Find generations at which sweeps (or at least partial sweeps) occur}
+\title{Find generations at which sweeps (or at least partial sweeps) occurred}
 \usage{
 sweep_times(phylo, threshold, min_pop = 0)
 }
@@ -13,11 +13,14 @@ sweep_times(phylo, threshold, min_pop = 0)
 
 \item{min_pop}{Genotypes with populations smaller than this size will be removed before analysis (default 0)}
 }
+\value{
+Vector of generations at which (partial) sweeps occurred.
+}
 \description{
-Find generations at which sweeps (or at least partial sweeps) occur
+Find generations at which sweeps (or at least partial sweeps) occurred
 }
 \examples{
 library(dplyr)
 phylo <- filter(driver_phylo, CellsPerSample == -1)
-sweep_times(phylo, threshold = 0.9)
+sweep_times(phylo, threshold = 0.1)
 }
