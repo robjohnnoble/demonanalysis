@@ -40,8 +40,8 @@ get_tree_from_matrix <- function(matrix) {
 #' @param edges Dataframe comprising an adjacency matrix, with column names "Parent" and "Identity"
 #' 
 #' @export
-#' @import dplyr
-#' @import ggmuller
+#' @importFrom ggmuller find_start_node
+#' @importFrom ggmuller move_up
 #' 
 #' @examples
 #' library(dplyr)
@@ -114,7 +114,8 @@ dominant <- function(anc, pop_subdf, threshold) {
 #' 
 #' @export
 #' @import dplyr
-#' @import ggmuller
+#' @importFrom ggmuller get_population_df
+#' @importFrom ggmuller get_edges
 #' 
 #' @examples
 #' library(dplyr)
@@ -188,7 +189,6 @@ sweep_sequence <- function(pop_df, lag_type = "generations", breaks = 10, lag_ge
 #' 
 #' @export
 #' @import dplyr
-#' @import ggmuller
 #' 
 #' @examples
 #' library(dplyr)

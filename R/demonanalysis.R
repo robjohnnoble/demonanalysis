@@ -6,7 +6,7 @@
 #' @return a dataframe formatted for plotting
 #' 
 #' @export
-#' @import readr
+#' @importFrom readr read_delim
 #' 
 #' @examples
 #' image_df <- image_df_from_grid_file(system.file("extdata", 
@@ -41,7 +41,7 @@ image_df_from_grid_file <- function(file, trim = -1) {
 #' @return a dataframe formatted for plotting
 #' 
 #' @export
-#' @import readr
+#' @importFrom readr read_delim
 #' @import dplyr
 #' @import ggmuller
 #' 
@@ -113,7 +113,7 @@ grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FAL
 #' 
 #' @export
 #' @import ggmuller
-#' @import gridExtra
+#' @importFrom gridExtra grid.arrange
 #' @importFrom grDevices dev.off
 #' @importFrom grDevices pdf
 #' @importFrom grDevices png
@@ -301,7 +301,7 @@ plot_first_inc_moment <- function(hist) {
 #' 
 #' @export
 #' 
-#' @import readr
+#' @importFrom readr read_delim
 #' @importFrom grDevices dev.off
 #' @importFrom grDevices pdf
 #' @importFrom grDevices png
@@ -416,6 +416,7 @@ final_generation <- function(input_dir) {
 #' 
 #' @return final line of error log
 #' 
+#' @importFrom readr read_lines
 #' @export
 #' 
 #' @examples
