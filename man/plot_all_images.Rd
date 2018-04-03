@@ -25,5 +25,5 @@ either an image file or a plot displyed on screen
 Create a set of grid and Muller plots
 }
 \examples{
-plot_all_images(system.file("extdata", "", package = "demonanalysis"))
+plot_all_images(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
 }

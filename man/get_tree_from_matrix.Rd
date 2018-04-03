@@ -14,5 +14,6 @@ Get a "phylo" object from a relatedness matrix
 }
 \examples{
 tree <- get_tree_from_matrix(driver_matrix)
-plot(tree, show.tip.label = FALSE)
+library(ape)
+plot.phylo(tree, show.tip.label = FALSE)
 }

@@ -20,11 +20,14 @@ reflect_on_diagonal <- function(matrix) {
 #' @param matrix square matrix
 #' 
 #' @export
-#' @import ape
+#' @importFrom ape plot.phylo
+#' @importFrom ape njs
+#' @importFrom stats as.dist
 #' 
 #' @examples
 #' tree <- get_tree_from_matrix(driver_matrix)
-#' plot(tree, show.tip.label = FALSE)
+#' library(ape)
+#' plot.phylo(tree, show.tip.label = FALSE)
 get_tree_from_matrix <- function(matrix) {
   if(dim(matrix)[1] != dim(matrix)[2]) stop("Not a square matrix")
   matrix <- matrix[, colSums(is.na(matrix)) < nrow(matrix)] # remove any NA columns
@@ -141,6 +144,8 @@ sweep_times <- function(phylo, threshold, min_pop = 0) {
 #' 
 #' @export
 #' @import dplyr
+#' @importFrom stats median
+#' @importFrom graphics plot
 #' 
 #' @examples
 #' library(ggmuller)

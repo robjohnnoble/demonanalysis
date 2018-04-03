@@ -17,5 +17,5 @@ Read a "phylo" dataframe and process it for plotting
 }
 \examples{
 Muller_df <- muller_df_from_file(system.file("extdata", 
-"driver_phylo.dat", package = "demonanalysis"))
+"driver_phylo.dat", package = "demonanalysis", mustWork = TRUE))
 }

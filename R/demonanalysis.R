@@ -10,7 +10,7 @@
 #' 
 #' @examples
 #' image_df <- image_df_from_grid_file(system.file("extdata", 
-#' "output_passengersgrid.dat", package = "demonanalysis"))
+#' "output_passengersgrid.dat", package = "demonanalysis", mustWork = TRUE))
 image_df_from_grid_file <- function(file, trim = -1) {
   res <- read_delim(file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
   res <- data.matrix(res) # data frame to matrix
@@ -47,7 +47,7 @@ image_df_from_grid_file <- function(file, trim = -1) {
 #' 
 #' @examples
 #' Muller_df <- muller_df_from_file(system.file("extdata", 
-#' "driver_phylo.dat", package = "demonanalysis"))
+#' "driver_phylo.dat", package = "demonanalysis", mustWork = TRUE))
 muller_df_from_file <- function(file) {
   phylo <- read_delim(file, "\t", escape_double = FALSE, trim_ws = TRUE)
   phylo <- filter(phylo, CellsPerSample == -1)
@@ -114,9 +114,12 @@ grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FAL
 #' @export
 #' @import ggmuller
 #' @import gridExtra
+#' @importFrom grDevices dev.off
+#' @importFrom grDevices pdf
+#' @importFrom grDevices png
 #' 
 #' @examples
-#' plot_all_images(system.file("extdata", "", package = "demonanalysis"))
+#' plot_all_images(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
 plot_all_images <- function(path, output_filename = NA, file_type = "png", output_dir = NA, trim = -1) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
   if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
@@ -173,6 +176,10 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
 #' @return plot displyed on screen
 #' 
 #' @export
+#' @importFrom stats plogis
+#' @importFrom stats qlogis
+#' @importFrom graphics axis
+#' @importFrom graphics lines
 #' 
 #' @examples
 #' plot_allele_hist(output_allele_hist)
@@ -200,7 +207,7 @@ plot_allele_hist <- function(df) {
 #' 
 #' @export
 #' 
-#' @import TeachingDemos
+#' @importFrom TeachingDemos subplot
 #' 
 #' @examples
 #' plot_allele_cum_dist(output_allele_cum_dist)
@@ -219,10 +226,12 @@ plot_allele_cum_dist <- function(df) {
 #' 
 #' @return histogram object
 #' 
+#' @importFrom graphics hist
 #' @export
 #' 
 #' @examples
-#' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", package = "demonanalysis"))
+#' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
+#' package = "demonanalysis", mustWork = TRUE))
 #' plot_genotype_sizes_hist(hist1)
 get_genotype_sizes_hist <- function(file) {
   lastline <- function(filename) {
@@ -244,10 +253,12 @@ get_genotype_sizes_hist <- function(file) {
 #' 
 #' @return plot displyed on screen
 #' 
+#' @importFrom graphics hist
 #' @export
 #' 
 #' @examples
-#' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", package = "demonanalysis"))
+#' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
+#' package = "demonanalysis", mustWork = TRUE))
 #' plot_genotype_sizes_hist(hist1)
 plot_genotype_sizes_hist <- function(hist) {
   plot(hist$density / sum(hist$density) ~ hist$mids, log = "y", 
@@ -264,7 +275,8 @@ plot_genotype_sizes_hist <- function(hist) {
 #' @export
 #' 
 #' @examples
-#' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", package = "demonanalysis"))
+#' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
+#' package = "demonanalysis", mustWork = TRUE))
 #' plot_first_inc_moment(hist1)
 plot_first_inc_moment <- function(hist) { 
   first_inc_moment <- function(sizes, counts, n) {
@@ -290,9 +302,13 @@ plot_first_inc_moment <- function(hist) {
 #' @export
 #' 
 #' @import readr
+#' @importFrom grDevices dev.off
+#' @importFrom grDevices pdf
+#' @importFrom grDevices png
+#' @importFrom graphics par
 #' 
 #' @examples
-#' plot_all_charts(system.file("extdata", "", package = "demonanalysis"))
+#' plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
 plot_all_charts <- function(path, output_filename = NA, file_type = "png", output_dir = NA) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
   if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
@@ -385,7 +401,7 @@ make_image_file_name <- function(prefix, pars, indices) {
 #' @export
 #' 
 #' @examples
-#' final_generation(system.file("extdata", "", package = "demonanalysis"))
+#' final_generation(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
 final_generation <- function(input_dir) {
   if(substr(input_dir, nchar(input_dir), nchar(input_dir)) == "/") input_dir <- substr(input_dir, 1, nchar(input_dir) - 1)
   
@@ -403,7 +419,7 @@ final_generation <- function(input_dir) {
 #' @export
 #' 
 #' @examples
-#' final_error_message(system.file("extdata", "", package = "demonanalysis"))
+#' final_error_message(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
 final_error_message <- function(input_dir) {
   if(substr(input_dir, nchar(input_dir), nchar(input_dir)) == "/") input_dir <- substr(input_dir, 1, nchar(input_dir) - 1)
   

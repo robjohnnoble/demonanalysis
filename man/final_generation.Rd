@@ -16,5 +16,5 @@ generation number
 Return the final generation number of a simulation
 }
 \examples{
-final_generation(system.file("extdata", "", package = "demonanalysis"))
+final_generation(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
 }
