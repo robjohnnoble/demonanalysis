@@ -16,6 +16,6 @@ plot displyed on screen
 Plot a histogram of genotype sizes
 }
 \examples{
-hist1 <- get_genotype_sizes_hist("data/genotypes.dat")
+hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", package = "demonanalysis"))
 plot_genotype_sizes_hist(hist1)
 }

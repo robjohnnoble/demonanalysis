@@ -16,7 +16,5 @@ plot displyed on screen
 Plot a histogram of variant allele frequencies
 }
 \examples{
-library(readr)
-output_allele_hist <- read_delim("data/output_allele_hist.dat", "\\t", trim_ws = TRUE)
 plot_allele_hist(output_allele_hist)
 }

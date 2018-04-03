@@ -9,7 +9,8 @@
 #' @import readr
 #' 
 #' @examples
-#' image_df <- image_df_from_grid_file("data/output_passengersgrid.dat")
+#' image_df <- image_df_from_grid_file(system.file("extdata", 
+#' "output_passengersgrid.dat", package = "demonanalysis"))
 image_df_from_grid_file <- function(file, trim = -1) {
   res <- read_delim(file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
   res <- data.matrix(res) # data frame to matrix
@@ -45,7 +46,8 @@ image_df_from_grid_file <- function(file, trim = -1) {
 #' @import ggmuller
 #' 
 #' @examples
-#' Muller_df <- muller_df_from_file("data/driver_phylo.dat")
+#' Muller_df <- muller_df_from_file(system.file("extdata", 
+#' "driver_phylo.dat", package = "demonanalysis"))
 muller_df_from_file <- function(file) {
   phylo <- read_delim(file, "\t", escape_double = FALSE, trim_ws = TRUE)
   phylo <- filter(phylo, CellsPerSample == -1)
@@ -61,10 +63,10 @@ muller_df_from_file <- function(file) {
 #' Plot a grid from a properly formatted data frame.
 #' 
 #' @param image_df data frame formatted by image_df_from_grid_file
-#' @param palette colour palette
-#' @param discrete whether to use a discrete or continuous colour scale
-#' @param add_legend whether to add a legend
-#' @param legend_title text for legend title
+#' @param palette colour palette (default NA)
+#' @param discrete whether to use a discrete or continuous colour scale (default FALSE)
+#' @param add_legend whether to add a legend (default FALSE)
+#' @param legend_title text for legend title (default none)
 #' 
 #' @return a plot object
 #' 
@@ -72,9 +74,8 @@ muller_df_from_file <- function(file) {
 #' @import ggplot2
 #' 
 #' @examples
-#' image_df <- image_df_from_grid_file("data/output_passengersgrid.dat")
-#' grid_plot(image_df)
-grid_plot <- function(image_df, palette, discrete = FALSE, add_legend = FALSE, legend_title = "") {
+#' grid_plot(output_passengersgrid)
+grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FALSE, legend_title = "") {
   h2 <- ggplot(image_df, aes(x, y, fill = z)) + 
     geom_raster() +
     theme(legend.position = ifelse(add_legend, "right", "none")) + 
@@ -84,12 +85,18 @@ grid_plot <- function(image_df, palette, discrete = FALSE, add_legend = FALSE, l
           panel.background=element_blank(),panel.border=element_blank(),panel.grid.major=element_blank(),
           panel.grid.minor=element_blank(),plot.background=element_blank())
   if(discrete) {
-    h2 <- h2 + scale_fill_manual(name = legend_title, values = palette) +
+    if(!is.na(palette)) h2 <- h2 + scale_fill_manual(name = legend_title, values = palette) +
       scale_color_manual(values = palette)
   }
   else {
-    h2 <- h2 + scale_fill_distiller(name = legend_title, palette ="RdBu", direction = -1, na.value="white") + 
-      scale_color_distiller(palette ="RdBu", na.value="white")
+    if(is.na(palette)) {
+      h2 <- h2 + scale_fill_distiller(name = legend_title, palette ="RdBu", direction = -1, na.value="white") + 
+        scale_color_distiller(palette ="RdBu", na.value="white")
+    }
+    else {
+      h2 <- h2 + scale_fill_distiller(name = legend_title, palette = palette, direction = -1) + 
+        scale_color_distiller(palette = palette)
+    }
   }
   return(h2)
 }
@@ -109,10 +116,10 @@ grid_plot <- function(image_df, palette, discrete = FALSE, add_legend = FALSE, l
 #' @import gridExtra
 #' 
 #' @examples
-#' plot_all_images("data")
-plot_all_images <- function(path, output_filename = "plot", file_type = "png", output_dir = NA, trim = -1) {
+#' plot_all_images(system.file("extdata", "", package = "demonanalysis"))
+plot_all_images <- function(path, output_filename = NA, file_type = "png", output_dir = NA, trim = -1) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
-  if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+  if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
   Muller_df <- muller_df_from_file(paste0(path, "driver_phylo.dat"))
   if(class(Muller_df) != "data.frame") return(NA)
@@ -143,7 +150,7 @@ plot_all_images <- function(path, output_filename = "plot", file_type = "png", o
   image_df <- image_df_from_grid_file(paste0(path, "output_popgrid.dat"), trim)
   g4 <- grid_plot(image_df, add_legend = TRUE, legend_title = "Population")
   
-  print(paste0("Created all plots for file ", output_filename))
+  if(!is.na(output_filename)) print(paste0("Created all plots for file ", output_filename))
   
   if(!is.na(output_dir)) {
     if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1000, height = 1000, res = 100)
@@ -156,7 +163,7 @@ plot_all_images <- function(path, output_filename = "plot", file_type = "png", o
   print(grid.arrange(h1, g1, h2, h3, g2, g3, g4, layout_matrix = lay, heights = c(1, 1, 0.75, 0.75)))
   if(!is.na(output_dir)) dev.off()
   
-  print("Saved the plot")
+  if(!is.na(output_filename)) print("Saved the plot")
 }
 
 #' Plot a histogram of variant allele frequencies
@@ -168,8 +175,6 @@ plot_all_images <- function(path, output_filename = "plot", file_type = "png", o
 #' @export
 #' 
 #' @examples
-#' library(readr)
-#' output_allele_hist <- read_delim("data/output_allele_hist.dat", "\t", trim_ws = TRUE)
 #' plot_allele_hist(output_allele_hist)
 plot_allele_hist <- function(df) {
   plot(log10(density) ~ qlogis(frequency), data = df, 
@@ -198,8 +203,6 @@ plot_allele_hist <- function(df) {
 #' @import TeachingDemos
 #' 
 #' @examples
-#' library(readr)
-#' output_allele_cum_dist <- read_delim("data/output_allele_cum_dist.dat", "\t", trim_ws = TRUE)
 #' plot_allele_cum_dist(output_allele_cum_dist)
 plot_allele_cum_dist <- function(df) {
   plot(cumulative_count ~ inverse_frequency, data = df,
@@ -219,7 +222,8 @@ plot_allele_cum_dist <- function(df) {
 #' @export
 #' 
 #' @examples
-#' hist1 <- get_genotype_sizes_hist("data/genotypes.dat")
+#' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", package = "demonanalysis"))
+#' plot_genotype_sizes_hist(hist1)
 get_genotype_sizes_hist <- function(file) {
   lastline <- function(filename) {
     out <- system(sprintf("wc -l %s", filename), intern = TRUE)
@@ -243,7 +247,7 @@ get_genotype_sizes_hist <- function(file) {
 #' @export
 #' 
 #' @examples
-#' hist1 <- get_genotype_sizes_hist("data/genotypes.dat")
+#' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", package = "demonanalysis"))
 #' plot_genotype_sizes_hist(hist1)
 plot_genotype_sizes_hist <- function(hist) {
   plot(hist$density / sum(hist$density) ~ hist$mids, log = "y", 
@@ -260,7 +264,7 @@ plot_genotype_sizes_hist <- function(hist) {
 #' @export
 #' 
 #' @examples
-#' hist1 <- get_genotype_sizes_hist("data/genotypes.dat")
+#' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", package = "demonanalysis"))
 #' plot_first_inc_moment(hist1)
 plot_first_inc_moment <- function(hist) { 
   first_inc_moment <- function(sizes, counts, n) {
@@ -288,10 +292,10 @@ plot_first_inc_moment <- function(hist) {
 #' @import readr
 #' 
 #' @examples
-#' plot_all_charts("data")
-plot_all_charts <- function(path, output_filename = "chart", file_type = "png", output_dir = NA) {
+#' plot_all_charts(system.file("extdata", "", package = "demonanalysis"))
+plot_all_charts <- function(path, output_filename = NA, file_type = "png", output_dir = NA) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
-  if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+  if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
   output_allele_hist <- read_delim(paste0(path, "output_allele_hist.dat"), "\t", trim_ws = TRUE)
   output_allele_cum_dist <- read_delim(paste0(path, "output_allele_cum_dist.dat"), "\t", trim_ws = TRUE)
@@ -323,8 +327,6 @@ plot_all_charts <- function(path, output_filename = "chart", file_type = "png", 
 #' @export
 #' 
 #' @examples
-#' library(readr)
-#' output <- read_delim("data/output.dat", "\t", trim_ws = TRUE)
 #' plot_mutation_waves(output)
 plot_mutation_waves <- function(df) {
   start_ind <- which(colnames(df) == "CellsWith1Drivers")
@@ -383,7 +385,7 @@ make_image_file_name <- function(prefix, pars, indices) {
 #' @export
 #' 
 #' @examples
-#' final_generation("data")
+#' final_generation(system.file("extdata", "", package = "demonanalysis"))
 final_generation <- function(input_dir) {
   if(substr(input_dir, nchar(input_dir), nchar(input_dir)) == "/") input_dir <- substr(input_dir, 1, nchar(input_dir) - 1)
   
@@ -401,7 +403,7 @@ final_generation <- function(input_dir) {
 #' @export
 #' 
 #' @examples
-#' final_error_message("data")
+#' final_error_message(system.file("extdata", "", package = "demonanalysis"))
 final_error_message <- function(input_dir) {
   if(substr(input_dir, nchar(input_dir), nchar(input_dir)) == "/") input_dir <- substr(input_dir, 1, nchar(input_dir) - 1)
   
@@ -412,7 +414,7 @@ final_error_message <- function(input_dir) {
 #' Create image files for every simulation in a batch
 #' 
 #' @param input_dir base input directory name
-#' @param output_dir output directory name
+#' @param output_dir folder in which to save the image files
 #' @param pars vector of parameter names
 #' @param final_values vector of largest parameter values, of same length as pars
 #' @param type what type of images to create: "plot" or "chart" or c("plot", "chart")
@@ -420,10 +422,7 @@ final_error_message <- function(input_dir) {
 #' @return a set of image files
 #' 
 #' @export
-#' 
-#' @examples
-#' 
-create_plots_batch <- function(input_dir, output_dir, pars, final_values, type = "plot") {
+create_plots_batch <- function(input_dir, output_dir = NA, pars, final_values, type = "plot") {
   N <- length(pars)
   if(N != length(final_values)) stop("Unequal lengths of pars and final_values.")
   

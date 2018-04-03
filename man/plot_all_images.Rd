@@ -4,7 +4,7 @@
 \alias{plot_all_images}
 \title{Create a set of grid and Muller plots}
 \usage{
-plot_all_images(path, output_filename = "plot", file_type = "png",
+plot_all_images(path, output_filename = NA, file_type = "png",
   output_dir = NA, trim = -1)
 }
 \arguments{
@@ -25,5 +25,5 @@ either an image file or a plot displyed on screen
 Create a set of grid and Muller plots
 }
 \examples{
-plot_all_images("data")
+plot_all_images(system.file("extdata", "", package = "demonanalysis"))
 }

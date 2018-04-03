@@ -16,5 +16,6 @@ a dataframe formatted for plotting
 Read a "phylo" dataframe and process it for plotting
 }
 \examples{
-Muller_df <- muller_df_from_file("data/driver_phylo.dat")
+Muller_df <- muller_df_from_file(system.file("extdata", 
+"driver_phylo.dat", package = "demonanalysis"))
 }

@@ -16,7 +16,5 @@ plot displyed on screen
 Plot numers of cells with n mutations for each value of n
 }
 \examples{
-library(readr)
-output <- read_delim("data/output.dat", "\\t", trim_ws = TRUE)
 plot_mutation_waves(output)
 }

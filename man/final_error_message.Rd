@@ -16,5 +16,5 @@ final line of error log
 Return the final line of an error log of a simulation
 }
 \examples{
-final_error_message("data")
+final_error_message(system.file("extdata", "", package = "demonanalysis"))
 }

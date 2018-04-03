@@ -17,11 +17,11 @@ dominant(anc, pop_subdf, threshold)
 Find the latest-occurring mutation shared by at least a threshold proportion of cells
 }
 \examples{
-library(readr)
 library(ggmuller)
-phylo <- read_delim("data/driver_phylo.dat", "\\t")
-phylo <- filter(phylo, CellsPerSample == -1)
+library(dplyr)
+phylo <- filter(driver_phylo, CellsPerSample == -1)
 pop_df <- get_population_df(phylo)
+edges <- get_edges(phylo)
 anc <- ancestry(edges)
 pop_subdf <- filter(pop_df, Generation == max(Generation)) \%>\% select(Identity, Population)
 dominant(anc, pop_subdf, 0.1)

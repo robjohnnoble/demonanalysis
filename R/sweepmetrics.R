@@ -23,9 +23,7 @@ reflect_on_diagonal <- function(matrix) {
 #' @import ape
 #' 
 #' @examples
-#' library(readr)
-#' matrix <- read.delim("data/driver_matrix.dat", header=FALSE)
-#' tree <- get_tree_from_matrix(matrix)
+#' tree <- get_tree_from_matrix(driver_matrix)
 #' plot(tree, show.tip.label = FALSE)
 get_tree_from_matrix <- function(matrix) {
   if(dim(matrix)[1] != dim(matrix)[2]) stop("Not a square matrix")
@@ -43,9 +41,9 @@ get_tree_from_matrix <- function(matrix) {
 #' @import ggmuller
 #' 
 #' @examples
-#' library(readr)
-#' phylo <- read_delim("data/driver_phylo.dat", "\t")
-#' phylo <- filter(phylo, CellsPerSample == -1)
+#' library(dplyr)
+#' phylo <- filter(driver_phylo, CellsPerSample == -1)
+#' library(ggmuller)
 #' edges <- get_edges(phylo)
 #' ancestry(edges)
 ancestry <- function(edges) {
@@ -81,11 +79,11 @@ ancestry <- function(edges) {
 #' @import dplyr
 #' 
 #' @examples
-#' library(readr)
 #' library(ggmuller)
-#' phylo <- read_delim("data/driver_phylo.dat", "\t")
-#' phylo <- filter(phylo, CellsPerSample == -1)
+#' library(dplyr)
+#' phylo <- filter(driver_phylo, CellsPerSample == -1)
 #' pop_df <- get_population_df(phylo)
+#' edges <- get_edges(phylo)
 #' anc <- ancestry(edges)
 #' pop_subdf <- filter(pop_df, Generation == max(Generation)) %>% select(Identity, Population)
 #' dominant(anc, pop_subdf, 0.1)
@@ -116,9 +114,8 @@ dominant <- function(anc, pop_subdf, threshold) {
 #' @import ggmuller
 #' 
 #' @examples
-#' library(readr)
-#' phylo <- read_delim("data/driver_phylo.dat", "\t")
-#' phylo <- filter(phylo, CellsPerSample == -1)
+#' library(dplyr)
+#' phylo <- filter(driver_phylo, CellsPerSample == -1)
 #' sweep_times(phylo, threshold = 0.9)
 sweep_times <- function(phylo, threshold, min_pop = 0) {
   pop_df <- get_population_df(phylo)
@@ -146,10 +143,9 @@ sweep_times <- function(phylo, threshold, min_pop = 0) {
 #' @import dplyr
 #' 
 #' @examples
-#' library(readr)
 #' library(ggmuller)
-#' phylo <- read_delim("data/driver_phylo.dat", "\t")
-#' phylo <- filter(phylo, CellsPerSample == -1)
+#' library(dplyr)
+#' phylo <- filter(driver_phylo, CellsPerSample == -1)
 #' pop_df <- get_population_df(phylo)
 #' sweep_seq1 <- sweep_sequence(pop_df, lag_type = "proportions", breaks = 6)
 #' sweep_seq2 <- sweep_sequence(pop_df, lag_type = "generations", lag_gens = 2)
@@ -190,9 +186,9 @@ sweep_sequence <- function(pop_df, lag_type = "generations", breaks = 10, lag_ge
 #' @import ggmuller
 #' 
 #' @examples
-#' library(readr)
-#' phylo <- read_delim("data/driver_phylo.dat", "\t")
-#' phylo <- filter(phylo, CellsPerSample == -1)
+#' library(dplyr)
+#' library(ggmuller)
+#' phylo <- filter(driver_phylo, CellsPerSample == -1)
 #' pop_df <- get_population_df(phylo)
 #' dist <- geno_dist(pop_df)
 #' barplot(dist, ylim = c(0, 1))

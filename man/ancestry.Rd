@@ -13,9 +13,9 @@ ancestry(edges)
 Get the ancestry of a genotype
 }
 \examples{
-library(readr)
-phylo <- read_delim("data/driver_phylo.dat", "\\t")
-phylo <- filter(phylo, CellsPerSample == -1)
+library(dplyr)
+phylo <- filter(driver_phylo, CellsPerSample == -1)
+library(ggmuller)
 edges <- get_edges(phylo)
 ancestry(edges)
 }

@@ -4,19 +4,19 @@
 \alias{grid_plot}
 \title{Plot a grid from a properly formatted data frame.}
 \usage{
-grid_plot(image_df, palette, discrete = FALSE, add_legend = FALSE,
+grid_plot(image_df, palette = NA, discrete = FALSE, add_legend = FALSE,
   legend_title = "")
 }
 \arguments{
 \item{image_df}{data frame formatted by image_df_from_grid_file}
 
-\item{palette}{colour palette}
+\item{palette}{colour palette (default NA)}
 
-\item{discrete}{whether to use a discrete or continuous colour scale}
+\item{discrete}{whether to use a discrete or continuous colour scale (default FALSE)}
 
-\item{add_legend}{whether to add a legend}
+\item{add_legend}{whether to add a legend (default FALSE)}
 
-\item{legend_title}{text for legend title}
+\item{legend_title}{text for legend title (default none)}
 }
 \value{
 a plot object
@@ -25,6 +25,5 @@ a plot object
 Plot a grid from a properly formatted data frame.
 }
 \examples{
-image_df <- image_df_from_grid_file("data/output_passengersgrid.dat")
-grid_plot(image_df)
+grid_plot(output_passengersgrid)
 }

@@ -18,5 +18,6 @@ a dataframe formatted for plotting
 Read a file containing grid states and process it into a dataframe for plotting.
 }
 \examples{
-image_df <- image_df_from_grid_file("data/output_passengersgrid.dat")
+image_df <- image_df_from_grid_file(system.file("extdata", 
+"output_passengersgrid.dat", package = "demonanalysis"))
 }

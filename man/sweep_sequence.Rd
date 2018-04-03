@@ -20,10 +20,9 @@ sweep_sequence(pop_df, lag_type = "generations", breaks = 10,
 Calculate how the genotype frequency distribution changes over time
 }
 \examples{
-library(readr)
 library(ggmuller)
-phylo <- read_delim("data/driver_phylo.dat", "\\t")
-phylo <- filter(phylo, CellsPerSample == -1)
+library(dplyr)
+phylo <- filter(driver_phylo, CellsPerSample == -1)
 pop_df <- get_population_df(phylo)
 sweep_seq1 <- sweep_sequence(pop_df, lag_type = "proportions", breaks = 6)
 sweep_seq2 <- sweep_sequence(pop_df, lag_type = "generations", lag_gens = 2)

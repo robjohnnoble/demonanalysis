@@ -4,7 +4,7 @@
 \alias{plot_all_charts}
 \title{Plot a set of charts representing allele frequencies and genotype sizes}
 \usage{
-plot_all_charts(path, output_filename = "chart", file_type = "png",
+plot_all_charts(path, output_filename = NA, file_type = "png",
   output_dir = NA)
 }
 \arguments{
@@ -23,5 +23,5 @@ plot displyed on screen
 Plot a set of charts representing allele frequencies and genotype sizes
 }
 \examples{
-plot_all_charts("data")
+plot_all_charts(system.file("extdata", "", package = "demonanalysis"))
 }

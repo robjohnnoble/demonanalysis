@@ -15,9 +15,9 @@ geno_dist(pop_df, generation = NA)
 Get genotype frequencies in increasing order of size
 }
 \examples{
-library(readr)
-phylo <- read_delim("data/driver_phylo.dat", "\\t")
-phylo <- filter(phylo, CellsPerSample == -1)
+library(dplyr)
+library(ggmuller)
+phylo <- filter(driver_phylo, CellsPerSample == -1)
 pop_df <- get_population_df(phylo)
 dist <- geno_dist(pop_df)
 barplot(dist, ylim = c(0, 1))

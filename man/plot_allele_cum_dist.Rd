@@ -16,7 +16,5 @@ plot displyed on screen
 Plot cumulative density of variant allele frequencies versus inverse allele frequency
 }
 \examples{
-library(readr)
-output_allele_cum_dist <- read_delim("data/output_allele_cum_dist.dat", "\\t", trim_ws = TRUE)
 plot_allele_cum_dist(output_allele_cum_dist)
 }

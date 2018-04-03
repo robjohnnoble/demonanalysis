@@ -17,8 +17,7 @@ sweep_times(phylo, threshold, min_pop = 0)
 Find generations at which sweeps (or at least partial sweeps) occur
 }
 \examples{
-library(readr)
-phylo <- read_delim("data/driver_phylo.dat", "\\t")
-phylo <- filter(phylo, CellsPerSample == -1)
+library(dplyr)
+phylo <- filter(driver_phylo, CellsPerSample == -1)
 sweep_times(phylo, threshold = 0.9)
 }
