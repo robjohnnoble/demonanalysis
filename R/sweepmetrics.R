@@ -149,8 +149,8 @@ sweep_times <- function(phylo, threshold, min_pop = 0) {
 #' 
 #' @param pop_df Dataframe with column names "Identity", "Population" and "Generation"
 #' @param lag_type Either "generations" or "proportions" (default "generations")
-#' @param breaks Number of breaks (used only if lag_type = "proportions"; default 10)
-#' @param lag_gens Number of generations between  (used only if lag_type = "generations"; default 500)
+#' @param breaks Number of breaks for determining lag (used only if lag_type = "proportions"; default 10)
+#' @param lag_gens Lag in terms of generations (used only if lag_type = "generations"; default 500)
 #' 
 #' @return For each generation g in pop_df, the output vector quantifies the change in genotype frequencies 
 #' compared to generation g - lag_gens (by summing the squares of the differences).
@@ -166,7 +166,8 @@ sweep_times <- function(phylo, threshold, min_pop = 0) {
 #' phylo <- filter(driver_phylo, CellsPerSample == -1)
 #' pop_df <- get_population_df(phylo)
 #' sweep_seq1 <- sweep_sequence(pop_df, lag_type = "proportions", breaks = 6)
-#' sweep_seq2 <- sweep_sequence(pop_df, lag_type = "generations", lag_gens = 2)
+#' lag_gens <- round(length(unique(pop_df$Generation))/6)
+#' sweep_seq2 <- sweep_sequence(pop_df, lag_type = "generations", lag_gens = lag_gens)
 #' identical(sweep_seq1, sweep_seq2)
 #' sweep_df <- data.frame(y = sweep_seq2, x = (1:length(sweep_seq2))/length(sweep_seq2))
 #' plot(y ~ x , data = sweep_df, type = "l")
@@ -264,9 +265,10 @@ combine_dfs <- function(full_dir, res = data.frame()) {
   df_out <- read_delim(file_out, "\t")
   df_div <- read_delim(file_div, "\t")
   
-  df_out <- add_columns(df_out)
-  
   temp <- merge(df_out, df_div, all = TRUE)
+  
+  temp <- add_columns(temp)
+  
   temp <- cbind(df_pars, temp)
   
   return(rbind(res, temp))
@@ -335,20 +337,19 @@ all_output <- function(input_dir, pars, final_values) {
 #' 
 #' @examples
 #' comb_df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-#' get_summary(comb_df, c(10, 20), c(0.1, 0.2), 100)
+#' get_summary(comb_df, c(100, 300), c(0.5, 0.6), 1000)
 get_summary <- function(data, start_size_range, gap_range, final_size) {
   summary <- data.frame()
   parameter_column_names <- colnames(comb_df)[1:(which(colnames(comb_df) == "Generation") - 1)]
-  data <- data %>% group_by_at(parameter_column_names) %>%
-    select_(parameter_column_names, "gen_adj", "NumCells")
+  data <- data %>% group_by_at(parameter_column_names)
   for(start_size in start_size_range) {
     for(gap in gap_range) {
       if(start_size < final_size) {
         new_summary1 <- data %>% 
-          filter(NumCells >= start_size) %>% 
+          filter(NumCells >= start_size, !is.na(DriverDiversity)) %>% 
           summarise(start_time = min(gen_adj, na.rm = TRUE))
         new_summary2 <- data %>% 
-          filter(NumCells >= final_size) %>% 
+          filter(NumCells >= final_size, !is.na(DriverDiversity)) %>% 
           summarise(end_time = min(gen_adj, na.rm = TRUE))
         new_summary12 <- merge(new_summary1, new_summary2, all.x = TRUE)
         new_summary12 <- new_summary12 %>% 
@@ -356,19 +357,19 @@ get_summary <- function(data, start_size_range, gap_range, final_size) {
       }
       else {
         new_summary12 <- data %>% 
-          filter(NumCells >= start_size) %>% 
+          filter(NumCells >= start_size, !is.na(DriverDiversity)) %>% 
           summarise(waiting_time = NA, start_time = NA, end_time = NA)
       }
       new_summary3 <- data %>% 
-        filter(NumCells > start_size) %>% 
+        filter(NumCells > start_size, !is.na(DriverDiversity)) %>% 
         filter(gen_adj < min(gen_adj, na.rm = TRUE) + gap) %>% 
         summarise(outcome = max(NumCells, na.rm = TRUE))
       new_summary3a <- data %>% 
-        filter(NumCells > start_size) %>% 
+        filter(NumCells > start_size, !is.na(DriverDiversity)) %>% 
         summarise(outcome = max(NumCells, na.rm = TRUE))
       new_summary3$outcome <- ifelse(new_summary3$outcome == new_summary3a$outcome, NA, new_summary3$outcome)
       new_summary4 <- data %>% 
-        filter(NumCells > start_size) %>% 
+        filter(NumCells > start_size, !is.na(DriverDiversity)) %>% 
         filter(gen_adj == min(gen_adj, na.rm = TRUE)) %>%
         mutate(gap = gap, start_size = start_size)
       summary <- rbind(summary, merge(merge(new_summary12, new_summary3, all.x = TRUE), new_summary4, all.x = TRUE))
