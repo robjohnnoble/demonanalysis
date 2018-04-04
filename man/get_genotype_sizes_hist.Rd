@@ -18,5 +18,5 @@ Get a histogram of genotype sizes
 \examples{
 hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
 package = "demonanalysis", mustWork = TRUE))
-plot_genotype_sizes_hist(hist1)
+plot_genotype_sizes_hist(hist1, xmax = 20)
 }

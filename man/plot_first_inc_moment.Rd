@@ -4,10 +4,12 @@
 \alias{plot_first_inc_moment}
 \title{Plot first incomplete moment of genotype sizes}
 \usage{
-plot_first_inc_moment(hist)
+plot_first_inc_moment(hist, xmax = 10000)
 }
 \arguments{
 \item{hist}{histogram of genotype sizes}
+
+\item{xmax}{maximum limit of x-axis}
 }
 \value{
 plot displyed on screen
@@ -18,5 +20,5 @@ Plot first incomplete moment of genotype sizes
 \examples{
 hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
 package = "demonanalysis", mustWork = TRUE))
-plot_first_inc_moment(hist1)
+plot_first_inc_moment(hist1, xmax = 20)
 }
