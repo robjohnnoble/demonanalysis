@@ -252,6 +252,7 @@ get_genotype_sizes_hist <- function(file) {
 #' Plot a histogram of genotype sizes
 #' 
 #' @param hist histogram of genotype sizes
+#' @param xmax maximum limit of x-axis
 #' 
 #' @return plot displyed on screen
 #' 
@@ -261,10 +262,10 @@ get_genotype_sizes_hist <- function(file) {
 #' @examples
 #' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
 #' package = "demonanalysis", mustWork = TRUE))
-#' plot_genotype_sizes_hist(hist1)
-plot_genotype_sizes_hist <- function(hist) {
+#' plot_genotype_sizes_hist(hist1, xmax = 20)
+plot_genotype_sizes_hist <- function(hist, xmax = 1E4) {
   plot(hist$density / sum(hist$density) ~ hist$mids, log = "y", 
-       xlim = c(0, 1E4), ylim = c(1E-5, 1), 
+       xlim = c(0, xmax), ylim = c(1E-5, 1), 
        xlab = "genotype size", ylab = "frequency")
 }
 

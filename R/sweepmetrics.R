@@ -318,7 +318,7 @@ all_output <- function(input_dir, pars, final_values) {
   return(res)
 }
 
-#' Get summary metrics for a simulation
+#' Get summary metrics for a batch of simulations
 #' 
 #' @param data dataframe
 #' @param start_size_range vector of NumCells at time of initial measurement for forecasting

@@ -2,7 +2,7 @@
 % Please edit documentation in R/sweepmetrics.R
 \name{get_summary}
 \alias{get_summary}
-\title{Get summary metrics for a simulation}
+\title{Get summary metrics for a batch of simulations}
 \usage{
 get_summary(data, start_size_range, gap_range, final_size)
 }
@@ -22,7 +22,7 @@ and which has added columns "start_time" (proportional time until NumCells reach
 "waiting_time" ("start_time" - "end_time"), and "outcome" (NumCells after "gap")
 }
 \description{
-Get summary metrics for a simulation
+Get summary metrics for a batch of simulations
 }
 \examples{
 comb_df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
