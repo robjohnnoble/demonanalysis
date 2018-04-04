@@ -234,7 +234,7 @@ plot_allele_cum_dist <- function(df) {
 #' @examples
 #' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
 #' package = "demonanalysis", mustWork = TRUE))
-#' plot_genotype_sizes_hist(hist1)
+#' plot_genotype_sizes_hist(hist1, xmax = 20)
 get_genotype_sizes_hist <- function(file) {
   lastline <- function(filename) {
     out <- system(sprintf("wc -l %s", filename), intern = TRUE)
@@ -272,6 +272,7 @@ plot_genotype_sizes_hist <- function(hist, xmax = 1E4) {
 #' Plot first incomplete moment of genotype sizes
 #' 
 #' @param hist histogram of genotype sizes
+#' @param xmax maximum limit of x-axis
 #' 
 #' @return plot displyed on screen
 #' 
@@ -280,8 +281,8 @@ plot_genotype_sizes_hist <- function(hist, xmax = 1E4) {
 #' @examples
 #' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
 #' package = "demonanalysis", mustWork = TRUE))
-#' plot_first_inc_moment(hist1)
-plot_first_inc_moment <- function(hist) { 
+#' plot_first_inc_moment(hist1, xmax = 20)
+plot_first_inc_moment <- function(hist, xmax = 1E4) { 
   first_inc_moment <- function(sizes, counts, n) {
     mean_size <- sum(sizes * counts)
     sum1 <- sum(sizes[which(sizes >= n)] * counts[which(sizes >= n)])
@@ -289,7 +290,7 @@ plot_first_inc_moment <- function(hist) {
   }
   mom <- sapply(hist$mids, first_inc_moment, counts = hist$density, sizes = hist$mids)
   plot(mom ~ hist$mids, log = "y", 
-       xlim = c(0, 1E4), ylim = c(1E-3, 1), 
+       xlim = c(0, xmax), ylim = c(1E-3, 1), 
        xlab = "genotype size", ylab = "first incomplete moment")
 }
 
@@ -299,6 +300,7 @@ plot_first_inc_moment <- function(hist) {
 #' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
 #' @param output_filename name of output image file
 #' @param file_type either "pdf" or "png" (other values default to "pdf")
+#' @param xmax maximum limit of x-axis in genotype size plots
 #' 
 #' @return plot displyed on screen
 #' 
@@ -311,8 +313,8 @@ plot_first_inc_moment <- function(hist) {
 #' @importFrom graphics par
 #' 
 #' @examples
-#' plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-plot_all_charts <- function(path, output_filename = NA, file_type = "png", output_dir = NA) {
+#' plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), xmax = 20)
+plot_all_charts <- function(path, output_filename = NA, file_type = "png", output_dir = NA, xmax = 1E4) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
   if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
@@ -331,8 +333,8 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   
   plot_allele_hist(output_allele_hist)
   plot_allele_cum_dist(output_allele_cum_dist)
-  plot_genotype_sizes_hist(hist1)
-  plot_first_inc_moment(hist1)
+  plot_genotype_sizes_hist(hist1, xmax)
+  plot_first_inc_moment(hist1, xmax)
   
   if(!is.na(output_dir)) dev.off()
 }
