@@ -94,7 +94,8 @@ ancestry <- function(edges) {
 #' pop_df <- get_population_df(phylo)
 #' edges <- get_edges(phylo)
 #' anc <- ancestry(edges)
-#' pop_subdf <- filter(pop_df, Generation == max(Generation)) %>% select(Identity, Population)
+#' pop_subdf <- filter(pop_df, Generation == max(Generation, na.rm = TRUE)) %>% 
+#' select(Identity, Population)
 #' dominant(anc, pop_subdf, 0.1)
 dominant <- function(anc, pop_subdf, threshold) {
   anc <- merge(anc, pop_subdf)
@@ -107,7 +108,7 @@ dominant <- function(anc, pop_subdf, threshold) {
       select_(col)
     dom <- dom[!is.na(dom), ]
     if(dim(dom)[1] == 0) break
-    else res <- max(dom)
+    else res <- max(dom, na.rm = TRUE)
   }
   return(res)
 }
@@ -138,7 +139,7 @@ sweep_times <- function(phylo, threshold, min_pop = 0) {
   for(generation in unique(pop_df$Generation)) {
     pop_subdf <- filter(pop_df, Generation == generation) %>% select(Identity, Population)
     dom <- dominant(anc, pop_subdf, threshold)
-    if(generation > min(pop_df$Generation)) if(dom != prev_dom) res <- c(res, generation)
+    if(generation > min(pop_df$Generation, na.rm = TRUE)) if(dom != prev_dom) res <- c(res, generation)
     prev_dom <- dom
   }
   return(res)
@@ -187,7 +188,7 @@ sweep_sequence <- function(pop_df, lag_type = "generations", breaks = 10, lag_ge
   pop_df <- group_by(pop_df, Identity) %>% 
     mutate(diff = (Frequency - lag(Frequency, n = lag))^2)
   # find sum of differences for each generation:
-  #pop_df <- filter(pop_df, Generation >= min(pop_df$Generation) + (max(pop_df$Generation) - min(pop_df$Generation))/breaks)
+  #pop_df <- filter(pop_df, Generation >= min(pop_df$Generation, na.rm = TRUE) + (max(pop_df$Generation, na.rm = TRUE) - min(pop_df$Generation, na.rm = TRUE))/breaks)
   sum_df <- group_by(pop_df, Generation) %>% 
     summarise(sum_diff = sum(diff, na.rm=TRUE))
   return(sum_df$sum_diff)
@@ -211,7 +212,7 @@ sweep_sequence <- function(pop_df, lag_type = "generations", breaks = 10, lag_ge
 #' dist <- geno_dist(pop_df)
 #' barplot(dist, ylim = c(0, 1))
 geno_dist <- function(pop_df, generation = NA) {
-  if(is.na(generation)) generation = max(pop_df$Generation)
+  if(is.na(generation)) generation = max(pop_df$Generation, na.rm = TRUE)
   # add frequency column:
   pop_df <- pop_df %>% group_by(Generation) %>% 
     mutate(Frequency = Population / sum(Population)) %>% 
@@ -233,7 +234,7 @@ geno_dist <- function(pop_df, generation = NA) {
 #' @examples
 #' add_columns(output)
 add_columns <- function(df) {
-  df$maxgen <- max(df$Generation)
+  df$maxgen <- max(df$Generation, na.rm = TRUE)
   df$gen_adj <- df$Generation / df$maxgen
   
   return(df)
@@ -317,7 +318,7 @@ all_output <- function(input_dir, pars, final_values) {
   return(res)
 }
 
-#' Get summary metrics for each simulation in a batch
+#' Get summary metrics for a simulation
 #' 
 #' @param data dataframe
 #' @param start_size_range vector of NumCells at time of initial measurement for forecasting
@@ -337,18 +338,18 @@ all_output <- function(input_dir, pars, final_values) {
 #' get_summary(comb_df, c(10, 20), c(0.1, 0.2), 100)
 get_summary <- function(data, start_size_range, gap_range, final_size) {
   summary <- data.frame()
-  parameter_column_nums <- 1:(which(colnames(data) == "Generation") - 1)
-  data <- data %>% group_by_at(parameter_column_nums)
+  parameter_column_names <- colnames(comb_df)[1:(which(colnames(comb_df) == "Generation") - 1)]
+  data <- data %>% group_by_at(parameter_column_names) %>%
+    select_(parameter_column_names, "gen_adj", "NumCells")
   for(start_size in start_size_range) {
-    print("So far so good")
     for(gap in gap_range) {
       if(start_size < final_size) {
         new_summary1 <- data %>% 
           filter(NumCells >= start_size) %>% 
-          summarise(start_time = min(gen_adj))
+          summarise(start_time = min(gen_adj, na.rm = TRUE))
         new_summary2 <- data %>% 
           filter(NumCells >= final_size) %>% 
-          summarise(end_time = min(gen_adj))
+          summarise(end_time = min(gen_adj, na.rm = TRUE))
         new_summary12 <- merge(new_summary1, new_summary2, all.x = TRUE)
         new_summary12 <- new_summary12 %>% 
           mutate(waiting_time = end_time - start_time)
@@ -360,15 +361,15 @@ get_summary <- function(data, start_size_range, gap_range, final_size) {
       }
       new_summary3 <- data %>% 
         filter(NumCells > start_size) %>% 
-        filter(gen_adj < min(gen_adj) + gap) %>% 
-        summarise(outcome = max(NumCells))
+        filter(gen_adj < min(gen_adj, na.rm = TRUE) + gap) %>% 
+        summarise(outcome = max(NumCells, na.rm = TRUE))
       new_summary3a <- data %>% 
         filter(NumCells > start_size) %>% 
-        summarise(outcome = max(NumCells))
+        summarise(outcome = max(NumCells, na.rm = TRUE))
       new_summary3$outcome <- ifelse(new_summary3$outcome == new_summary3a$outcome, NA, new_summary3$outcome)
       new_summary4 <- data %>% 
         filter(NumCells > start_size) %>% 
-        filter(gen_adj == min(gen_adj)) %>%
+        filter(gen_adj == min(gen_adj, na.rm = TRUE)) %>%
         mutate(gap = gap, start_size = start_size)
       summary <- rbind(summary, merge(merge(new_summary12, new_summary3, all.x = TRUE), new_summary4, all.x = TRUE))
     }

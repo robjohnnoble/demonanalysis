@@ -26,6 +26,7 @@ phylo <- filter(driver_phylo, CellsPerSample == -1)
 pop_df <- get_population_df(phylo)
 edges <- get_edges(phylo)
 anc <- ancestry(edges)
-pop_subdf <- filter(pop_df, Generation == max(Generation)) \%>\% select(Identity, Population)
+pop_subdf <- filter(pop_df, Generation == max(Generation, na.rm = TRUE)) \%>\% 
+select(Identity, Population)
 dominant(anc, pop_subdf, 0.1)
 }
