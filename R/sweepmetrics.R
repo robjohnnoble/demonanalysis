@@ -255,18 +255,18 @@ add_columns <- function(df) {
 #' combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
 combine_dfs <- function(full_dir, res = data.frame()) {
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
-  file1 <- paste0(full_dir, "/parameters.dat")
-  file2 <- paste0(full_dir, "/output.dat")
-  file3 <- paste0(full_dir, "/output_diversities.dat")
+  file_pars <- paste0(full_dir, "/parameters.dat")
+  file_out <- paste0(full_dir, "/output.dat")
+  file_div <- paste0(full_dir, "/output_diversities.dat")
   
-  df1 <- read_delim(file1, "\t")
-  df2 <- read_delim(file2, "\t")
-  df3 <- read_delim(file3, "\t")
+  df_pars <- read_delim(file_pars, "\t")
+  df_out <- read_delim(file_out, "\t")
+  df_div <- read_delim(file_div, "\t")
   
-  df2 <- add_columns(df2)
+  df_out <- add_columns(df_out)
   
-  temp <- cbind(df1, df2)
-  temp <- merge(temp, df3, by = "Generation", all = TRUE)
+  temp <- merge(df_out, df_div, all = TRUE)
+  temp <- cbind(df_pars, temp)
   
   return(rbind(res, temp))
 }
@@ -320,14 +320,14 @@ all_output <- function(input_dir, pars, final_values) {
 #' Get summary metrics for each simulation in a batch
 #' 
 #' @param data dataframe
-#' @param start_size_range vector of Population sizes at time of initial measurement for forecasting
+#' @param start_size_range vector of NumCells at time of initial measurement for forecasting
 #' @param gap_range vector of projection periods (gap between time of initial measurement and second measurement)
-#' @param final_size waiting time is measured until tumour reaches this Population size
+#' @param final_size waiting time is measured until tumour reaches this NumCells value
 #' 
 #' @return a dataframe that for each simulation has one row for each combination of "gap" and "start_size", 
-#' and which has added columns "start_time" (proportional time until Population reached start_size), 
-#' "end_time" (proportional time until Population reached end_size), 
-#' "waiting_time" ("start_time" - "end_time"), and "outcome" (Population size after "gap")
+#' and which has added columns "start_time" (proportional time until NumCells reached start_size), 
+#' "end_time" (proportional time until NumCells reached end_size), 
+#' "waiting_time" ("start_time" - "end_time"), and "outcome" (NumCells after "gap")
 #' 
 #' @import dplyr
 #' @export
@@ -344,10 +344,10 @@ get_summary <- function(data, start_size_range, gap_range, final_size) {
     for(gap in gap_range) {
       if(start_size < final_size) {
         new_summary1 <- data %>% 
-          filter(Population >= start_size) %>% 
+          filter(NumCells >= start_size) %>% 
           summarise(start_time = min(gen_adj))
         new_summary2 <- data %>% 
-          filter(Population >= final_size) %>% 
+          filter(NumCells >= final_size) %>% 
           summarise(end_time = min(gen_adj))
         new_summary12 <- merge(new_summary1, new_summary2, all.x = TRUE)
         new_summary12 <- new_summary12 %>% 
@@ -355,19 +355,19 @@ get_summary <- function(data, start_size_range, gap_range, final_size) {
       }
       else {
         new_summary12 <- data %>% 
-          filter(Population >= start_size) %>% 
+          filter(NumCells >= start_size) %>% 
           summarise(waiting_time = NA, start_time = NA, end_time = NA)
       }
       new_summary3 <- data %>% 
-        filter(Population > start_size) %>% 
+        filter(NumCells > start_size) %>% 
         filter(gen_adj < min(gen_adj) + gap) %>% 
-        summarise(outcome = max(Population))
+        summarise(outcome = max(NumCells))
       new_summary3a <- data %>% 
-        filter(Population > start_size) %>% 
-        summarise(outcome = max(Population))
+        filter(NumCells > start_size) %>% 
+        summarise(outcome = max(NumCells))
       new_summary3$outcome <- ifelse(new_summary3$outcome == new_summary3a$outcome, NA, new_summary3$outcome)
       new_summary4 <- data %>% 
-        filter(Population > start_size) %>% 
+        filter(NumCells > start_size) %>% 
         filter(gen_adj == min(gen_adj)) %>%
         mutate(gap = gap, start_size = start_size)
       summary <- rbind(summary, merge(merge(new_summary12, new_summary3, all.x = TRUE), new_summary4, all.x = TRUE))

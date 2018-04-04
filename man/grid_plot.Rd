@@ -25,5 +25,7 @@ a plot object
 Plot a grid from a properly formatted data frame.
 }
 \examples{
-grid_plot(output_passengersgrid)
+image_df <- image_df_from_grid_file(system.file("extdata", 
+"output_passengersgrid.dat", package = "demonanalysis", mustWork = TRUE))
+grid_plot(image_df)
 }

@@ -74,7 +74,9 @@ muller_df_from_file <- function(file) {
 #' @import ggplot2
 #' 
 #' @examples
-#' grid_plot(output_passengersgrid)
+#' image_df <- image_df_from_grid_file(system.file("extdata", 
+#' "output_passengersgrid.dat", package = "demonanalysis", mustWork = TRUE))
+#' grid_plot(image_df)
 grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FALSE, legend_title = "") {
   h2 <- ggplot(image_df, aes(x, y, fill = z)) + 
     geom_raster() +
@@ -348,7 +350,7 @@ plot_mutation_waves <- function(df) {
   start_ind <- which(colnames(df) == "CellsWith1Drivers")
   end_ind <- dim(df)[2]
   plot(CellsWith0Drivers ~ Generation, data = df, type = "l", 
-       ylim = c(10, max(df$Population)), log = "y", xlab = "Cell generations", ylab = "Number of cells")
+       ylim = c(10, max(df$NumCells)), log = "y", xlab = "Cell generations", ylab = "Number of cells")
   for(i in start_ind:end_ind) lines(df[ , i][[1]] ~ df$Generation)
 }
 

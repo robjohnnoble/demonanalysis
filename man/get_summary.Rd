@@ -9,17 +9,17 @@ get_summary(data, start_size_range, gap_range, final_size)
 \arguments{
 \item{data}{dataframe}
 
-\item{start_size_range}{vector of Population sizes at time of initial measurement for forecasting}
+\item{start_size_range}{vector of NumCells at time of initial measurement for forecasting}
 
 \item{gap_range}{vector of projection periods (gap between time of initial measurement and second measurement)}
 
-\item{final_size}{waiting time is measured until tumour reaches this Population size}
+\item{final_size}{waiting time is measured until tumour reaches this NumCells value}
 }
 \value{
 a dataframe that for each simulation has one row for each combination of "gap" and "start_size", 
-and which has added columns "start_time" (proportional time until Population reached start_size), 
-"end_time" (proportional time until Population reached end_size), 
-"waiting_time" ("start_time" - "end_time"), and "outcome" (Population size after "gap")
+and which has added columns "start_time" (proportional time until NumCells reached start_size), 
+"end_time" (proportional time until NumCells reached end_size), 
+"waiting_time" ("start_time" - "end_time"), and "outcome" (NumCells after "gap")
 }
 \description{
 Get summary metrics for each simulation in a batch
