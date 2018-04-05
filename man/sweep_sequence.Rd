@@ -12,9 +12,9 @@ sweep_sequence(pop_df, lag_type = "generations", breaks = 10,
 
 \item{lag_type}{Either "generations" or "proportions" (default "generations")}
 
-\item{breaks}{Number of breaks (used only if lag_type = "proportions"; default 10)}
+\item{breaks}{Number of breaks for determining lag (used only if lag_type = "proportions"; default 10)}
 
-\item{lag_gens}{Number of generations between  (used only if lag_type = "generations"; default 500)}
+\item{lag_gens}{Lag in terms of generations (used only if lag_type = "generations"; default 500)}
 }
 \value{
 For each generation g in pop_df, the output vector quantifies the change in genotype frequencies 
@@ -29,7 +29,8 @@ library(dplyr)
 phylo <- filter(driver_phylo, CellsPerSample == -1)
 pop_df <- get_population_df(phylo)
 sweep_seq1 <- sweep_sequence(pop_df, lag_type = "proportions", breaks = 6)
-sweep_seq2 <- sweep_sequence(pop_df, lag_type = "generations", lag_gens = 2)
+lag_gens <- round(length(unique(pop_df$Generation))/6)
+sweep_seq2 <- sweep_sequence(pop_df, lag_type = "generations", lag_gens = lag_gens)
 identical(sweep_seq1, sweep_seq2)
 sweep_df <- data.frame(y = sweep_seq2, x = (1:length(sweep_seq2))/length(sweep_seq2))
 plot(y ~ x , data = sweep_df, type = "l")

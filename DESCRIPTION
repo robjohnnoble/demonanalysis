@@ -6,7 +6,7 @@ Description: Analyse and plot data created by demon (deme-based oncology model).
 License: GPL-3
 Depends:
     R (>= 3.2.0)
-Imports: dplyr (>= 0.7.0), ggplot2, ggmuller, readr, gridExtra, TeachingDemos, ape
+Imports: dplyr (>= 0.7.0), ggplot2, ggmuller, readr, gridExtra, TeachingDemos, ape, lazyeval
 Suggests: RColorBrewer, knitr, rmarkdown
 LazyData: true
 RoxygenNote: 6.0.1

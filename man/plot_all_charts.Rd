@@ -25,5 +25,5 @@ plot displyed on screen
 Plot a set of charts representing allele frequencies and genotype sizes
 }
 \examples{
-plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), xmax = 20)
+plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), xmax = 50)
 }
