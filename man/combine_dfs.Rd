@@ -2,7 +2,8 @@
 % Please edit documentation in R/datacollation.R
 \name{combine_dfs}
 \alias{combine_dfs}
-\title{Add columns to an output dataframe, containing parameter values and diversity metrics}
+\title{Combine data from files containing population metrics, parameter values and diversity metrics, 
+and add columns containing derived variables.}
 \usage{
 combine_dfs(full_dir, res = data.frame())
 }
@@ -12,10 +13,11 @@ combine_dfs(full_dir, res = data.frame())
 \item{res}{dataframe to which the result will be appended (default is an empty dataframe)}
 }
 \value{
-the same dataframe with additional columns
+the combined dataframe
 }
 \description{
-Add columns to an output dataframe, containing parameter values and diversity metrics
+Combine data from files containing population metrics, parameter values and diversity metrics, 
+and add columns containing derived variables.
 }
 \examples{
 combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))

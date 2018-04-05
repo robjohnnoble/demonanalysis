@@ -4,17 +4,22 @@
 \alias{add_columns}
 \title{Add derived variables to a dataframe}
 \usage{
-add_columns(df)
+add_columns(df, num_parameters = 15)
 }
 \arguments{
 \item{df}{dataframe with columns including "Generation"}
+
+\item{num_parameters}{number of parameters, accounting for the first set of columns in the dataframe}
 }
 \value{
-the same dataframe with additional columns
+the same dataframe with additional columns: for each simulation, 
+"maxgen" is the maximum value of Generation; "gen_adj" is the time elapsed
+since Generation zero, relative to maxgen.
 }
 \description{
 Add derived variables to a dataframe
 }
 \examples{
-add_columns(output)
+df <- data.frame(A = rep(1:2, each = 4), Generation = c(1:4, 3:6), Y = rep(1:4, times = 2))
+add_columns(df, 1)
 }

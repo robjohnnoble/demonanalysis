@@ -1,28 +1,55 @@
 #' Add derived variables to a dataframe
 #' 
 #' @param df dataframe with columns including "Generation"
+#' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
+#' 
+#' @return the same dataframe with additional columns: for each simulation, 
+#' "maxgen" is the maximum value of Generation; "gen_adj" is the time elapsed
+#' since Generation zero, relative to maxgen.
+#' 
+#' @export
+#' 
+#' @examples
+#' df <- data.frame(A = rep(1:2, each = 4), Generation = c(1:4, 3:6), Y = rep(1:4, times = 2))
+#' add_columns(df, 1)
+add_columns <- function(df, num_parameters = 15) {
+  df <- df %>% group_by_at(1:num_parameters)
+  
+  df <- df %>% mutate(maxgen = max(Generation, na.rm = TRUE))
+  df <- df %>% mutate(gen_adj = Generation / maxgen)
+  
+  df <- ungroup(df)
+  
+  return(df)
+}
+
+#' Add relative time column to a dataframe, and diversity at the new time zero
+#' 
+#' @param df dataframe with columns including "gen_adj", "NumCells" and "DriverEdgeDiversity"
 #' @param start_size value of NumCells at which new_time should be set to zero
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' 
-#' @return the same dataframe with additional columns
+#' @return the same dataframe with additional columns: "new_time" is the time elapsed since
+#' NumCells = start_size; "div0" is DriverEdgeDiversity when NumCells = start_size
 #' 
 #' @export
 #' 
 #' @examples
 #' comb_df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-#' add_columns(comb_df, 100)
-add_columns <- function(df, start_size, num_parameters = 15) {
+#' add_relative_time(comb_df, start_size = 100)
+add_relative_time <- function(df, start_size, num_parameters = 15) {
   df <- df %>% group_by_at(1:num_parameters)
   
-  df <- df %>% mutate(maxgen = max(Generation, na.rm = TRUE))
-  df <- df %>% mutate(gen_adj = Generation / maxgen, 
-                      new_time = gen_adj - min(gen_adj[NumCells >= start_size]))
+  df <- df %>% mutate(new_time = gen_adj - min(gen_adj[NumCells >= start_size], na.rm = TRUE))
   df <- df %>% mutate(div0 = DriverEdgeDiversity[new_time == 0])
+  
+  df <- ungroup(df)
   
   return(df)
 }
 
-#' Combine data from files containing population metrics, parameter values and diversity metrics
+#' Combine data from files containing population metrics, parameter values and diversity metrics, 
+#' and add columns containing derived variables.
 #' 
 #' @param full_dir base input directory name
 #' @param res dataframe to which the result will be appended (default is an empty dataframe)
@@ -37,7 +64,9 @@ add_columns <- function(df, start_size, num_parameters = 15) {
 #' @examples
 #' combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
 combine_dfs <- function(full_dir, res = data.frame()) {
+  
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
+  
   file_pars <- paste0(full_dir, "/parameters.dat")
   file_out <- paste0(full_dir, "/output.dat")
   file_div <- paste0(full_dir, "/output_diversities.dat")
@@ -50,10 +79,12 @@ combine_dfs <- function(full_dir, res = data.frame()) {
   
   temp <- cbind(df_pars, temp)
   
+  temp <- add_columns(temp)
+  
   return(rbind(res, temp))
 }
 
-#' Create a composite dataframe by combining data for every simulation in a batch
+#' Create a composite dataframe by combining data for every simulation in a batch.
 #' 
 #' @param input_dir base input directory name
 #' @param pars vector of parameter names
