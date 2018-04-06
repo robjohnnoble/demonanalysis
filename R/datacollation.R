@@ -255,7 +255,10 @@ get_cor_summary <- function(summary, col_names_list, num_parameters = 15) {
     filter(!is.na(outcome)) %>% 
     filter(var(outcome) > 0)
   cor_summary <- summary %>% 
-    summarise(mean_start_time = mean(start_time), num_seeds = n())
+    summarise(mean_start_time = mean(start_time), 
+              mean_DriverDiversity = mean(DriverDiversity),
+              mean_outcome = mean(outcome), 
+              num_seeds = n())
   result_names_list <- paste0("Cor_", col_names_list)
   cor_summary_list <- list()
   for(i in 1:length(col_names_list)) cor_summary_list[[i]] <- find_correlations(summary, "outcome", col_names_list[i], result_names_list[i])
@@ -288,7 +291,10 @@ get_wait_cor_summary <- function(summary, col_names_list, num_parameters = 15) {
     filter(!is.na(waiting_time)) %>% 
     filter(var(waiting_time) > 0)
   cor_summary <- summary %>% 
-    summarise(mean_start_time = mean(start_time), num_seeds = n())
+    summarise(mean_start_time = mean(start_time), 
+              mean_DriverDiversity = mean(DriverDiversity), 
+              mean(waiting_time) = mean(waiting_time), 
+              num_seeds = n())
   result_names_list <- paste0("Cor_", col_names_list)
   cor_summary_list <- list()
   for(i in 1:length(col_names_list)) cor_summary_list[[i]] <- find_correlations(summary, "waiting_time", col_names_list[i], result_names_list[i])
