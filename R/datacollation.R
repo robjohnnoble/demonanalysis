@@ -136,10 +136,10 @@ all_output <- function(input_dir, pars, final_values) {
 #' @examples
 #' count_seeds(sum_df)
 count_seeds <- function(data, num_parameters = 15) {
-  col_nums <- c(1:num_parameters, which(colnames(data) == "Generation"))
+  col_nums <- c(1:num_parameters)
   col_nums <- col_nums[col_nums != which(colnames(data) == "seed")]
   res <- data %>% group_by_at(col_nums) %>%
-    summarise(num_seeds = n())
+    summarise(num_seeds = length(unique(seed)))
   return(res$num_seeds)
 }
 
