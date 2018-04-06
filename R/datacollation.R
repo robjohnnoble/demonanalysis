@@ -93,6 +93,8 @@ combine_dfs <- function(full_dir, res = data.frame()) {
                    sqrt_mean_autocor = sqrt(mean(sweep_seq)), 
                    skewness = skewness(sweep_seq))
   
+  print(paste0("result of combine_dfs has dimensions ", dim(rbind(res, temp))))
+  
   return(rbind(res, temp))
 }
 
