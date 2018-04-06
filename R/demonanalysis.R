@@ -1,3 +1,20 @@
+#' Apply a function to every combination of some sequences
+#' 
+#' @param vec vector of final values of the sequences (initial values are always zero)
+#' @param fn function to apply to the values
+#' 
+#' @return result of applying fn to every combination of vec values
+#' 
+#' @export
+#' 
+#' @examples
+#' apply_combinations(c(2, 3), mean)
+apply_combinations <- function(vec, fn){
+  vecs <- mapply(seq, 0, vec)
+  tmp <- do.call(expand.grid, vecs)
+  apply(tmp, 1, fn)
+}
+
 #' Read a file containing grid states and process it into a dataframe for plotting.
 #' 
 #' @param file file name including path
@@ -433,6 +450,27 @@ final_error_message <- function(input_dir) {
   return(res[length(res)])
 }
 
+#' Return the final line of every error log in a batch of simulations.
+#' 
+#' @param input_dir base input directory name
+#' @param pars vector of parameter names
+#' @param final_values vector of largest parameter values, of same length as pars
+#' 
+#' @return final line of each error log
+#' 
+#' @export
+all_statuses <- function(input_dir, pars, final_values) {
+  N <- length(pars)
+  if(N != length(final_values)) stop("Unequal lengths of pars and final_values.")
+  
+  each_msg <- function(x) {
+    full_dir <- make_dir(input_dir, pars, x)
+    msg <- final_error_message(full_dir)
+    if(!identical(msg, character(0))) if(msg == "Exit code 0") res <- final_error_message(full_dir)
+  }
+  apply_combinations(final_values, each_msg)
+}
+
 #' Create image files for every simulation in a batch
 #' 
 #' @param input_dir base input directory name
@@ -448,53 +486,15 @@ create_plots_batch <- function(input_dir, output_dir = NA, pars, final_values, t
   N <- length(pars)
   if(N != length(final_values)) stop("Unequal lengths of pars and final_values.")
   
-  if(N == 1) for(a in 0:final_values[1]) {
-    full_dir <- make_dir(input_dir, pars, a)
+  each_plot <- function(x) {
+    full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
     if(!identical(msg, character(0))) if(msg == "Exit code 0") {
-      if("plot" %in% type) plot_all_images(full_dir, make_image_file_name("plot", pars, a), "png", output_dir)
-      if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, a), "png", output_dir)
+      if("plot" %in% type) plot_all_images(full_dir, make_image_file_name("plot", pars, x), "png", output_dir)
+      if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, x), "png", output_dir)
     }
   }
-  
-  if(N == 2) for(a in 0:final_values[1]) for(b in 0:final_values[2]) {
-    full_dir <- make_dir(input_dir, pars, c(a, b))
-    msg <- final_error_message(full_dir)
-    if(!identical(msg, character(0))) if(msg == "Exit code 0") {
-      if("plot" %in% type) plot_all_images(full_dir, make_image_file_name("plot", pars, c(a, b)), "png", output_dir)
-      if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, c(a, b)), "png", output_dir)
-    }
-  }
-  
-  if(N == 3) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
-    for(c in 0:final_values[3]) {
-      full_dir <- make_dir(input_dir, pars, c(a, b, c))
-      msg <- final_error_message(full_dir)
-      if(!identical(msg, character(0))) if(msg == "Exit code 0") {
-        if("plot" %in% type) plot_all_images(full_dir, make_image_file_name("plot", pars, c(a, b, c)), "png", output_dir)
-        if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, c(a, b, c)), "png", output_dir)
-      }
-    }
-  
-  if(N == 4) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
-    for(c in 0:final_values[3]) for(d in 0:final_values[4]) {
-      full_dir <- make_dir(input_dir, pars, c(a, b, c, d))
-      msg <- final_error_message(full_dir)
-      if(!identical(msg, character(0))) if(msg == "Exit code 0") {
-        if("plot" %in% type) plot_all_images(full_dir, make_image_file_name("plot", pars, c(a, b, c, d)), "png", output_dir)
-        if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, c(a, b, c, d)), "png", output_dir)
-      }
-    }
-  
-  if(N == 5) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
-    for(c in 0:final_values[3]) for(d in 0:final_values[4]) for(e in 0:final_values[5]) {
-      full_dir <- make_dir(input_dir, pars, c(a, b, c, d, e))
-      msg <- final_error_message(full_dir)
-      if(!identical(msg, character(0))) if(msg == "Exit code 0") {
-        if("plot" %in% type) plot_all_images(full_dir, make_image_file_name("plot", pars, c(a, b, c, d, e)), "png", output_dir)
-        if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, c(a, b, c, d, e)), "png", output_dir)
-      }
-    }
+  apply_combinations(final_values, each_plot)
 }
 
 

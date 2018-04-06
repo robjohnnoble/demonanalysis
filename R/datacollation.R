@@ -109,42 +109,15 @@ combine_dfs <- function(full_dir, res = data.frame()) {
 all_output <- function(input_dir, pars, final_values) {
   N <- length(pars)
   if(N != length(final_values)) stop("Unequal lengths of pars and final_values.")
-  if(N > 5) stop("Too many parameters")
   
   res <- data.frame()
   
-  if(N == 1) for(a in 0:final_values[1]) {
-    full_dir <- make_dir(input_dir, pars, a)
+  each_df <- function(x) {
+    full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
     if(!identical(msg, character(0))) if(msg == "Exit code 0") res <- combine_dfs(full_dir, res)
   }
-  
-  if(N == 2) for(a in 0:final_values[1]) for(b in 0:final_values[2]) {
-    full_dir <- make_dir(input_dir, pars, c(a, b))
-    msg <- final_error_message(full_dir)
-    if(!identical(msg, character(0))) if(msg == "Exit code 0") res <- combine_dfs(full_dir, res)
-  }
-  
-  if(N == 3) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
-    for(c in 0:final_values[3]) {
-      full_dir <- make_dir(input_dir, pars, c(a, b, c))
-      msg <- final_error_message(full_dir)
-      if(!identical(msg, character(0))) if(msg == "Exit code 0") res <- combine_dfs(full_dir, res)
-    }
-  
-  if(N == 4) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
-    for(c in 0:final_values[3]) for(d in 0:final_values[4]) {
-      full_dir <- make_dir(input_dir, pars, c(a, b, c, d))
-      msg <- final_error_message(full_dir)
-      if(!identical(msg, character(0))) if(msg == "Exit code 0") res <- combine_dfs(full_dir, res)
-    }
-  
-  if(N == 5) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
-    for(c in 0:final_values[3]) for(d in 0:final_values[4]) for(e in 0:final_values[5]) {
-      full_dir <- make_dir(input_dir, pars, c(a, b, c, d, e))
-      msg <- final_error_message(full_dir)
-      if(!identical(msg, character(0))) if(msg == "Exit code 0") res <- combine_dfs(full_dir, res)
-    }
+  apply_combinations(final_values, each_df)
   
   return(res)
 }
