@@ -293,7 +293,7 @@ get_wait_cor_summary <- function(summary, col_names_list, num_parameters = 15) {
   cor_summary <- summary %>% 
     summarise(mean_start_time = mean(start_time), 
               mean_DriverDiversity = mean(DriverDiversity), 
-              mean(waiting_time) = mean(waiting_time), 
+              mean_waiting_time = mean(waiting_time), 
               num_seeds = n())
   result_names_list <- paste0("Cor_", col_names_list)
   cor_summary_list <- list()
