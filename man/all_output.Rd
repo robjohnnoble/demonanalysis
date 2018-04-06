@@ -2,7 +2,8 @@
 % Please edit documentation in R/datacollation.R
 \name{all_output}
 \alias{all_output}
-\title{Create a composite dataframe by combining data for every simulation in a batch.}
+\title{Create a composite dataframe for a batch of simulations, derived from multiple 
+data files per simulation.}
 \usage{
 all_output(input_dir, pars, final_values)
 }
@@ -17,5 +18,6 @@ all_output(input_dir, pars, final_values)
 a combined dataframe
 }
 \description{
-Create a composite dataframe by combining data for every simulation in a batch.
+Create a composite dataframe for a batch of simulations, derived from multiple 
+data files per simulation.
 }

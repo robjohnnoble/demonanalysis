@@ -7,15 +7,16 @@
 get_cor_summary(summary, col_names_list, num_parameters = 15)
 }
 \arguments{
-\item{summary}{dataframe including columns named "Generation", "start_time" and "outcome"}
+\item{summary}{dataframe including columns named "seed", "Generation", "start_size", "start_time" and "outcome"}
 
 \item{col_names_list}{char vector of column names in the summary dataframe}
 
 \item{num_parameters}{number of parameters, accounting for the first set of columns in the dataframe}
 }
 \value{
-Dataframe with one row per simulation, and including columns containing the 
-correlations between "outcome" and each variable in col_names_list.
+Dataframe with one row for each unique combination of parameter values, gap and start_size 
+(i.e. it summarises over "seed"), and including columns containing the correlations between "outcome" 
+and each variable in col_names_list.
 }
 \description{
 Generate summary dataframe of correlations with "outcome"

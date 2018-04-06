@@ -2,7 +2,7 @@
 % Please edit documentation in R/datacollation.R
 \name{get_summary}
 \alias{get_summary}
-\title{Get summary metrics for a batch of simulations}
+\title{Get summary metrics for one or more simulations}
 \usage{
 get_summary(data, start_size_range, gap_range, final_size,
   num_parameters = 15)
@@ -19,13 +19,14 @@ get_summary(data, start_size_range, gap_range, final_size,
 \item{num_parameters}{number of parameters, accounting for the first set of columns in the dataframe}
 }
 \value{
-a dataframe that for each simulation has one row for each combination of "gap" and "start_size", 
-and which has added columns "start_time" (proportional time until NumCells reached start_size), 
-"end_time" (proportional time until NumCells reached end_size), 
-"waiting_time" (difference between start_time and end_time), and "outcome" (NumCells after "gap")
+a dataframe with one row for each unique combination of parameter values (including seed), 
+"gap" and "start_size", (i.e. it summarises over time) and which has added columns "start_time" 
+(proportional time until NumCells reached start_size), "end_time" (proportional time until NumCells 
+reached end_size), "waiting_time" (difference between start_time and end_time), and "outcome" 
+(NumCells after "gap")
 }
 \description{
-Get summary metrics for a batch of simulations
+Get summary metrics for one or more simulations
 }
 \examples{
 comb_df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))

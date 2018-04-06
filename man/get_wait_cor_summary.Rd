@@ -4,25 +4,23 @@
 \alias{get_wait_cor_summary}
 \title{Generate summary dataframe of correlations with "waiting_time"}
 \usage{
-get_wait_cor_summary(summary, col_names_list, gap_val, num_parameters = 15)
+get_wait_cor_summary(summary, col_names_list, num_parameters = 15)
 }
 \arguments{
-\item{summary}{dataframe including columns named "Generation", "start_time", "gap" and "waiting_time"}
+\item{summary}{dataframe including columns named "seed", "Generation", "start_time", "start_size", "gap" and "waiting_time"}
 
 \item{col_names_list}{char vector of column names in the summary dataframe}
-
-\item{gap_val}{which "gap" value to use}
 
 \item{num_parameters}{number of parameters, accounting for the first set of columns in the dataframe}
 }
 \value{
-Dataframe with one row per simulation, and including columns containing the 
-correlations between "outcome" and each variable in col_names_list.
+Dataframe with one row for each unique combination of parameter values and start_size 
+(i.e. it summarises over "seed"), and including columns containing the correlations between "waiting_time" 
+and each variable in col_names_list.
 }
 \description{
 Generate summary dataframe of correlations with "waiting_time"
 }
 \examples{
-gap_val <- names(sort(-table(sum_df$gap)))[1] # the most frequent (mode average) gap value
-get_wait_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), gap_val)
+get_wait_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"))
 }

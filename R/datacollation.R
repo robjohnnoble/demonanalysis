@@ -48,8 +48,8 @@ add_relative_time <- function(df, start_size, num_parameters = 15) {
   return(df)
 }
 
-#' Combine data from files containing population metrics, parameter values and diversity metrics, 
-#' and add columns containing derived variables.
+#' Combine data for one simulation, including population metrics, parameter values 
+#' and diversity metrics, and with added columns containing derived variables.
 #' 
 #' @param full_dir base input directory name
 #' @param res dataframe to which the result will be appended (default is an empty dataframe)
@@ -58,6 +58,7 @@ add_relative_time <- function(df, start_size, num_parameters = 15) {
 #' 
 #' @importFrom readr read_delim
 #' @importFrom dplyr bind_cols
+#' @importFrom moments skewness
 #' 
 #' @export
 #' 
@@ -70,10 +71,21 @@ combine_dfs <- function(full_dir, res = data.frame()) {
   file_pars <- paste0(full_dir, "/parameters.dat")
   file_out <- paste0(full_dir, "/output.dat")
   file_div <- paste0(full_dir, "/output_diversities.dat")
+  file_driver_phylo <- paste0(full_dir, "/driver_phylo.dat")
   
   df_pars <- read_delim(file_pars, "\t")
   df_out <- read_delim(file_out, "\t")
   df_div <- read_delim(file_div, "\t")
+  df_driver_phylo <- read_delim(file_driver_phylo, "\t")
+  
+  df_driver_phylo <- filter(df_driver_phylo, CellsPerSample == -1)
+  pop_df <- get_population_df(df_driver_phylo)
+  
+  sweep_seq <- sweep_sequence(pop_df, lag_type = "proportions", breaks = 10)
+  df_out <- mutate(df_out, mean_autocor = mean(sweep_seq), 
+                   log_mean_autocor = log(mean(sweep_seq)), 
+                   sqrt_mean_autocor = sqrt(mean(sweep_seq)), 
+                   skewness = skewness(sweep_seq))
   
   temp <- merge(df_out, df_div, all = TRUE)
   
@@ -84,7 +96,8 @@ combine_dfs <- function(full_dir, res = data.frame()) {
   return(rbind(res, temp))
 }
 
-#' Create a composite dataframe by combining data for every simulation in a batch.
+#' Create a composite dataframe for a batch of simulations, derived from multiple 
+#' data files per simulation.
 #' 
 #' @param input_dir base input directory name
 #' @param pars vector of parameter names
@@ -96,41 +109,67 @@ combine_dfs <- function(full_dir, res = data.frame()) {
 all_output <- function(input_dir, pars, final_values) {
   N <- length(pars)
   if(N != length(final_values)) stop("Unequal lengths of pars and final_values.")
+  if(N > 5) stop("Too many parameters")
   
   res <- data.frame()
   
   if(N == 1) for(a in 0:final_values[1]) {
     full_dir <- make_dir(input_dir, pars, a)
-    res <- combine_dfs(full_dir, res)
+    msg <- final_error_message(full_dir)
+    if(!identical(msg, character(0))) if(msg == "Exit code 0") res <- combine_dfs(full_dir, res)
   }
   
   if(N == 2) for(a in 0:final_values[1]) for(b in 0:final_values[2]) {
     full_dir <- make_dir(input_dir, pars, c(a, b))
-    res <- combine_dfs(full_dir, res)
+    msg <- final_error_message(full_dir)
+    if(!identical(msg, character(0))) if(msg == "Exit code 0") res <- combine_dfs(full_dir, res)
   }
   
   if(N == 3) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
     for(c in 0:final_values[3]) {
       full_dir <- make_dir(input_dir, pars, c(a, b, c))
-      res <- combine_dfs(full_dir, res)
+      msg <- final_error_message(full_dir)
+      if(!identical(msg, character(0))) if(msg == "Exit code 0") res <- combine_dfs(full_dir, res)
     }
   
   if(N == 4) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
     for(c in 0:final_values[3]) for(d in 0:final_values[4]) {
       full_dir <- make_dir(input_dir, pars, c(a, b, c, d))
-      res <- combine_dfs(full_dir, res)
+      msg <- final_error_message(full_dir)
+      if(!identical(msg, character(0))) if(msg == "Exit code 0") res <- combine_dfs(full_dir, res)
     }
   
   if(N == 5) for(a in 0:final_values[1]) for(b in 0:final_values[2]) 
     for(c in 0:final_values[3]) for(d in 0:final_values[4]) for(e in 0:final_values[5]) {
       full_dir <- make_dir(input_dir, pars, c(a, b, c, d, e))
-      res <- combine_dfs(full_dir, res)
+      msg <- final_error_message(full_dir)
+      if(!identical(msg, character(0))) if(msg == "Exit code 0") res <- combine_dfs(full_dir, res)
     }
   
   return(res)
 }
 
-#' Get summary metrics for a batch of simulations
+#' Count the number of rows in a dataframe per parameter set.
+#' 
+#' @param data dataframe
+#' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
+#' 
+#' @return a dataframe listing number of rows per parameter set
+#' 
+#' @import dplyr
+#' @export
+#' 
+#' @examples
+#' count_seeds(sum_df)
+count_seeds <- function(data, num_parameters = 15) {
+  col_nums <- c(1:num_parameters)
+  col_nums <- col_nums[col_nums != which(colnames(data) == "seed")]
+  res <- data %>% group_by_at(col_nums) %>%
+    summarise(num_seeds = n())
+  return(res$num_seeds)
+}
+
+#' Get summary metrics for one or more simulations
 #' 
 #' @param data dataframe
 #' @param start_size_range vector of NumCells at time of initial measurement for forecasting
@@ -138,10 +177,11 @@ all_output <- function(input_dir, pars, final_values) {
 #' @param final_size waiting time is measured until tumour reaches this NumCells value
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' 
-#' @return a dataframe that for each simulation has one row for each combination of "gap" and "start_size", 
-#' and which has added columns "start_time" (proportional time until NumCells reached start_size), 
-#' "end_time" (proportional time until NumCells reached end_size), 
-#' "waiting_time" (difference between start_time and end_time), and "outcome" (NumCells after "gap")
+#' @return a dataframe with one row for each unique combination of parameter values (including seed), 
+#' "gap" and "start_size", (i.e. it summarises over time) and which has added columns "start_time" 
+#' (proportional time until NumCells reached start_size), "end_time" (proportional time until NumCells 
+#' reached end_size), "waiting_time" (difference between start_time and end_time), and "outcome" 
+#' (NumCells after "gap")
 #' 
 #' @import dplyr
 #' @export
@@ -219,12 +259,13 @@ find_correlations <- function(summary, factor1, factor2, result_name) {
 
 #' Generate summary dataframe of correlations with "outcome"
 #' 
-#' @param summary dataframe including columns named "Generation", "start_time" and "outcome"
+#' @param summary dataframe including columns named "seed", "Generation", "start_size", "start_time" and "outcome"
 #' @param col_names_list char vector of column names in the summary dataframe
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' 
-#' @return Dataframe with one row per simulation, and including columns containing the 
-#' correlations between "outcome" and each variable in col_names_list.
+#' @return Dataframe with one row for each unique combination of parameter values, gap and start_size 
+#' (i.e. it summarises over "seed"), and including columns containing the correlations between "outcome" 
+#' and each variable in col_names_list.
 #' 
 #' @import dplyr
 #' @importFrom stats var
@@ -233,12 +274,14 @@ find_correlations <- function(summary, factor1, factor2, result_name) {
 #' @examples
 #' get_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"))
 get_cor_summary <- function(summary, col_names_list, num_parameters = 15) {
+  col_nums <- c(1:num_parameters, which(colnames(summary) == "gap"), which(colnames(summary) == "start_size"))
+  col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
   summary <- summary %>% 
-    group_by_at(1:num_parameters) %>% 
+    group_by_at(col_nums) %>% 
     filter(!is.na(outcome)) %>% 
     filter(var(outcome) > 0)
   cor_summary <- summary %>% 
-    summarise(mean_start_time = mean(start_time))
+    summarise(mean_start_time = mean(start_time), num_seeds = n())
   result_names_list <- paste0("Cor_", col_names_list)
   cor_summary_list <- list()
   for(i in 1:length(col_names_list)) cor_summary_list[[i]] <- find_correlations(summary, "outcome", col_names_list[i], result_names_list[i])
@@ -248,29 +291,30 @@ get_cor_summary <- function(summary, col_names_list, num_parameters = 15) {
 
 #' Generate summary dataframe of correlations with "waiting_time"
 #' 
-#' @param summary dataframe including columns named "Generation", "start_time", "gap" and "waiting_time"
+#' @param summary dataframe including columns named "seed", "Generation", "start_time", "start_size", "gap" and "waiting_time"
 #' @param col_names_list char vector of column names in the summary dataframe
-#' @param gap_val which "gap" value to use
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' 
-#' @return Dataframe with one row per simulation, and including columns containing the 
-#' correlations between "outcome" and each variable in col_names_list.
+#' @return Dataframe with one row for each unique combination of parameter values and start_size 
+#' (i.e. it summarises over "seed"), and including columns containing the correlations between "waiting_time" 
+#' and each variable in col_names_list.
 #' 
 #' @import dplyr
 #' @importFrom stats var
 #' @export
 #' 
 #' @examples
-#' gap_val <- names(sort(-table(sum_df$gap)))[1] # the most frequent (mode average) gap value
-#' get_wait_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), gap_val)
-get_wait_cor_summary <- function(summary, col_names_list, gap_val, num_parameters = 15) {
+#' get_wait_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"))
+get_wait_cor_summary <- function(summary, col_names_list, num_parameters = 15) {
+  col_nums <- c(1:num_parameters, which(colnames(summary) == "start_size"))
+  col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
   summary <- summary %>% 
-    group_by_at(1:num_parameters) %>% 
-    filter(gap == gap_val | is.na(gap)) %>% 
+    group_by_at(col_nums) %>% 
+    filter(gap == min(gap, na.rm = TRUE)) %>% # choice of gap value doesn't affect the result
     filter(!is.na(waiting_time)) %>% 
     filter(var(waiting_time) > 0)
   cor_summary <- summary %>% 
-    summarise(mean_start_time = mean(start_time))
+    summarise(mean_start_time = mean(start_time), num_seeds = n())
   result_names_list <- paste0("Cor_", col_names_list)
   cor_summary_list <- list()
   for(i in 1:length(col_names_list)) cor_summary_list[[i]] <- find_correlations(summary, "waiting_time", col_names_list[i], result_names_list[i])
