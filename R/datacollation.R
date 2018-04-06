@@ -81,17 +81,17 @@ combine_dfs <- function(full_dir, res = data.frame()) {
   df_driver_phylo <- filter(df_driver_phylo, CellsPerSample == -1)
   pop_df <- get_population_df(df_driver_phylo)
   
-  sweep_seq <- sweep_sequence(pop_df, lag_type = "proportions", breaks = 10)
-  df_out <- mutate(df_out, mean_autocor = mean(sweep_seq), 
-                   log_mean_autocor = log(mean(sweep_seq)), 
-                   sqrt_mean_autocor = sqrt(mean(sweep_seq)), 
-                   skewness = skewness(sweep_seq))
-  
   temp <- merge(df_out, df_div, all = TRUE)
   
   temp <- cbind(df_pars, temp)
   
   temp <- add_columns(temp)
+  
+  sweep_seq <- sweep_sequence(pop_df, lag_type = "proportions", breaks = 10)
+  temp <- mutate(temp, mean_autocor = mean(sweep_seq), 
+                   log_mean_autocor = log(mean(sweep_seq)), 
+                   sqrt_mean_autocor = sqrt(mean(sweep_seq)), 
+                   skewness = skewness(sweep_seq))
   
   return(rbind(res, temp))
 }
