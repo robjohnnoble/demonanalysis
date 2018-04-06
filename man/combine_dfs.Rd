@@ -5,12 +5,10 @@
 \title{Combine data for one simulation, including population metrics, parameter values 
 and diversity metrics, and with added columns containing derived variables.}
 \usage{
-combine_dfs(full_dir, res = data.frame())
+combine_dfs(full_dir)
 }
 \arguments{
 \item{full_dir}{base input directory name}
-
-\item{res}{dataframe to which the result will be appended (default is an empty dataframe)}
 }
 \value{
 the combined dataframe

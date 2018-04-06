@@ -52,7 +52,6 @@ add_relative_time <- function(df, start_size, num_parameters = 15) {
 #' and diversity metrics, and with added columns containing derived variables.
 #' 
 #' @param full_dir base input directory name
-#' @param res dataframe to which the result will be appended (default is an empty dataframe)
 #' 
 #' @return the combined dataframe
 #' 
@@ -64,9 +63,7 @@ add_relative_time <- function(df, start_size, num_parameters = 15) {
 #' 
 #' @examples
 #' combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-combine_dfs <- function(full_dir, res = data.frame()) {
-  
-  print(paste0("input to combine_dfs has dimensions ", dim(res)[1], " x ", dim(res)[2]))
+combine_dfs <- function(full_dir) {
   
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
   
@@ -95,8 +92,6 @@ combine_dfs <- function(full_dir, res = data.frame()) {
                    sqrt_mean_autocor = sqrt(mean(sweep_seq)), 
                    skewness = skewness(sweep_seq))
   
-  temp <- rbind(res, temp)
-  
   print(paste0("result of combine_dfs has dimensions ", dim(temp)[1], " x ", dim(temp)[2]))
   
   return(temp)
@@ -116,16 +111,14 @@ all_output <- function(input_dir, pars, final_values) {
   N <- length(pars)
   if(N != length(final_values)) stop("Unequal lengths of pars and final_values.")
   
-  res <- data.frame()
-  
   each_df <- function(x, res) {
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
     print(paste0(full_dir, " ", msg))
-    if(!identical(msg, character(0))) if(msg == "Exit code 0") res <- combine_dfs(full_dir, res)
-    return(res)
+    if(!identical(msg, character(0))) if(msg == "Exit code 0") return(combine_dfs(full_dir))
+    return(data.frame())
   }
-  apply_combinations(final_values, each_df, res = res)
+  res <- do.call(rbind, apply_combinations(final_values, each_df))
   
   return(res)
 }

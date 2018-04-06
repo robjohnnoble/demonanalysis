@@ -2,6 +2,7 @@
 #' 
 #' @param vec vector of final values of the sequences (initial values are always zero)
 #' @param fn function to apply to the values
+#' @param ... other arguments passed to fn
 #' 
 #' @return result of applying fn to every combination of vec values
 #' 
