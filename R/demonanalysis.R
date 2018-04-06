@@ -11,6 +11,7 @@
 #' apply_combinations(c(2, 3), mean)
 apply_combinations <- function(vec, fn){
   vecs <- mapply(seq, 0, vec)
+  print(vecs)
   tmp <- do.call(expand.grid, vecs)
   apply(tmp, 1, fn)
 }
