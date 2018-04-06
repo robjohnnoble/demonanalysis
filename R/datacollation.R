@@ -66,6 +66,8 @@ add_relative_time <- function(df, start_size, num_parameters = 15) {
 #' combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
 combine_dfs <- function(full_dir, res = data.frame()) {
   
+  print(paste0("input to combine_dfs has dimensions ", dim(res)[1], " x ", dim(res)[2]))
+  
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
   
   file_pars <- paste0(full_dir, "/parameters.dat")
@@ -93,9 +95,11 @@ combine_dfs <- function(full_dir, res = data.frame()) {
                    sqrt_mean_autocor = sqrt(mean(sweep_seq)), 
                    skewness = skewness(sweep_seq))
   
-  print(paste0("result of combine_dfs has dimensions ", dim(rbind(res, temp))))
+  temp <- rbind(res, temp)
   
-  return(rbind(res, temp))
+  print(paste0("result of combine_dfs has dimensions ", dim(temp)[1], " x ", dim(temp)[2]))
+  
+  return(temp)
 }
 
 #' Create a composite dataframe for a batch of simulations, derived from multiple 
