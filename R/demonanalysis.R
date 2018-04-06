@@ -9,11 +9,10 @@
 #' 
 #' @examples
 #' apply_combinations(c(2, 3), mean)
-apply_combinations <- function(vec, fn){
+apply_combinations <- function(vec, fn, ...){
   vecs <- mapply(seq, 0, vec, SIMPLIFY = FALSE)
-  print(vecs)
   tmp <- do.call(expand.grid, vecs)
-  apply(tmp, 1, fn)
+  apply(tmp, 1, fn, ...)
 }
 
 #' Read a file containing grid states and process it into a dataframe for plotting.
