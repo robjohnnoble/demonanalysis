@@ -115,6 +115,7 @@ all_output <- function(input_dir, pars, final_values) {
   each_df <- function(x) {
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
+    print(paste0(full_dir, " ", msg))
     if(!identical(msg, character(0))) if(msg == "Exit code 0") res <- combine_dfs(full_dir, res)
   }
   apply_combinations(final_values, each_df)
