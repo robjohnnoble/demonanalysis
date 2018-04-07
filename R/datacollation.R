@@ -210,9 +210,10 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
 #' @param factor1 char name of first column in the summary dataframe
 #' @param factor2 char name of second column in the summary dataframe
 #' @param result_name char name to give the result
+#' @param min_count minimum number of items in each column (otherwise result will be NA)
 #' 
 #' @return Correlation between the two columns (or NA if either factor1 or factor2 contains NA, 
-#' or if all values of factor2 are identical).
+#' or if all values of factor1 or factor2 are identical).
 #' 
 #' @import dplyr
 #' @import lazyeval
@@ -222,11 +223,12 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
 #' 
 #' @examples
 #' s1 <- data.frame(a = 1:3, b = 1:3 * (1 + rnorm(3) / 10))
-#' find_correlations(s1, "a", "b", "c")
-find_correlations <- function(summary, factor1, factor2, result_name) {
+#' find_correlations(s1, "a", "b", "c", 3)
+find_correlations <- function(summary, factor1, factor2, result_name, min_count) {
   summary %>% 
-    mutate_(variance = interp(~var(var1), var1 = as.name(factor2))) %>% 
-    filter(variance > 0) %>% 
+    mutate_(count1 = interp(~length(var1), var1 = as.name(factor1)), 
+            count2 = interp(~length(var2), var2 = as.name(factor2))) %>% 
+    filter(count1 >= min_count, count2 >= min_count) %>% 
     summarise_(temp_name = interp(~cor(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2))) %>% 
     rename_(.dots = setNames("temp_name", paste0(result_name)))
 }
@@ -236,6 +238,7 @@ find_correlations <- function(summary, factor1, factor2, result_name) {
 #' @param summary dataframe including columns named "seed", "Generation", "start_size", "start_time" and "outcome"
 #' @param col_names_list char vector of column names in the summary dataframe
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
+#' @param min_count minimum number of items in each column (otherwise result will be NA)
 #' 
 #' @return Dataframe with one row for each unique combination of parameter values, gap and start_size 
 #' (i.e. it summarises over "seed"), and including columns containing the correlations between "outcome" 
@@ -246,8 +249,8 @@ find_correlations <- function(summary, factor1, factor2, result_name) {
 #' @export
 #' 
 #' @examples
-#' get_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"))
-get_cor_summary <- function(summary, col_names_list, num_parameters = 15) {
+#' get_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), min_count = 10)
+get_cor_summary <- function(summary, col_names_list, num_parameters = 15, min_count) {
   col_nums <- c(1:num_parameters, which(colnames(summary) == "gap"), which(colnames(summary) == "start_size"))
   col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
   summary <- summary %>% 
@@ -261,7 +264,7 @@ get_cor_summary <- function(summary, col_names_list, num_parameters = 15) {
               num_seeds = n())
   result_names_list <- paste0("Cor_", col_names_list)
   cor_summary_list <- list()
-  for(i in 1:length(col_names_list)) cor_summary_list[[i]] <- find_correlations(summary, "outcome", col_names_list[i], result_names_list[i])
+  for(i in 1:length(col_names_list)) cor_summary_list[[i]] <- find_correlations(summary, "outcome", col_names_list[i], result_names_list[i], min_count)
   for(i in 1:length(col_names_list)) cor_summary <- merge(cor_summary, cor_summary_list[[i]], all.x = TRUE)
   return(cor_summary)
 }
@@ -271,6 +274,7 @@ get_cor_summary <- function(summary, col_names_list, num_parameters = 15) {
 #' @param summary dataframe including columns named "seed", "Generation", "start_time", "start_size", "gap" and "waiting_time"
 #' @param col_names_list char vector of column names in the summary dataframe
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
+#' @param min_count minimum number of items in each column (otherwise result will be NA)
 #' 
 #' @return Dataframe with one row for each unique combination of parameter values and start_size 
 #' (i.e. it summarises over "seed"), and including columns containing the correlations between "waiting_time" 
@@ -281,8 +285,8 @@ get_cor_summary <- function(summary, col_names_list, num_parameters = 15) {
 #' @export
 #' 
 #' @examples
-#' get_wait_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"))
-get_wait_cor_summary <- function(summary, col_names_list, num_parameters = 15) {
+#' get_wait_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), min_count = 10)
+get_wait_cor_summary <- function(summary, col_names_list, num_parameters = 15, min_count) {
   col_nums <- c(1:num_parameters, which(colnames(summary) == "start_size"))
   col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
   summary <- summary %>% 
@@ -297,7 +301,7 @@ get_wait_cor_summary <- function(summary, col_names_list, num_parameters = 15) {
               num_seeds = n())
   result_names_list <- paste0("Cor_", col_names_list)
   cor_summary_list <- list()
-  for(i in 1:length(col_names_list)) cor_summary_list[[i]] <- find_correlations(summary, "waiting_time", col_names_list[i], result_names_list[i])
+  for(i in 1:length(col_names_list)) cor_summary_list[[i]] <- find_correlations(summary, "waiting_time", col_names_list[i], result_names_list[i], min_count)
   for(i in 1:length(col_names_list)) cor_summary <- merge(cor_summary, cor_summary_list[[i]], all.x = TRUE)
   return(cor_summary)
 }

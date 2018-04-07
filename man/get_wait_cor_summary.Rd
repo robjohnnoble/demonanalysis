@@ -4,7 +4,7 @@
 \alias{get_wait_cor_summary}
 \title{Generate summary dataframe of correlations with "waiting_time"}
 \usage{
-get_wait_cor_summary(summary, col_names_list, num_parameters = 15)
+get_wait_cor_summary(summary, col_names_list, num_parameters = 15, min_count)
 }
 \arguments{
 \item{summary}{dataframe including columns named "seed", "Generation", "start_time", "start_size", "gap" and "waiting_time"}
@@ -12,6 +12,8 @@ get_wait_cor_summary(summary, col_names_list, num_parameters = 15)
 \item{col_names_list}{char vector of column names in the summary dataframe}
 
 \item{num_parameters}{number of parameters, accounting for the first set of columns in the dataframe}
+
+\item{min_count}{minimum number of items in each column (otherwise result will be NA)}
 }
 \value{
 Dataframe with one row for each unique combination of parameter values and start_size 
@@ -22,5 +24,5 @@ and each variable in col_names_list.
 Generate summary dataframe of correlations with "waiting_time"
 }
 \examples{
-get_wait_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"))
+get_wait_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), min_count = 10)
 }

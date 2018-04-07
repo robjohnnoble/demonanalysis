@@ -4,7 +4,7 @@
 \alias{find_correlations}
 \title{Generic function to find a correlation between two columns of a dataframe}
 \usage{
-find_correlations(summary, factor1, factor2, result_name)
+find_correlations(summary, factor1, factor2, result_name, min_count)
 }
 \arguments{
 \item{summary}{dataframe}
@@ -14,15 +14,17 @@ find_correlations(summary, factor1, factor2, result_name)
 \item{factor2}{char name of second column in the summary dataframe}
 
 \item{result_name}{char name to give the result}
+
+\item{min_count}{minimum number of items in each column (otherwise result will be NA)}
 }
 \value{
 Correlation between the two columns (or NA if either factor1 or factor2 contains NA, 
-or if all values of factor2 are identical).
+or if all values of factor1 or factor2 are identical).
 }
 \description{
 Generic function to find a correlation between two columns of a dataframe
 }
 \examples{
 s1 <- data.frame(a = 1:3, b = 1:3 * (1 + rnorm(3) / 10))
-find_correlations(s1, "a", "b", "c")
+find_correlations(s1, "a", "b", "c", 3)
 }
