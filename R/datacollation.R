@@ -167,7 +167,7 @@ combine_dfs <- function(full_dir) {
 #' @export
 all_output <- function(input_dir) {
   pars <- parameter_names_and_values(input_dir)$name
-  final_values <- parameter_names_and_values(input_dir)$final_values
+  final_values <- parameter_names_and_values(input_dir)$final_value
   
   each_df <- function(x, res) {
     full_dir <- make_dir(input_dir, pars, x)

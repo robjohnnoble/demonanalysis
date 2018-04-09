@@ -460,7 +460,7 @@ final_error_message <- function(input_dir) {
 #' @export
 all_statuses <- function(input_dir) {
   pars <- parameter_names_and_values(input_dir)$name
-  final_values <- parameter_names_and_values(input_dir)$final_values
+  final_values <- parameter_names_and_values(input_dir)$final_value
   
   each_msg <- function(x) {
     full_dir <- make_dir(input_dir, pars, x)
@@ -481,7 +481,7 @@ all_statuses <- function(input_dir) {
 #' @export
 create_plots_batch <- function(input_dir, output_dir = NA, type = "plot") {
   pars <- parameter_names_and_values(input_dir)$name
-  final_values <- parameter_names_and_values(input_dir)$final_values
+  final_values <- parameter_names_and_values(input_dir)$final_value
   
   each_plot <- function(x) {
     full_dir <- make_dir(input_dir, pars, x)
