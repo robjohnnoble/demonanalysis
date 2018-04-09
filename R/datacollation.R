@@ -170,10 +170,10 @@ all_output <- function(input_dir) {
   final_values <- parameter_names_and_values(input_dir)$final_value
   
   each_check <- function(x, res) {
+    print(paste0("x = ", x), quote = FALSE)
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
-    print(paste0(full_dir, " ", msg), quote = FALSE)
-    if(!identical(msg, character(0))) print(msg)
+    if(!identical(msg, character(0))) print(paste0(full_dir, " ", msg), quote = FALSE)
     else print("Failed")
   }
   apply_combinations(final_values, each_check)
@@ -191,7 +191,7 @@ all_output <- function(input_dir) {
   
   # report number of replicates per parameter set:
   num_parameters = count_parameters(make_dir(input_dir, pars, final_values))
-  print(paste0("Number of seeds: ", count_seeds(res, num_parameters)), quote = FALSE, quote = FALSE)
+  print(paste0("Number of seeds: ", count_seeds(res, num_parameters)), quote = FALSE)
   
   return(res)
 }
