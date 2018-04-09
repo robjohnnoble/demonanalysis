@@ -168,6 +168,8 @@ combine_dfs <- function(full_dir) {
 all_output <- function(input_dir) {
   pars <- parameter_names_and_values(input_dir)$name
   final_values <- parameter_names_and_values(input_dir)$final_value
+  print("final_values: ", quote = FALSE)
+  print(final_values)
   
   each_check <- function(x, res) {
     print("x = ", quote = FALSE)
