@@ -64,14 +64,16 @@ count_seeds(data)
 ### Get summary data
 
 ``` r
-summary <- get_summary(data, start_size_range, gap_range, final_size) # summary data for each simulation, for each combination of gap and final_size
+num_parameters = count_parameters(input_dir)
+
+summary <- get_summary(data, start_size_range, gap_range, final_size, , num_parameters = num_parameters) # summary data for each simulation, for each combination of gap and final_size
 # check number of replicates per parameter set:
 count_seeds(summary)
 # check number of rows:
 dim(summary)[1] == sum(count_seeds(summary)) * length(start_size_range) * length(gap_range)
 
-cor_summary <- get_cor_summary(summary, c("DriverDiversity", "DriverEdgeDiversity")) # summary dataframe of correlations with "outcome"
-wait_cor_summary <- get_wait_cor_summary(summary, c("DriverDiversity", "DriverEdgeDiversity")) # summary dataframe of correlations with "waiting_time"
+cor_summary <- get_cor_summary(summary, c("DriverDiversity", "DriverEdgeDiversity"), num_parameters = num_parameters, min_count = 5) # summary dataframe of correlations with "outcome"
+wait_cor_summary <- get_wait_cor_summary(summary, c("DriverDiversity", "DriverEdgeDiversity"), num_parameters = num_parameters, min_count = 5) # summary dataframe of correlations with "waiting_time"
 ```
 
 ### Write data

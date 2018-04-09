@@ -1,3 +1,25 @@
+#' Count the number of parameters in a parameter file.
+#' 
+#' @param full_dir base input directory name
+#' 
+#' @return number of parameters
+#' 
+#' @importFrom readr read_delim
+#' 
+#' @export
+#' 
+#' @examples
+#' count_parameters(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
+count_parameters <- function(full_dir) {
+  
+  if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
+  
+  file_pars <- paste0(full_dir, "/parameters.dat")
+  df_pars <- read_delim(file_pars, "\t")
+  
+  return(dim(df_pars)[2])
+}
+
 #' Add derived variables to a dataframe
 #' 
 #' @param df dataframe with columns including "Generation"
@@ -12,7 +34,7 @@
 #' @examples
 #' df <- data.frame(A = rep(1:2, each = 4), Generation = c(1:4, 3:6), Y = rep(1:4, times = 2))
 #' add_columns(df, 1)
-add_columns <- function(df, num_parameters = 15) {
+add_columns <- function(df, num_parameters) {
   df <- df %>% group_by_at(1:num_parameters)
   
   df <- df %>% mutate(maxgen = max(Generation, na.rm = TRUE))
@@ -35,9 +57,11 @@ add_columns <- function(df, num_parameters = 15) {
 #' @export
 #' 
 #' @examples
+#' num_parameters = count_parameters(system.file("extdata", "", 
+#' package = "demonanalysis", mustWork = TRUE))
 #' comb_df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-#' add_relative_time(comb_df, start_size = 100)
-add_relative_time <- function(df, start_size, num_parameters = 15) {
+#' add_relative_time(comb_df, start_size = 100, num_parameters = num_parameters)
+add_relative_time <- function(df, start_size, num_parameters) {
   df <- df %>% group_by_at(1:num_parameters)
   
   df <- df %>% mutate(new_time = gen_adj - min(gen_adj[NumCells >= start_size], na.rm = TRUE))
@@ -84,7 +108,8 @@ combine_dfs <- function(full_dir) {
   
   temp <- cbind(df_pars, temp)
   
-  temp <- add_columns(temp)
+  num_parameters <- count_parameters(full_dir)
+  temp <- add_columns(temp, num_parameters)
   
   sweep_seq <- sweep_sequence(pop_df, lag_type = "proportions", breaks = 10)
   temp <- mutate(temp, mean_autocor = mean(sweep_seq), 
@@ -134,8 +159,8 @@ all_output <- function(input_dir, pars, final_values) {
 #' @export
 #' 
 #' @examples
-#' count_seeds(sum_df)
-count_seeds <- function(data, num_parameters = 15) {
+#' count_seeds(sum_df, 16)
+count_seeds <- function(data, num_parameters) {
   col_nums <- c(1:num_parameters)
   col_nums <- col_nums[col_nums != which(colnames(data) == "seed")]
   res <- data %>% group_by_at(col_nums) %>%
@@ -161,9 +186,11 @@ count_seeds <- function(data, num_parameters = 15) {
 #' @export
 #' 
 #' @examples
+#' num_parameters = count_parameters(system.file("extdata", "", 
+#' package = "demonanalysis", mustWork = TRUE))
 #' comb_df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-#' get_summary(comb_df, c(100, 300), c(0.35, 0.65), 1000)
-get_summary <- function(data, start_size_range, gap_range, final_size, num_parameters = 15) {
+#' get_summary(comb_df, c(100, 300), c(0.35, 0.65), 1000, num_parameters)
+get_summary <- function(data, start_size_range, gap_range, final_size, num_parameters) {
   summary <- data.frame()
   data <- data %>% group_by_at(1:num_parameters)
   for(start_size in start_size_range) {
@@ -249,8 +276,8 @@ find_correlations <- function(summary, factor1, factor2, result_name, min_count)
 #' @export
 #' 
 #' @examples
-#' get_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), min_count = 5)
-get_cor_summary <- function(summary, col_names_list, num_parameters = 15, min_count) {
+#' get_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), 16, min_count = 5)
+get_cor_summary <- function(summary, col_names_list, num_parameters, min_count) {
   col_nums <- c(1:num_parameters, which(colnames(summary) == "gap"), which(colnames(summary) == "start_size"))
   col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
   summary <- summary %>% 
@@ -285,8 +312,8 @@ get_cor_summary <- function(summary, col_names_list, num_parameters = 15, min_co
 #' @export
 #' 
 #' @examples
-#' get_wait_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), min_count = 5)
-get_wait_cor_summary <- function(summary, col_names_list, num_parameters = 15, min_count) {
+#' get_wait_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), 16, min_count = 5)
+get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_count) {
   col_nums <- c(1:num_parameters, which(colnames(summary) == "start_size"))
   col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
   summary <- summary %>% 

@@ -4,7 +4,7 @@
 \alias{add_relative_time}
 \title{Add relative time column to a dataframe, and diversity at the new time zero}
 \usage{
-add_relative_time(df, start_size, num_parameters = 15)
+add_relative_time(df, start_size, num_parameters)
 }
 \arguments{
 \item{df}{dataframe with columns including "gen_adj", "NumCells" and "DriverEdgeDiversity"}
@@ -21,6 +21,8 @@ NumCells = start_size; "div0" is DriverEdgeDiversity when NumCells = start_size
 Add relative time column to a dataframe, and diversity at the new time zero
 }
 \examples{
+num_parameters = count_parameters(system.file("extdata", "", 
+package = "demonanalysis", mustWork = TRUE))
 comb_df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-add_relative_time(comb_df, start_size = 100)
+add_relative_time(comb_df, start_size = 100, num_parameters = num_parameters)
 }

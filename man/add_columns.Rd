@@ -4,7 +4,7 @@
 \alias{add_columns}
 \title{Add derived variables to a dataframe}
 \usage{
-add_columns(df, num_parameters = 15)
+add_columns(df, num_parameters)
 }
 \arguments{
 \item{df}{dataframe with columns including "Generation"}

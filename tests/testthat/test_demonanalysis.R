@@ -1,4 +1,4 @@
-context("First tests")
+context("All tests")
 
 library(ggmuller)
 library(dplyr)

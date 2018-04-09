@@ -4,8 +4,7 @@
 \alias{get_summary}
 \title{Get summary metrics for one or more simulations}
 \usage{
-get_summary(data, start_size_range, gap_range, final_size,
-  num_parameters = 15)
+get_summary(data, start_size_range, gap_range, final_size, num_parameters)
 }
 \arguments{
 \item{data}{dataframe}
@@ -29,6 +28,8 @@ reached end_size), "waiting_time" (difference between start_time and end_time), 
 Get summary metrics for one or more simulations
 }
 \examples{
+num_parameters = count_parameters(system.file("extdata", "", 
+package = "demonanalysis", mustWork = TRUE))
 comb_df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-get_summary(comb_df, c(100, 300), c(0.35, 0.65), 1000)
+get_summary(comb_df, c(100, 300), c(0.35, 0.65), 1000, num_parameters)
 }

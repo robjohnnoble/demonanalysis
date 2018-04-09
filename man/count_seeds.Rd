@@ -4,7 +4,7 @@
 \alias{count_seeds}
 \title{Count the number of rows in a dataframe per parameter set.}
 \usage{
-count_seeds(data, num_parameters = 15)
+count_seeds(data, num_parameters)
 }
 \arguments{
 \item{data}{dataframe}
@@ -18,5 +18,5 @@ a dataframe listing number of rows per parameter set
 Count the number of rows in a dataframe per parameter set.
 }
 \examples{
-count_seeds(sum_df)
+count_seeds(sum_df, 16)
 }

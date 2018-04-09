@@ -4,7 +4,7 @@
 \alias{get_cor_summary}
 \title{Generate summary dataframe of correlations with "outcome"}
 \usage{
-get_cor_summary(summary, col_names_list, num_parameters = 15, min_count)
+get_cor_summary(summary, col_names_list, num_parameters, min_count)
 }
 \arguments{
 \item{summary}{dataframe including columns named "seed", "Generation", "start_size", "start_time" and "outcome"}
@@ -24,5 +24,5 @@ and each variable in col_names_list.
 Generate summary dataframe of correlations with "outcome"
 }
 \examples{
-get_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), min_count = 5)
+get_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), 16, min_count = 5)
 }
