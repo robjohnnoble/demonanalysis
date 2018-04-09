@@ -84,10 +84,10 @@ write.csv(wait_cor_summary, paste0(output_dir_data, "/wait_cor_summary.csv"))
 ``` r
 output_dir_data <- paste0("data/", subfolder_name) # folder containing data files
 
-data <- read.csv(paste0(output_dir_data, "data.csv"))
-summary <- read.csv(paste0(output_dir_data, "summary.csv"))
-cor_summary <- read.csv(paste0(output_dir_data, "cor_summary.csv"))
-wait_cor_summary <- read.csv(paste0(output_dir_data, "wait_cor_summary.csv"))
+data <- read.csv(paste0(output_dir_data, "/data.csv"))
+summary <- read.csv(paste0(output_dir_data, "/summary.csv"))
+cor_summary <- read.csv(paste0(output_dir_data, "/cor_summary.csv"))
+wait_cor_summary <- read.csv(paste0(output_dir_data, "/wait_cor_summary.csv"))
 ```
 
 ### Copy plots from Euler
