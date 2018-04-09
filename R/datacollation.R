@@ -1,4 +1,4 @@
-#' Count the number of parameters in a parameter file in a specified folder.
+#' Count the number of parameters in a parameter file in a specified folder or its subfolders.
 #' 
 #' @param full_dir folder name
 #' 
@@ -14,8 +14,15 @@ count_parameters <- function(full_dir) {
   
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
   
-  file_pars <- paste0(full_dir, "/parameters.dat")
-  df_pars <- read_delim(file_pars, "\t")
+  files_list = list.files(full_dir, recursive = TRUE)
+  
+  present_file = grepl("parameters.dat", files_list)
+  
+  if(sum(present_file) == 0) stop("Cannot find a parameters file")
+  
+  file_pars <- files_list[present_file][1]
+  
+  df_pars <- read_delim(paste0(full_dir, "/", file_pars), "\t")
   
   return(dim(df_pars)[2])
 }
@@ -195,7 +202,8 @@ all_output <- function(input_dir) {
   # report number of replicates per parameter set:
   num_parameters = count_parameters(make_dir(input_dir, pars, final_values))
   print(paste0("num_parameters: ", num_parameters), quote = FALSE)
-  print(paste0("Number of seeds: ", count_seeds(res, num_parameters)), quote = FALSE)
+  print("Number of seeds:", quote = FALSE)
+  print(count_seeds(res, num_parameters))
   
   return(res)
 }
