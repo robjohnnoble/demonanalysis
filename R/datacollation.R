@@ -117,7 +117,7 @@ combine_dfs <- function(full_dir) {
                    sqrt_mean_autocor = sqrt(mean(sweep_seq)), 
                    skewness = skewness(sweep_seq))
   
-  print(paste0("result of combine_dfs has dimensions ", dim(temp)[1], " x ", dim(temp)[2]))
+  print(paste0("Result of combine_dfs has dimensions ", dim(temp)[1], " x ", dim(temp)[2]), quote = FALSE)
   
   return(temp)
 }
@@ -139,11 +139,15 @@ all_output <- function(input_dir, pars, final_values) {
   each_df <- function(x, res) {
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
-    print(paste0(full_dir, " ", msg))
+    print(paste0(full_dir, " ", msg), quote = FALSE)
     if(!identical(msg, character(0))) if(msg == "Exit code 0") return(combine_dfs(full_dir))
     return(data.frame())
   }
   res <- do.call(rbind, apply_combinations(final_values, each_df))
+  
+  # report number of replicates per parameter set:
+  num_parameters = count_parameters(input_dir)
+  print(paste0("Number of seeds: ", count_seeds(data, num_parameters)), quote = FALSE, quote = FALSE)
   
   return(res)
 }
@@ -228,6 +232,15 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
   }
   summary <- summary %>% 
     mutate(Ratio = DriverEdgeDiversity / DriverDiversity)
+  
+  # check number of rows:
+  count1 <- dim(summary)[1]
+  count2 <- sum(count_seeds(summary, num_parameters)) * length(start_size_range) * length(gap_range)
+  if(count1 != count2) stop(paste0("Row count (", count1, ") is not as expected (", count2, ")."))
+  
+  # report number of replicates per parameter set:
+  print(paste0("Number of seeds: ", count_seeds(summary, num_parameters)), quote = FALSE)
+  
   return(summary)
 }
 

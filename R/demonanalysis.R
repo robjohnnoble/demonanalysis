@@ -173,7 +173,7 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
   image_df <- image_df_from_grid_file(paste0(path, "output_popgrid.dat"), trim)
   g4 <- grid_plot(image_df, add_legend = TRUE, legend_title = "Population")
   
-  if(!is.na(output_filename)) print(paste0("Created all plots for file ", output_filename))
+  if(!is.na(output_filename)) print(paste0("Created all plots for file ", output_filename), quote = FALSE)
   
   if(!is.na(output_dir)) {
     if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1000, height = 1000, res = 100)
@@ -186,7 +186,7 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
   print(grid.arrange(h1, g1, h2, h3, g2, g3, g4, layout_matrix = lay, heights = c(1, 1, 0.75, 0.75)))
   if(!is.na(output_dir)) dev.off()
   
-  if(!is.na(output_filename)) print("Saved the plot")
+  if(!is.na(output_filename)) print("Saved the plot", quote = FALSE)
 }
 
 #' Plot a histogram of variant allele frequencies
