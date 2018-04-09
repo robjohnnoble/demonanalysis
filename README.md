@@ -33,12 +33,12 @@ setwd("/cluster/work/bewi/members/lebidm_nobelr/demon")
 ``` r
 library(demonanalysis)
 
-subfolder_name <- "Mar20_Batch1" # name given to the batch
+subfolder_name <- "April_6th_batch1" # name given to the batch
 input_dir <- paste0("all_results/", subfolder_name) # folder containing results of the batch
 
 start_size_range <- 500 + (0:5) * 1000 # NumCells at time of initial measurement for forecasting
 gap_range <- (1:10)/10 # gap between time of initial measurement and second measurement
-final_size <- 1E6 # waiting time is measured until tumour reaches this NumCells value
+final_size <- 1E5 # waiting time is measured until tumour reaches this NumCells value
 ```
 
 ### Create plots
@@ -73,10 +73,10 @@ wait_cor_summary <- get_wait_cor_summary(summary, c("DriverDiversity", "DriverEd
 ``` r
 output_dir_data <- paste0("data/", subfolder_name) # folder to receive data files
 
-write.csv(data, paste0(output_dir_data, "data.csv"))
-write.csv(summary, paste0(output_dir_data, "summary.csv"))
-write.csv(cor_summary, paste0(output_dir_data, "cor_summary.csv"))
-write.csv(wait_cor_summary, paste0(output_dir_data, "wait_cor_summary.csv"))
+write.csv(data, paste0(output_dir_data, "/data.csv"))
+write.csv(summary, paste0(output_dir_data, "/summary.csv"))
+write.csv(cor_summary, paste0(output_dir_data, "/cor_summary.csv"))
+write.csv(wait_cor_summary, paste0(output_dir_data, "/wait_cor_summary.csv"))
 ```
 
 ### Read data
