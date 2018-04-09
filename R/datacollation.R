@@ -43,7 +43,7 @@ parameter_names_and_values <- function(input_dir) {
     final_dir <- dirs_list[length(dirs_list)] # final subfolder (with largest parameter value)
     
     splits <- strsplit(final_dir, "_")[[1]]
-    parameter_val <- splits[length(splits)]
+    parameter_val <- as.numeric(splits[length(splits)])
     parameter_name <- substr(final_dir, 1, nchar(final_dir) - nchar(parameter_val) - 1)
     
     out_df <- rbind(out_df, data.frame("name" = parameter_name, "final_value" = parameter_val))
