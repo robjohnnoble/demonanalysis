@@ -38,7 +38,7 @@ parameter_names_and_values <- function(input_dir) {
   repeat{
     dirs_list <- list.dirs(parent_dir, recursive = FALSE, full.names = FALSE) # list of subfolders
     
-    if(!identical(dirs_list, character(0))) stop("Invalid folder name")
+    if(!identical(dirs_list, character(0))) stop(paste0("Invalid folder name (", parent_dir), ")")
     
     final_dir <- dirs_list[length(dirs_list)] # final subfolder (with largest parameter value)
     

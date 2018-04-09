@@ -33,7 +33,7 @@ setwd("/cluster/work/bewi/members/lebidm_nobelr/demon")
 ``` r
 library(demonanalysis)
 
-subfolder_name <- Mar20_Batch1 # name given to the batch
+subfolder_name <- "Mar20_Batch1" # name given to the batch
 input_dir <- paste0("all_results/", subfolder_name) # folder containing results of the batch
 
 start_size_range <- 500 + (0:5) * 1000 # NumCells at time of initial measurement for forecasting
@@ -51,7 +51,7 @@ create_plots_batch(input_dir, output_dir_plots, pars, final_values, type = "char
 ### Get complete data
 
 ``` r
-data <- all_output(input_dir, pars, final_values) # combined data for a batch of simulations
+data <- all_output(input_dir) # combined data for a batch of simulations
 data <- add_relative_time(data, start_size = 5500) # add columns useful for plotting trajectories
 ```
 
