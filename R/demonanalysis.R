@@ -454,15 +454,13 @@ final_error_message <- function(input_dir) {
 #' Return the final line of every error log in a batch of simulations.
 #' 
 #' @param input_dir base input directory name
-#' @param pars vector of parameter names
-#' @param final_values vector of largest parameter values, of same length as pars
 #' 
 #' @return final line of each error log
 #' 
 #' @export
-all_statuses <- function(input_dir, pars, final_values) {
-  N <- length(pars)
-  if(N != length(final_values)) stop("Unequal lengths of pars and final_values.")
+all_statuses <- function(input_dir) {
+  pars <- parameter_names_and_values(input_dir)$name
+  final_values <- parameter_names_and_values(input_dir)$final_values
   
   each_msg <- function(x) {
     full_dir <- make_dir(input_dir, pars, x)
@@ -476,16 +474,14 @@ all_statuses <- function(input_dir, pars, final_values) {
 #' 
 #' @param input_dir base input directory name
 #' @param output_dir folder in which to save the image files
-#' @param pars vector of parameter names
-#' @param final_values vector of largest parameter values, of same length as pars
 #' @param type what type of images to create: "plot" or "chart" or c("plot", "chart")
 #' 
 #' @return a set of image files
 #' 
 #' @export
-create_plots_batch <- function(input_dir, output_dir = NA, pars, final_values, type = "plot") {
-  N <- length(pars)
-  if(N != length(final_values)) stop("Unequal lengths of pars and final_values.")
+create_plots_batch <- function(input_dir, output_dir = NA, type = "plot") {
+  pars <- parameter_names_and_values(input_dir)$name
+  final_values <- parameter_names_and_values(input_dir)$final_values
   
   each_plot <- function(x) {
     full_dir <- make_dir(input_dir, pars, x)

@@ -1,6 +1,6 @@
-#' Count the number of parameters in a parameter file.
+#' Count the number of parameters in a parameter file in a specified folder.
 #' 
-#' @param full_dir base input directory name
+#' @param full_dir folder name
 #' 
 #' @return number of parameters
 #' 
@@ -18,6 +18,41 @@ count_parameters <- function(full_dir) {
   df_pars <- read_delim(file_pars, "\t")
   
   return(dim(df_pars)[2])
+}
+
+#' Find the names and final values of parameters that were varied in a batch of simulations
+#' 
+#' @param input_dir base input directory name
+#' 
+#' @return dataframe of parameter names and values
+#' 
+#' @export
+parameter_names_and_values <- function(input_dir) {
+  
+  if(substr(input_dir, nchar(input_dir), nchar(input_dir)) == "/") input_dir <- substr(input_dir, 1, nchar(input_dir) - 1)
+  
+  parent_dir <- input_dir
+  
+  out_df <- data.frame("name" = NULL, "final_value" = NULL)
+  
+  repeat{
+    dirs_list <- list.dirs(parent_dir, recursive = FALSE, full.names = FALSE) # list of subfolders
+    
+    if(!identical(dirs_list, character(0))) stop("Invalid folder name")
+    
+    final_dir <- dirs_list[length(dirs_list)] # final subfolder (with largest parameter value)
+    
+    splits <- strsplit(final_dir, "_")[[1]]
+    parameter_val <- splits[length(splits)]
+    parameter_name <- substr(final_dir, 1, nchar(final_dir) - nchar(parameter_val) - 1)
+    
+    out_df <- rbind(out_df, data.frame("name" = parameter_name, "final_value" = parameter_val))
+    
+    parent_dir <- paste0(parent_dir, "/", final_dir)
+    
+    if("output.dat" %in% list.files(parent_dir, recursive = FALSE, full.names = FALSE)) break
+  }
+  return(out_df)
 }
 
 #' Add derived variables to a dataframe
@@ -126,15 +161,13 @@ combine_dfs <- function(full_dir) {
 #' data files per simulation.
 #' 
 #' @param input_dir base input directory name
-#' @param pars vector of parameter names
-#' @param final_values vector of largest parameter values, of same length as pars
 #' 
 #' @return a combined dataframe
 #' 
 #' @export
-all_output <- function(input_dir, pars, final_values) {
-  N <- length(pars)
-  if(N != length(final_values)) stop("Unequal lengths of pars and final_values.")
+all_output <- function(input_dir) {
+  pars <- parameter_names_and_values(input_dir)$name
+  final_values <- parameter_names_and_values(input_dir)$final_values
   
   each_df <- function(x, res) {
     full_dir <- make_dir(input_dir, pars, x)
@@ -146,7 +179,7 @@ all_output <- function(input_dir, pars, final_values) {
   res <- do.call(rbind, apply_combinations(final_values, each_df))
   
   # report number of replicates per parameter set:
-  num_parameters = count_parameters(input_dir)
+  num_parameters = count_parameters(make_dir(input_dir, pars, final_values))
   print(paste0("Number of seeds: ", count_seeds(data, num_parameters)), quote = FALSE, quote = FALSE)
   
   return(res)

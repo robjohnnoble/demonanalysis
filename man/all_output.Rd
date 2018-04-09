@@ -5,14 +5,10 @@
 \title{Create a composite dataframe for a batch of simulations, derived from multiple 
 data files per simulation.}
 \usage{
-all_output(input_dir, pars, final_values)
+all_output(input_dir)
 }
 \arguments{
 \item{input_dir}{base input directory name}
-
-\item{pars}{vector of parameter names}
-
-\item{final_values}{vector of largest parameter values, of same length as pars}
 }
 \value{
 a combined dataframe

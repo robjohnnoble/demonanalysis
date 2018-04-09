@@ -33,22 +33,18 @@ setwd("/cluster/work/bewi/members/lebidm_nobelr/demon")
 ``` r
 library(demonanalysis)
 
-# set parameter values:
-subfolder_name <- Mar20_Batch1
-pars <- c("migration_edge_only", "mu_driver_birth", "seed") # parameters that were varied within the batch
-final_values <- c(1, 1, 9) # maximum values of the parameters that were varied
+subfolder_name <- Mar20_Batch1 # name given to the batch
+input_dir <- paste0("all_results/", subfolder_name) # folder containing results of the batch
+
 start_size_range <- 500 + (0:5) * 1000 # NumCells at time of initial measurement for forecasting
 gap_range <- (1:10)/10 # gap between time of initial measurement and second measurement
 final_size <- 1E6 # waiting time is measured until tumour reaches this NumCells value
-
-input_dir <- paste0("all_results/", subfolder_name) # folder containing results of a batch of simulations
-output_dir_plots <- paste0("plots/", subfolder_name) # folder to receive image files
-output_dir_data <- paste0("data/", subfolder_name) # folder to receive data files
 ```
 
 ### Create plots
 
 ``` r
+output_dir_plots <- paste0("plots/", subfolder_name) # folder to receive image files
 create_plots_batch(input_dir, output_dir_plots, pars, final_values, type = "chart") # create plots
 ```
 
@@ -73,6 +69,8 @@ wait_cor_summary <- get_wait_cor_summary(summary, c("DriverDiversity", "DriverEd
 ### Write data
 
 ``` r
+output_dir_data <- paste0("data/", subfolder_name) # folder to receive data files
+
 write.csv(data, paste0(output_dir_data, "data.csv"))
 write.csv(summary, paste0(output_dir_data, "summary.csv"))
 write.csv(cor_summary, paste0(output_dir_data, "cor_summary.csv"))
@@ -82,6 +80,8 @@ write.csv(wait_cor_summary, paste0(output_dir_data, "wait_cor_summary.csv"))
 ### Read data
 
 ``` r
+output_dir_data <- paste0("data/", subfolder_name) # folder containing data files
+
 data <- read.csv(paste0(output_dir_data, "data.csv"))
 summary <- read.csv(paste0(output_dir_data, "summary.csv"))
 cor_summary <- read.csv(paste0(output_dir_data, "cor_summary.csv"))

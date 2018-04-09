@@ -4,14 +4,10 @@
 \alias{all_statuses}
 \title{Return the final line of every error log in a batch of simulations.}
 \usage{
-all_statuses(input_dir, pars, final_values)
+all_statuses(input_dir)
 }
 \arguments{
 \item{input_dir}{base input directory name}
-
-\item{pars}{vector of parameter names}
-
-\item{final_values}{vector of largest parameter values, of same length as pars}
 }
 \value{
 final line of each error log

@@ -4,17 +4,12 @@
 \alias{create_plots_batch}
 \title{Create image files for every simulation in a batch}
 \usage{
-create_plots_batch(input_dir, output_dir = NA, pars, final_values,
-  type = "plot")
+create_plots_batch(input_dir, output_dir = NA, type = "plot")
 }
 \arguments{
 \item{input_dir}{base input directory name}
 
 \item{output_dir}{folder in which to save the image files}
-
-\item{pars}{vector of parameter names}
-
-\item{final_values}{vector of largest parameter values, of same length as pars}
 
 \item{type}{what type of images to create: "plot" or "chart" or c("plot", "chart")}
 }
