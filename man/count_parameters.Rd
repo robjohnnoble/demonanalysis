@@ -2,7 +2,7 @@
 % Please edit documentation in R/datacollation.R
 \name{count_parameters}
 \alias{count_parameters}
-\title{Count the number of parameters in a parameter file in a specified folder.}
+\title{Count the number of parameters in a parameter file in a specified folder or its subfolders.}
 \usage{
 count_parameters(full_dir)
 }
@@ -13,7 +13,7 @@ count_parameters(full_dir)
 number of parameters
 }
 \description{
-Count the number of parameters in a parameter file in a specified folder.
+Count the number of parameters in a parameter file in a specified folder or its subfolders.
 }
 \examples{
 count_parameters(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))

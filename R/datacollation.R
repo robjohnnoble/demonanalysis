@@ -295,7 +295,8 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
   if(count1 != count2) stop(paste0("Row count (", count1, ") is not as expected (", count2, ")."))
   
   # report number of replicates per parameter set:
-  print(paste0("Number of seeds: ", count_seeds(summary, num_parameters)), quote = FALSE)
+  print("Number of seeds:", quote = FALSE)
+  print(count_seeds(summary, num_parameters))
   
   return(summary)
 }
@@ -322,6 +323,8 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
 #' find_correlations(s1, "a", "b", "c", 3)
 find_correlations <- function(summary, factor1, factor2, result_name, min_count) {
   summary %>% 
+    mutate_(variance = interp(~var(var1), var1 = as.name(factor2))) %>% 
+    filter(variance > 0) %>% # to avoid warnings when all values of factor2 are identical
     mutate_(count1 = interp(~length(var1), var1 = as.name(factor1)), 
             count2 = interp(~length(var2), var2 = as.name(factor2))) %>% 
     filter(count1 >= min_count, count2 >= min_count) %>% 
