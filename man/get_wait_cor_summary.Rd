@@ -24,5 +24,5 @@ and each variable in col_names_list.
 Generate summary dataframe of correlations with "waiting_time"
 }
 \examples{
-get_wait_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), min_count = 10)
+get_wait_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), min_count = 5)
 }

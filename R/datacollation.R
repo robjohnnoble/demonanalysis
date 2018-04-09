@@ -249,7 +249,7 @@ find_correlations <- function(summary, factor1, factor2, result_name, min_count)
 #' @export
 #' 
 #' @examples
-#' get_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), min_count = 10)
+#' get_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), min_count = 5)
 get_cor_summary <- function(summary, col_names_list, num_parameters = 15, min_count) {
   col_nums <- c(1:num_parameters, which(colnames(summary) == "gap"), which(colnames(summary) == "start_size"))
   col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
@@ -285,7 +285,7 @@ get_cor_summary <- function(summary, col_names_list, num_parameters = 15, min_co
 #' @export
 #' 
 #' @examples
-#' get_wait_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), min_count = 10)
+#' get_wait_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), min_count = 5)
 get_wait_cor_summary <- function(summary, col_names_list, num_parameters = 15, min_count) {
   col_nums <- c(1:num_parameters, which(colnames(summary) == "start_size"))
   col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
