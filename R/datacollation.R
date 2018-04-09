@@ -169,6 +169,17 @@ all_output <- function(input_dir) {
   pars <- parameter_names_and_values(input_dir)$name
   final_values <- parameter_names_and_values(input_dir)$final_value
   
+  each_check <- function(x, res) {
+    full_dir <- make_dir(input_dir, pars, x)
+    msg <- final_error_message(full_dir)
+    print(paste0(full_dir, " ", msg), quote = FALSE)
+    if(!identical(msg, character(0))) print(msg)
+    else print("Failed")
+  }
+  apply_combinations(final_values, each_check)
+  
+  print("Finished checking", quote = FALSE)
+  
   each_df <- function(x, res) {
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
