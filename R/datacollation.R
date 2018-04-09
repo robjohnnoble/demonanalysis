@@ -180,7 +180,7 @@ all_output <- function(input_dir) {
   
   # report number of replicates per parameter set:
   num_parameters = count_parameters(make_dir(input_dir, pars, final_values))
-  print(paste0("Number of seeds: ", count_seeds(data, num_parameters)), quote = FALSE, quote = FALSE)
+  print(paste0("Number of seeds: ", count_seeds(res, num_parameters)), quote = FALSE, quote = FALSE)
   
   return(res)
 }
