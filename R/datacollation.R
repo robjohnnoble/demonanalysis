@@ -106,7 +106,7 @@ add_relative_time <- function(df, start_size, num_parameters) {
   df <- df %>% group_by_at(1:num_parameters) %>% 
     mutate(new_time = gen_adj - min(gen_adj[NumCells >= start_size], na.rm = TRUE)) %>% 
     mutate(div0 = DriverEdgeDiversity[gen_adj == min(gen_adj[NumCells >= start_size & 
-           (!is.na(DriverEdgeDiversity) || Generation == max(Generation))], na.rm = TRUE)]) %>% 
+           (!is.na(DriverEdgeDiversity) | Generation == max(Generation))], na.rm = TRUE)]) %>% 
     ungroup()
   
   return(df)
