@@ -34,9 +34,6 @@ setwd("/cluster/work/bewi/members/lebidm_nobelr/demon")
 library(demonanalysis)
 
 subfolder_name <- "April_6th_batch1" # batch name
-start_size_range <- 500 + (0:5) * 1000 # NumCells at time of initial measurement for forecasting
-gap_range <- (1:10)/10 # gap between time of initial measurement and second measurement
-final_size <- 1E5 # waiting time is measured until tumour reaches this NumCells value
 
 input_dir <- paste0("all_results/", subfolder_name) # folder containing results of the batch
 num_parameters <- count_parameters(input_dir) # number of simulation parameters (first columns in data)
@@ -61,6 +58,10 @@ data <- all_output(input_dir, include_diversities = FALSE) # combined data for a
 ``` r
 data <- all_output(input_dir) # combined data for a batch of simulations, including diversity columns
 data <- add_relative_time(data, start_size = 5500, num_parameters = num_parameters) # add columns useful for plotting trajectories
+
+start_size_range <- 500 + (0:5) * 1000 # NumCells at time of initial measurement for forecasting
+gap_range <- (1:10)/10 # gap between time of initial measurement and second measurement
+final_size <- 1E5 # waiting time is measured until tumour reaches this NumCells value
 
 summary <- get_summary(data, start_size_range, gap_range, final_size, num_parameters = num_parameters) # summary data for each simulation, for each combination of gap and final_size
 
