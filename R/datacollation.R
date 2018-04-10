@@ -104,12 +104,11 @@ add_columns <- function(df, num_parameters) {
 #' comb_df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
 #' add_relative_time(comb_df, start_size = 100, num_parameters = num_parameters)
 add_relative_time <- function(df, start_size, num_parameters) {
-  df <- df %>% group_by_at(1:num_parameters)
-  
-  df <- df %>% mutate(new_time = gen_adj - min(gen_adj[NumCells >= start_size], na.rm = TRUE), 
-                      div0 = DriverEdgeDiversity[gen_adj == min(gen_adj[NumCells >= start_size])])
-  
-  df <- ungroup(df)
+  df <- df %>% group_by_at(1:num_parameters) %>% 
+    mutate(new_time = gen_adj - min(gen_adj[NumCells >= start_size], na.rm = TRUE), 
+           div0 = DriverEdgeDiversity[gen_adj == min(gen_adj[NumCells >= start_size & 
+                  (!is.na(DriverEdgeDiversity) || Generation == max(Generation))], na.rm = TRUE)]) %>% 
+    ungroup()
   
   return(df)
 }
