@@ -78,7 +78,7 @@ write.csv(wait_cor_summary, paste0(output_dir_data, "/wait_cor_summary.csv"), ro
 ### Read data
 
 ``` r
-data <- read.csv(paste0(output_dir_data, "/data.csv"))
+data <- read.csv(paste0(output_dir_data, "/data.csv"), guess_max = 1E4) # large value of guess_max improves guessing of column types
 summary <- read.csv(paste0(output_dir_data, "/summary.csv"))
 cor_summary <- read.csv(paste0(output_dir_data, "/cor_summary.csv"))
 wait_cor_summary <- read.csv(paste0(output_dir_data, "/wait_cor_summary.csv"))

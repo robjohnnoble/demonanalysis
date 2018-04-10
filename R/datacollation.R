@@ -106,8 +106,8 @@ add_columns <- function(df, num_parameters) {
 add_relative_time <- function(df, start_size, num_parameters) {
   df <- df %>% group_by_at(1:num_parameters)
   
-  df <- df %>% mutate(new_time = gen_adj - min(gen_adj[NumCells >= start_size], na.rm = TRUE))
-  df <- df %>% mutate(div0 = DriverEdgeDiversity[new_time == 0])
+  df <- df %>% mutate(new_time = gen_adj - min(gen_adj[NumCells >= start_size], na.rm = TRUE), 
+                      div0 = DriverEdgeDiversity[gen_adj == min(gen_adj[NumCells >= start_size]])
   
   df <- ungroup(df)
   
