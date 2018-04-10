@@ -3,19 +3,21 @@
 \name{combine_dfs}
 \alias{combine_dfs}
 \title{Combine data for one simulation, including population metrics, parameter values 
-and diversity metrics, and with added columns containing derived variables.}
+and (optionally) diversity metrics, and with added columns containing derived variables.}
 \usage{
-combine_dfs(full_dir)
+combine_dfs(full_dir, include_diversities = TRUE)
 }
 \arguments{
 \item{full_dir}{base input directory name}
+
+\item{include_diversities}{boolean whether to include diversity metrics}
 }
 \value{
 the combined dataframe
 }
 \description{
 Combine data for one simulation, including population metrics, parameter values 
-and diversity metrics, and with added columns containing derived variables.
+and (optionally) diversity metrics, and with added columns containing derived variables.
 }
 \examples{
 combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))

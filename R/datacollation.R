@@ -113,9 +113,10 @@ add_relative_time <- function(df, start_size, num_parameters) {
 }
 
 #' Combine data for one simulation, including population metrics, parameter values 
-#' and diversity metrics, and with added columns containing derived variables.
+#' and (optionally) diversity metrics, and with added columns containing derived variables.
 #' 
 #' @param full_dir base input directory name
+#' @param include_diversities boolean whether to include diversity metrics
 #' 
 #' @return the combined dataframe
 #' 
@@ -127,7 +128,7 @@ add_relative_time <- function(df, start_size, num_parameters) {
 #' 
 #' @examples
 #' combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-combine_dfs <- function(full_dir) {
+combine_dfs <- function(full_dir, include_diversities = TRUE) {
   
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
   
@@ -138,13 +139,14 @@ combine_dfs <- function(full_dir) {
   
   df_pars <- read_delim(file_pars, "\t")
   df_out <- read_delim(file_out, "\t")
-  df_div <- read_delim(file_div, "\t")
+  if(include_diversities) df_div <- read_delim(file_div, "\t")
   df_driver_phylo <- read_delim(file_driver_phylo, "\t")
   
   df_driver_phylo <- filter(df_driver_phylo, CellsPerSample == -1)
   pop_df <- get_population_df(df_driver_phylo)
   
-  temp <- merge(df_out, df_div, all = TRUE)
+  if(include_diversities) temp <- merge(df_out, df_div, all = TRUE)
+  else temp <- df_out
   
   temp <- cbind(df_pars, temp)
   
@@ -166,15 +168,14 @@ combine_dfs <- function(full_dir) {
 #' data files per simulation.
 #' 
 #' @param input_dir base input directory name
+#' @param include_diversities boolean whether to include diversity metrics
 #' 
 #' @return a combined dataframe
 #' 
 #' @export
-all_output <- function(input_dir) {
+all_output <- function(input_dir, include_diversities = TRUE) {
   pars <- parameter_names_and_values(input_dir)$name
   final_values <- parameter_names_and_values(input_dir)$final_value
-  print("final_values: ", quote = FALSE)
-  print(final_values)
   
   each_check <- function(x, res) {
     full_dir <- make_dir(input_dir, pars, x)
@@ -190,7 +191,7 @@ all_output <- function(input_dir) {
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
     print(paste0(full_dir, " ", msg), quote = FALSE)
-    if(!identical(msg, character(0))) if(msg == "Exit code 0") return(combine_dfs(full_dir))
+    if(!identical(msg, character(0))) if(msg == "Exit code 0") return(combine_dfs(full_dir, include_diversities))
     return(data.frame())
   }
   res <- do.call(rbind, apply_combinations(final_values, each_df))

@@ -5,10 +5,12 @@
 \title{Create a composite dataframe for a batch of simulations, derived from multiple 
 data files per simulation.}
 \usage{
-all_output(input_dir)
+all_output(input_dir, include_diversities = TRUE)
 }
 \arguments{
 \item{input_dir}{base input directory name}
+
+\item{include_diversities}{boolean whether to include diversity metrics}
 }
 \value{
 a combined dataframe
