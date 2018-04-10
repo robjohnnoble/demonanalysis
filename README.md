@@ -33,35 +33,33 @@ setwd("/cluster/work/bewi/members/lebidm_nobelr/demon")
 ``` r
 library(demonanalysis)
 
-subfolder_name <- "April_6th_batch1" # name given to the batch
-input_dir <- paste0("all_results/", subfolder_name) # folder containing results of the batch
-
+subfolder_name <- "April_6th_batch1" # batch name
 start_size_range <- 500 + (0:5) * 1000 # NumCells at time of initial measurement for forecasting
 gap_range <- (1:10)/10 # gap between time of initial measurement and second measurement
 final_size <- 1E5 # waiting time is measured until tumour reaches this NumCells value
+
+input_dir <- paste0("all_results/", subfolder_name) # folder containing results of the batch
+num_parameters <- count_parameters(input_dir) # number of simulation parameters (first columns in data)
+output_dir_plots <- paste0("plots/", subfolder_name) # folder to receive image files
+output_dir_data <- paste0("data/", subfolder_name) # folder containing data files
 ```
 
 ### Create plots
 
 ``` r
-output_dir_plots <- paste0("plots/", subfolder_name) # folder to receive image files
-create_plots_batch(input_dir, output_dir_plots, pars, final_values, type = "chart") # create plots
+create_plots_batch(input_dir, output_dir_plots, pars, final_values, type = "chart") # change type to "chart", "plot" or c("chart", "plot") as needed
 ```
 
 ### Get complete data
 
 ``` r
 data <- all_output(input_dir) # combined data for a batch of simulations
-
-num_parameters <- count_parameters(input_dir)
 data <- add_relative_time(data, start_size = 5500, num_parameters = num_parameters) # add columns useful for plotting trajectories
 ```
 
 ### Get summary data
 
 ``` r
-num_parameters <- count_parameters(input_dir)
-
 summary <- get_summary(data, start_size_range, gap_range, final_size, num_parameters = num_parameters) # summary data for each simulation, for each combination of gap and final_size
 
 cor_summary <- get_cor_summary(summary, c("DriverDiversity", "DriverEdgeDiversity"), num_parameters = num_parameters, min_count = 5) # summary dataframe of correlations with "outcome"
@@ -71,8 +69,6 @@ wait_cor_summary <- get_wait_cor_summary(summary, c("DriverDiversity", "DriverEd
 ### Write data
 
 ``` r
-output_dir_data <- paste0("data/", subfolder_name) # folder to receive data files
-
 write.csv(data, paste0(output_dir_data, "/data.csv"))
 write.csv(summary, paste0(output_dir_data, "/summary.csv"))
 write.csv(cor_summary, paste0(output_dir_data, "/cor_summary.csv"))
@@ -82,8 +78,6 @@ write.csv(wait_cor_summary, paste0(output_dir_data, "/wait_cor_summary.csv"))
 ### Read data
 
 ``` r
-output_dir_data <- paste0("data/", subfolder_name) # folder containing data files
-
 data <- read.csv(paste0(output_dir_data, "/data.csv"))
 summary <- read.csv(paste0(output_dir_data, "/summary.csv"))
 cor_summary <- read.csv(paste0(output_dir_data, "/cor_summary.csv"))
