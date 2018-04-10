@@ -50,16 +50,18 @@ output_dir_data <- paste0("data/", subfolder_name) # folder containing data file
 create_plots_batch(input_dir, output_dir_plots, pars, final_values, type = "chart") # change type to "chart", "plot" or c("chart", "plot") as needed
 ```
 
-### Get complete data
+### Get general-purpose data
 
 ``` r
-data <- all_output(input_dir) # combined data for a batch of simulations
-data <- add_relative_time(data, start_size = 5500, num_parameters = num_parameters) # add columns useful for plotting trajectories
+data <- all_output(input_dir, include_diversities = FALSE) # combined data for a batch of simulations, including diversity columns
 ```
 
-### Get summary data
+### Get additional data for forecasting
 
 ``` r
+data <- all_output(input_dir) # combined data for a batch of simulations, including diversity columns
+data <- add_relative_time(data, start_size = 5500, num_parameters = num_parameters) # add columns useful for plotting trajectories
+
 summary <- get_summary(data, start_size_range, gap_range, final_size, num_parameters = num_parameters) # summary data for each simulation, for each combination of gap and final_size
 
 cor_summary <- get_cor_summary(summary, c("DriverDiversity", "DriverEdgeDiversity"), num_parameters = num_parameters, min_count = 5) # summary dataframe of correlations with "outcome"
@@ -70,18 +72,12 @@ wait_cor_summary <- get_wait_cor_summary(summary, c("DriverDiversity", "DriverEd
 
 ``` r
 write.csv(data, paste0(output_dir_data, "/data.csv"), row.names = FALSE)
-write.csv(summary, paste0(output_dir_data, "/summary.csv"), row.names = FALSE)
-write.csv(cor_summary, paste0(output_dir_data, "/cor_summary.csv"), row.names = FALSE)
-write.csv(wait_cor_summary, paste0(output_dir_data, "/wait_cor_summary.csv"), row.names = FALSE)
 ```
 
 ### Read data
 
 ``` r
 data <- read.csv(paste0(output_dir_data, "/data.csv"), guess_max = 1E4) # large value of guess_max improves guessing of column types
-summary <- read.csv(paste0(output_dir_data, "/summary.csv"))
-cor_summary <- read.csv(paste0(output_dir_data, "/cor_summary.csv"))
-wait_cor_summary <- read.csv(paste0(output_dir_data, "/wait_cor_summary.csv"))
 ```
 
 ### Copy plots from Euler
