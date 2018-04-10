@@ -77,12 +77,13 @@ parameter_names_and_values <- function(input_dir) {
 #' df <- data.frame(A = rep(1:2, each = 4), Generation = c(1:4, 3:6), Y = rep(1:4, times = 2))
 #' add_columns(df, 1)
 add_columns <- function(df, num_parameters) {
-  df <- df %>% group_by_at(1:num_parameters)
+  col_nums <- c(1:num_parameters)
+  col_nums <- col_nums[col_nums != which(colnames(df) == "seed")]
   
-  df <- df %>% mutate(maxgen = max(Generation, na.rm = TRUE))
-  df <- df %>% mutate(gen_adj = Generation / maxgen)
-  
-  df <- ungroup(df)
+  df <- df %>% group_by_at(col_nums) %>% 
+    mutate(maxgen = max(Generation, na.rm = TRUE)) %>% 
+    mutate(gen_adj = Generation / maxgen) %>% 
+    ungroup()
   
   return(df)
 }
@@ -104,7 +105,10 @@ add_columns <- function(df, num_parameters) {
 #' comb_df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
 #' add_relative_time(comb_df, start_size = 100, num_parameters = num_parameters)
 add_relative_time <- function(df, start_size, num_parameters) {
-  df <- df %>% group_by_at(1:num_parameters) %>% 
+  col_nums <- c(1:num_parameters)
+  col_nums <- col_nums[col_nums != which(colnames(df) == "seed")]
+  
+  df <- df %>% group_by_at(col_nums) %>% 
     mutate(new_time = gen_adj - min(gen_adj[NumCells >= start_size], na.rm = TRUE), 
            div0 = DriverEdgeDiversity[gen_adj == min(gen_adj[NumCells >= start_size & 
                   (!is.na(DriverEdgeDiversity) || Generation == max(Generation))], na.rm = TRUE)]) %>% 
