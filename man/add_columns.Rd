@@ -20,6 +20,7 @@ since Generation zero, relative to maxgen.
 Add derived variables to a dataframe
 }
 \examples{
-df <- data.frame(A = rep(1:2, each = 4), Generation = c(1:4, 3:6), Y = rep(1:4, times = 2))
+df <- data.frame(p = 1, seed = rep(1:2, each = 4), 
+Generation = c(1:4, 3:6), Y = rep(1:4, times = 2))
 add_columns(df, 1)
 }
