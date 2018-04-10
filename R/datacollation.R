@@ -179,8 +179,6 @@ all_output <- function(input_dir) {
   print(final_values)
   
   each_check <- function(x, res) {
-    print("x = ", quote = FALSE)
-    print(x)
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
     if(!identical(msg, character(0))) print(paste0(full_dir, " ", msg), quote = FALSE)

@@ -69,10 +69,10 @@ wait_cor_summary <- get_wait_cor_summary(summary, c("DriverDiversity", "DriverEd
 ### Write data
 
 ``` r
-write.csv(data, paste0(output_dir_data, "/data.csv"))
-write.csv(summary, paste0(output_dir_data, "/summary.csv"))
-write.csv(cor_summary, paste0(output_dir_data, "/cor_summary.csv"))
-write.csv(wait_cor_summary, paste0(output_dir_data, "/wait_cor_summary.csv"))
+write.csv(data, paste0(output_dir_data, "/data.csv"), row.names = FALSE)
+write.csv(summary, paste0(output_dir_data, "/summary.csv"), row.names = FALSE)
+write.csv(cor_summary, paste0(output_dir_data, "/cor_summary.csv"), row.names = FALSE)
+write.csv(wait_cor_summary, paste0(output_dir_data, "/wait_cor_summary.csv"), row.names = FALSE)
 ```
 
 ### Read data
