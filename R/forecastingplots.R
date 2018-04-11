@@ -335,19 +335,19 @@ plot_viol_sweep_metric <- function(df, output_filename = NA, file_type = "png", 
 }
 
 # R-squared by mean theta (JohnCode3)
-qp2 <- qplot(
-  mean_autocor,
-  Cor_DriverDiversity,
-  group = start_size,
-  data =  wait_cor_summary, 
-  colour = as.factor(K),
-  geom = "point", size = 0.5)
-qp2 + scale_fill_brewer(palette="Set1") + #scale_colour_gradientn(colours=c(brewer.pal(5,"RdYlBu"), "#0000FF"), name = "K") +
-  facet_wrap(~start_size) + 
-  scale_x_continuous(name = "mean theta") +
-  scale_y_continuous(name = "R-squared: diversity vs. waiting time", limits = c(0,1)) +
-  geom_smooth(size = 1) +
-  theme_classic()
+# qp2 <- qplot(
+#   mean_autocor,
+#   Cor_DriverDiversity,
+#   group = start_size,
+#   data =  wait_cor_summary, 
+#   colour = as.factor(K),
+#   geom = "point", size = 0.5)
+# qp2 + scale_fill_brewer(palette="Set1") + #scale_colour_gradientn(colours=c(brewer.pal(5,"RdYlBu"), "#0000FF"), name = "K") +
+#   facet_wrap(~start_size) + 
+#   scale_x_continuous(name = "mean theta") +
+#   scale_y_continuous(name = "R-squared: diversity vs. waiting time", limits = c(0,1)) +
+#   geom_smooth(size = 1) +
+#   theme_classic()
 
 # Metrics (Analyse&PlotOutput)
 
