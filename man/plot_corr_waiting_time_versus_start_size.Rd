@@ -22,3 +22,6 @@ a plot object
 \description{
 Plot correlation between waiting time and diversity, versus tumour size at measurement, coloured by K
 }
+\examples{
+plot_corr_waiting_time_versus_start_size(wait_cor_summary)
+}

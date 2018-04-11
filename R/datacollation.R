@@ -381,7 +381,12 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count) 
 #' @export
 #' 
 #' @examples
-#' get_wait_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), 16, min_count = 5)
+#' wait_cor_summary <- get_wait_cor_summary(sum_df, 
+#' c("DriverDiversity", "DriverEdgeDiversity"), 16, min_count = 5)
+#' depth_wait_cor_summary <- get_wait_cor_summary(sum_df, 
+#' c(paste0("DriverDiversityFrom1SamplesAtDepth", 0:10), 
+#' paste0("DriverDiversityFrom4SamplesAtDepth", 0:10)), 
+#' 16, min_count = 5)
 get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_count) {
   col_nums <- c(1:num_parameters, which(colnames(summary) == "start_size"))
   col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]

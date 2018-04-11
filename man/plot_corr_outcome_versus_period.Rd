@@ -22,3 +22,6 @@ a plot object
 \description{
 Plot correlation between outcome and diversity, versus projection period, coloured by K, for each value of tumour size at measurement
 }
+\examples{
+plot_corr_outcome_versus_period(cor_summary)
+}

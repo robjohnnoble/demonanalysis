@@ -65,8 +65,9 @@ final_size <- 1E5 # waiting time is measured until tumour reaches this NumCells 
 
 summary <- get_summary(data, start_size_range, gap_range, final_size, num_parameters = num_parameters) # summary data for each simulation, for each combination of gap and final_size
 
-cor_summary <- get_cor_summary(summary, c("DriverDiversity", "DriverEdgeDiversity"), num_parameters = num_parameters, min_count = 5) # summary dataframe of correlations with "outcome"
-wait_cor_summary <- get_wait_cor_summary(summary, c("DriverDiversity", "DriverEdgeDiversity"), num_parameters = num_parameters, min_count = 5) # summary dataframe of correlations with "waiting_time"
+cor_summary <- get_cor_summary(summary, c("DriverDiversity", "DriverEdgeDiversity"), num_parameters = num_parameters, min_count = 5) # summary dataframe of correlations with "outcome", including all cells
+wait_cor_summary <- get_wait_cor_summary(summary, c("DriverDiversity", "DriverEdgeDiversity"), num_parameters = num_parameters, min_count = 5) # summary dataframe of correlations with "waiting_time", including all cells
+depth_wait_cor_summary <- get_wait_cor_summary(summary, c(paste0("DriverDiversityFrom1SamplesAtDepth", 0:10), paste0("DriverDiversityFrom4SamplesAtDepth", 0:10)), num_parameters, min_count = 5) # summary dataframe of correlations with "waiting_time" for different biopsy protocols
 ```
 
 ### Write data

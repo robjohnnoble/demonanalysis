@@ -22,3 +22,6 @@ a plot object
 \description{
 Plot growth trajectories, coloured by K
 }
+\examples{
+plot_trajectories_by_K(data)
+}

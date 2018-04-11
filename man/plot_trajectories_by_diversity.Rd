@@ -22,3 +22,6 @@ a plot object
 \description{
 Plot growth trajectories, coloured by driver edge diversity
 }
+\examples{
+plot_trajectories_by_diversity(data)
+}
