@@ -357,6 +357,7 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count) 
     summarise(mean_start_time = mean(start_time), 
               mean_DriverDiversity = mean(DriverDiversity),
               mean_outcome = mean(outcome), 
+              mean_autocor = mean_autocor, 
               num_seeds = n())
   result_names_list <- paste0("Cor_", col_names_list)
   cor_summary_list <- list()
@@ -399,6 +400,7 @@ get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_co
     summarise(mean_start_time = mean(start_time), 
               mean_DriverDiversity = mean(DriverDiversity), 
               mean_waiting_time = mean(waiting_time), 
+              mean_autocor = mean_autocor, 
               num_seeds = n())
   result_names_list <- paste0("Cor_", col_names_list)
   cor_summary_list <- list()
