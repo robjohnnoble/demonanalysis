@@ -50,7 +50,7 @@ create_plots_batch(input_dir, output_dir_plots, pars, final_values, type = "char
 ### Get general-purpose data
 
 ``` r
-data <- all_output(input_dir, include_diversities = FALSE) # combined data for a batch of simulations, including diversity columns
+data <- all_output(input_dir, include_diversities = FALSE) # combined data for a batch of simulations, excluding diversity columns
 ```
 
 ### Get additional data for forecasting
