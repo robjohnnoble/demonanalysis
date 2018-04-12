@@ -44,7 +44,7 @@ output_dir_data <- paste0("data/", subfolder_name) # folder containing data file
 ### Create plots
 
 ``` r
-create_plots_batch(input_dir, output_dir_plots, pars, final_values, type = "chart") # change type to "chart", "plot" or c("chart", "plot") as needed
+create_plots_batch(input_dir, output_dir_plots, type = "chart") # change type to "chart", "plot" or c("chart", "plot") as needed
 ```
 
 ### Get general-purpose data
@@ -85,8 +85,8 @@ data <- read.csv(paste0(output_dir_data, "/data.csv"), guess_max = 1E4) # large 
 ### Copy plots from Euler
 
 ```
-cd /Users/rnoble/Documents/MontpellierDocuments/Models/Demon/EulerPlots
-scp -r rnoble@euler.ethz.ch:/cluster/work/bewi/members/lebidm_nobelr/demon/plots/* ./
+cd /Users/rnoble/Documents/MontpellierDocuments/Models/Demon/EulerPlots/April_6th_batch1/Charts
+scp -r rnoble@euler.ethz.ch:/cluster/work/bewi/members/lebidm_nobelr/demon/plots/April_6th_batch1/chart* ./
 ```
 
 
