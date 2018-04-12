@@ -4,7 +4,8 @@
 \alias{plot_trajectories_by_diversity}
 \title{Plot growth trajectories, coloured by driver edge diversity}
 \usage{
-plot_trajectories_by_diversity(df, output_filename = NA, file_type = "png",
+plot_trajectories_by_diversity(df,
+  output_filename = "trajectories_by_diversity", file_type = "png",
   output_dir = NA)
 }
 \arguments{

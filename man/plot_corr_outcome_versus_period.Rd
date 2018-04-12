@@ -4,7 +4,8 @@
 \alias{plot_corr_outcome_versus_period}
 \title{Plot correlation between outcome and diversity, versus projection period, coloured by K, for each value of tumour size at measurement}
 \usage{
-plot_corr_outcome_versus_period(df, output_filename = NA, file_type = "png",
+plot_corr_outcome_versus_period(df,
+  output_filename = "corr_outcome_versus_period", file_type = "png",
   output_dir = NA)
 }
 \arguments{

@@ -142,7 +142,7 @@ grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FAL
 #' plot_all_images(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
 plot_all_images <- function(path, output_filename = NA, file_type = "png", output_dir = NA, trim = -1) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
-  if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
   Muller_df <- muller_df_from_file(paste0(path, "driver_phylo.dat"))
   if(class(Muller_df) != "data.frame") return(NA)
@@ -175,16 +175,16 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
   
   if(!is.na(output_filename)) print(paste0("Created all plots for file ", output_filename), quote = FALSE)
   
-  if(!is.na(output_dir)) {
+  if(!is.na(output_filename) & !is.na(output_dir)) {
     if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1000, height = 1000, res = 100)
-    else pdf(paste0(output_dir,output_filename,".pdf"), width = 500, height = 600)
+    else pdf(paste0(output_dir,output_filename,".pdf"), width = 10, height = 10)
   }
   lay <- rbind(c(1,1,2),
                c(3,3,3),
                c(4,4,5),
                c(NA,6,7))
   print(grid.arrange(h1, g1, h2, h3, g2, g3, g4, layout_matrix = lay, heights = c(1, 1, 0.75, 0.75)))
-  if(!is.na(output_dir)) dev.off()
+  if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
   
   if(!is.na(output_filename)) print("Saved the plot", quote = FALSE)
 }
@@ -334,13 +334,13 @@ plot_first_inc_moment <- function(hist, xmax = 1E4) {
 #' plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), xmax = 50)
 plot_all_charts <- function(path, output_filename = NA, file_type = "png", output_dir = NA, xmax = 1E4) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
-  if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
   output_allele_hist <- read_delim(paste0(path, "output_allele_hist.dat"), "\t", trim_ws = TRUE)
   output_allele_cum_dist <- read_delim(paste0(path, "output_allele_cum_dist.dat"), "\t", trim_ws = TRUE)
   hist1 <- get_genotype_sizes_hist(paste0(path, "genotypes.dat"))
   
-  if(!is.na(output_dir)) {
+  if(!is.na(output_filename) & !is.na(output_dir)) {
     if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 600, height = 600, res = 100)
     else pdf(paste0(output_dir,output_filename,".pdf"), width = 6, height = 6)
   }
@@ -354,7 +354,7 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   plot_genotype_sizes_hist(hist1, xmax)
   plot_first_inc_moment(hist1, xmax)
   
-  if(!is.na(output_dir)) dev.off()
+  if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
 
 #' Plot numers of cells with n mutations for each value of n

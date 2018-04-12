@@ -4,8 +4,9 @@
 \alias{plot_scatter_waiting_time_diversity}
 \title{Example scatter plots of waiting time versus diversity}
 \usage{
-plot_scatter_waiting_time_diversity(df, output_filename = NA,
-  file_type = "png", output_dir = NA)
+plot_scatter_waiting_time_diversity(df,
+  output_filename = "scatter_waiting_time_diversity", file_type = "png",
+  output_dir = NA)
 }
 \arguments{
 \item{df}{dataframe}

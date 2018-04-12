@@ -4,7 +4,8 @@
 \alias{plot_corr_waiting_time_versus_start_size}
 \title{Plot correlation between waiting time and diversity, versus tumour size at measurement, coloured by K}
 \usage{
-plot_corr_waiting_time_versus_start_size(df, output_filename = NA,
+plot_corr_waiting_time_versus_start_size(df,
+  output_filename = "corr_waiting_time_versus_start_size",
   file_type = "png", output_dir = NA)
 }
 \arguments{

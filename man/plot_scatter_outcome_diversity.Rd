@@ -4,7 +4,8 @@
 \alias{plot_scatter_outcome_diversity}
 \title{Example scatter plots of outcome versus diversity}
 \usage{
-plot_scatter_outcome_diversity(df, output_filename = NA, file_type = "png",
+plot_scatter_outcome_diversity(df,
+  output_filename = "scatter_outcome_diversity", file_type = "png",
   output_dir = NA)
 }
 \arguments{

@@ -4,7 +4,8 @@
 \alias{plot_trajectories_by_K}
 \title{Plot growth trajectories, coloured by K}
 \usage{
-plot_trajectories_by_K(df, output_filename = NA, file_type = "png",
+plot_trajectories_by_K(df, x_var = "gen_adj",
+  output_filename = "trajectories_by_K", file_type = "png",
   output_dir = NA)
 }
 \arguments{
@@ -24,4 +25,5 @@ Plot growth trajectories, coloured by K
 }
 \examples{
 plot_trajectories_by_K(data)
+plot_trajectories_by_K(data, x_var = "Generation")
 }

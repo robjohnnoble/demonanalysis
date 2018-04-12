@@ -14,30 +14,30 @@
 #' 
 #' @examples 
 #' plot_corr_outcome_versus_period(cor_summary)
-plot_corr_outcome_versus_period <- function(df, output_filename = NA, file_type = "png", output_dir = NA) {
-  if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+plot_corr_outcome_versus_period <- function(df, output_filename = "corr_outcome_versus_period", file_type = "png", output_dir = NA) {
+  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
-  if(!is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir, output_filename,".png"), width = 1000, height = 1000, res = 100)
-    else pdf(paste0(output_dir, output_filename,".pdf"), width = 500, height = 600)
+  if(!is.na(output_filename) & !is.na(output_dir)) {
+    if(file_type == "png") png(paste0(output_dir, output_filename,".png"), width = 800, height = 500, res = 100)
+    else pdf(paste0(output_dir, output_filename,".pdf"), width = 8, height = 5)
   }
   
   start_size_range <- unique(df$start_size)
   K_range <- unique(df$K)
   
-  cols <- rainbow(8)
-  cols[5] <- "blue"
+  cols <- rainbow(length(K_range))
   
-  par(mfrow=c(2, 3))
-  par(mar=c(4.5, 4, 1.5, 1))
-  for(start_size_val in start_size_range) {
+  par(mfrow=c(2, ceiling(length(start_size_range) / 2)))
+  par(mar=c(4.5, 5, 1.5, 1))
+  for(i in 1:length(start_size_range)) {
+    start_size_val <- start_size_range[i]
     title <- paste("Measure at ", start_size_val, " cells", sep = "")
     for(K_val in K_range) {
       if(K_val == K_range[1]) {
-        plot(1, type = "n", xlim = c(0, 1), ylim = c(-0.1, 1),
-             main = title, xlab = "projection period", ylab = "correlation coefficient: diversity vs tumour size")
-        if(start_size_val == start_size_range[1]) legend("topright", as.character(K_range), title = "K", 
-                                                     xpd = TRUE, horiz = FALSE, inset = c(0.1, 0.03), bty = "n", lty = 1, col = cols)
+        plot(1, type = "n", xlim = c(0, 1), ylim = c(-1, 1),
+             main = title, xlab = "projection period", ylab = "correlation coefficient:\ndiversity vs tumour size")
+        if(i == 1) legend("bottomleft", as.character(K_range), title = "K", ncol = 3, 
+                                                     xpd = TRUE, horiz = FALSE, inset = c(0, 0), bty = "n", lty = 1, col = cols, lwd = 2)
       }
       lines(Cor_DriverDiversity ~ gap, data = filter(df, start_size == start_size_val, K == K_val), 
             col = cols[log2(K) + 1], lwd = 2)
@@ -45,7 +45,7 @@ plot_corr_outcome_versus_period <- function(df, output_filename = NA, file_type 
     }
   }
   
-  if(!is.na(output_dir)) dev.off()
+  if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
 
 #' Plot correlation between waiting time and diversity, versus tumour size at measurement, coloured by K
@@ -64,35 +64,34 @@ plot_corr_outcome_versus_period <- function(df, output_filename = NA, file_type 
 #' 
 #' @examples 
 #' plot_corr_waiting_time_versus_start_size(wait_cor_summary)
-plot_corr_waiting_time_versus_start_size <- function(df, output_filename = NA, file_type = "png", output_dir = NA) {
-  if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+plot_corr_waiting_time_versus_start_size <- function(df, output_filename = "corr_waiting_time_versus_start_size", file_type = "png", output_dir = NA) {
+  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
-  if(!is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 1000, height = 1000, res = 100)
-    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 500, height = 600)
+  if(!is.na(output_filename) & !is.na(output_dir)) {
+    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 500, height = 500, res = 100)
+    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 5, height = 5)
     }
   
   start_size_range <- unique(df$start_size)
   K_range <- unique(df$K)
   
-  cols <- rainbow(8)
-  cols[5] <- "blue"
+  cols <- rainbow(length(K_range))
   
   par(mfrow=c(1, 1))
   par(mar=c(4, 4, 2, 2))
   for(K_val in K_range) {
     if(K_val == K_range[1]) {
       plot(1, type = "n", xlim = c(0, 6E3), ylim = c(-1, 1),
-           main = "", xlab = "tumour size at measurement", ylab = "correlation coefficient: diversity vs waiting time")
-      legend("topright", as.character(K_range), title = "K", 
-             xpd = TRUE, horiz = FALSE, inset = c(0.1, 0.03), bty = "n", lty = 1, col = cols)
+           main = "", xlab = "tumour size at measurement", ylab = "correlation coefficient:\ndiversity vs waiting time")
+      legend("topleft", as.character(K_range), title = "K", ncol = 3, lwd = 2, 
+             xpd = TRUE, horiz = FALSE, inset = c(0, 0), bty = "n", lty = 1, col = cols)
       }
       lines(Cor_DriverDiversity ~ start_size, data = filter(df, K == K_val), 
             col = cols[log2(K) + 1], lwd = 2)
       abline(h = 0, untf = FALSE, lty = 3)
       }
   
-  if(!is.na(output_dir)) dev.off()
+  if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
 
 #' Plot correlations between waiting time and diversity measured at different depths, coloured by size at measurement
@@ -111,34 +110,33 @@ plot_corr_waiting_time_versus_start_size <- function(df, output_filename = NA, f
 #' library(dplyr)
 #' plot_corr_waiting_time_versus_depth(filter(depth_wait_cor_summary, K == 16), 
 #' "DriverDiversityFrom1SamplesAtDepth")
-plot_corr_waiting_time_versus_depth <- function(df, col_prefix, output_filename = NA, file_type = "png", output_dir = NA) {
-  if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+plot_corr_waiting_time_versus_depth <- function(df, col_prefix, output_filename = "corr_waiting_time_versus_depth", file_type = "png", output_dir = NA) {
+  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
-  if(!is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 1000, height = 1000, res = 100)
-    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 500, height = 600)
+  if(!is.na(output_filename) & !is.na(output_dir)) {
+    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 400, height = 350, res = 100)
+    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 4, height = 3.5)
   }
   
   par(mfrow=c(1,1))
-  par(mar=c(4.5,5,1,1))
+  par(mar=c(4.5,5,2,1))
   col_nums <- which(grepl(col_prefix, colnames(df)))
   depth <- (0:(length(col_nums)-1)) / (length(col_nums)-1)
   sizes <- unique(df$start_size)
   cols <- rainbow(length(sizes))
-  par(oma = c(0, 0, 0, 3))
-  plot(as.numeric(df[which(df$start_size == sizes[1]), col_nums]) ~ depth, ylim = c(-1, 0), col = cols[1], type = "l",
+  plot(as.numeric(df[which(df$start_size == sizes[1]), col_nums]) ~ depth, ylim = c(-1, 1), col = cols[1], type = "l",
        xlab = "measurement distance from periphery (%)", 
-       ylab = "correlation coefficient: diversity vs waiting time", xaxt = "n", lwd = 2)
-  axis(1, at=2*0:5,labels=20*0:5)
+       ylab = "correlation coefficient:\ndiversity vs waiting time", xaxt = "n", lwd = 2)
+  axis(1, at=0.2*0:5,labels=20*0:5)
   for(i in 2:length(sizes)) {
     lines(as.numeric(df[which(df$start_size == sizes[i]), col_nums]) ~ depth, col = cols[i], lwd = 2)
   }
   par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
   plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
-  legend("bottomright", as.character(sizes), title = "size at measurement", xpd = TRUE, 
-         horiz = FALSE, inset = c(0.2, 0.3), bty = "n", lty = 1, col = cols, lwd = 2)
+  legend("topright", as.character(sizes), title = "size at measurement", xpd = TRUE, ncol = 2, 
+         horiz = FALSE, inset = c(0.1, 0.1), bty = "n", lty = 1, col = cols, lwd = 2)
   
-  if(!is.na(output_dir)) dev.off()
+  if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
 
 #' Example scatter plots of outcome versus diversity
@@ -156,17 +154,17 @@ plot_corr_waiting_time_versus_depth <- function(df, col_prefix, output_filename 
 #' @examples
 #' library(dplyr)
 #' plot_scatter_outcome_diversity(filter(summary, K == 16, start_size == 500))
-plot_scatter_outcome_diversity <- function(df, output_filename = NA, file_type = "png", output_dir = NA) {
-  if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+plot_scatter_outcome_diversity <- function(df, output_filename = "scatter_outcome_diversity", file_type = "png", output_dir = NA) {
+  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
-  if(!is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 1000, height = 1000, res = 100)
-    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 500, height = 600)
+  if(!is.na(output_filename) & !is.na(output_dir)) {
+    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 1000, height = 400, res = 100)
+    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 10, height = 4)
   }
   
   gap_list <- unique(df$gap)
   par(mfrow=c(2, ceiling(length(gap_list)/2)))
-  par(mar=c(4.5,5,5,1))
+  par(mar=c(4.5,5,2,1))
   for(gap in gap_list) {
     plot_data <- df[which(df$gap == gap), ]
     title <- paste("Forecast period ", gap, sep = "")
@@ -181,7 +179,7 @@ plot_scatter_outcome_diversity <- function(df, output_filename = NA, file_type =
     title(title, line = 0.5)
   }
   
-  if(!is.na(output_dir)) dev.off()
+  if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
 
 #' Example scatter plots of waiting time versus diversity
@@ -198,17 +196,17 @@ plot_scatter_outcome_diversity <- function(df, output_filename = NA, file_type =
 #' @examples
 #' library(dplyr)
 #' plot_scatter_waiting_time_diversity(filter(summary, K == 16, gap == min(summary$gap)))
-plot_scatter_waiting_time_diversity <- function(df, output_filename = NA, file_type = "png", output_dir = NA) {
-  if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+plot_scatter_waiting_time_diversity <- function(df, output_filename = "scatter_waiting_time_diversity", file_type = "png", output_dir = NA) {
+  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
-  if(!is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 1000, height = 1000, res = 100)
-    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 500, height = 600)
+  if(!is.na(output_filename) & !is.na(output_dir)) {
+    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 600, height = 400, res = 100)
+    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 6, height = 4)
   }
   
   start_list <- unique(df$start_size)
   par(mfrow=c(2, ceiling(length(start_list)/2)))
-  par(mar=c(4.5,5,5,1))
+  par(mar=c(4.5,5,2,1))
   for(start_size in start_list) {
     plot_data <- df[which(df$start_size == start_size), ]
     title <- paste("Start size ", start_size, sep = "")
@@ -223,7 +221,7 @@ plot_scatter_waiting_time_diversity <- function(df, output_filename = NA, file_t
     title(title, line = 0.5)
   }
   
-  if(!is.na(output_dir)) dev.off()
+  if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
 
 #' Plot growth trajectories, coloured by K
@@ -240,24 +238,25 @@ plot_scatter_waiting_time_diversity <- function(df, output_filename = NA, file_t
 #' 
 #' @examples 
 #' plot_trajectories_by_K(data)
-plot_trajectories_by_K <- function(df, output_filename = NA, file_type = "png", output_dir = NA) {
-  if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+#' plot_trajectories_by_K(data, x_var = "Generation")
+plot_trajectories_by_K <- function(df, x_var = "gen_adj", output_filename = "trajectories_by_K", file_type = "png", output_dir = NA) {
+  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
-  if(!is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 1000, height = 1000, res = 100)
-    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 500, height = 600)
+  if(!is.na(output_filename) & !is.na(output_dir)) {
+    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 400, height = 300, res = 100)
+    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 4, height = 3)
   }
   
-  q <- qplot(
-    gen_adj,
-    NumCells,
-    group = interaction(K, seed),
-    data = df,
-    colour = factor(K),
-    geom = "line")
+  q <- ggplot(df, aes(x = get(x_var), y = NumCells, colour = factor(K), group = interaction(K, seed)))
+  q <- q + geom_line() +
+    scale_x_continuous(name = "relative time") +
+    scale_y_continuous(name = "tumour size") +
+    theme_classic() + 
+    labs(colour = 'K')
+  
   print(q)
   
-  if(!is.na(output_dir)) dev.off()
+  if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
 
 #' Plot growth trajectories, coloured by driver edge diversity
@@ -272,32 +271,49 @@ plot_trajectories_by_K <- function(df, output_filename = NA, file_type = "png", 
 #' @export
 #' @import ggplot2
 #' @import RColorBrewer
+#' @import dplyr
+#' @importFrom gridExtra grid.arrange
 #' 
 #' @examples 
 #' plot_trajectories_by_diversity(data)
-plot_trajectories_by_diversity <- function(df, output_filename = NA, file_type = "png", output_dir = NA) {
-  if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+plot_trajectories_by_diversity <- function(df, output_filename = "trajectories_by_diversity", file_type = "png", output_dir = NA) {
+  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
-  if(!is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 1000, height = 1000, res = 100)
-    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 500, height = 600)
+  if(!is.na(output_filename) & !is.na(output_dir)) {
+    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 1000, height = 500, res = 100)
+    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 10, height = 5)
   }
   
+  K_list <- unique(df$K)
+  mid_K <- K_list[floor(length(K_list) / 2)]
+  
+  qp1 <- qplot(
+    new_time,
+    NumCells,
+    group = interaction(seed, K),
+    data = filter(df, K <= mid_K),
+    colour = div0,
+    geom = "line")
   qp2 <- qplot(
     new_time,
     NumCells,
     group = interaction(seed, K),
-    data = df,
+    data = filter(df, K > mid_K),
     colour = div0,
     geom = "line")
+  qp1 <- qp1 + scale_colour_gradientn(colours = c(brewer.pal(5, "RdYlBu"), "#0000FF"), name = "diversity at periphery") +
+    facet_grid(.~K, scales = "free") +
+    scale_x_continuous(name = "relative time") +
+    scale_y_continuous(name = "tumour size") +
+    theme_classic()
   qp2 <- qp2 + scale_colour_gradientn(colours = c(brewer.pal(5, "RdYlBu"), "#0000FF"), name = "diversity at periphery") +
     facet_grid(.~K, scales = "free") +
     scale_x_continuous(name = "relative time") +
     scale_y_continuous(name = "tumour size") +
     theme_classic()
-  print(qp2)
+  print(grid.arrange(qp1, qp2, nrow = 2))
   
-  if(!is.na(output_dir)) dev.off()
+  if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
 
 #' Violin plot of mean sweep metric (genotype frequency autocorrelation)
@@ -317,12 +333,12 @@ plot_trajectories_by_diversity <- function(df, output_filename = NA, file_type =
 #' plot_viol_sweep_metric(filter(summary, gap == min(gap), start_size == min(start_size)))
 #' plot_viol_sweep_metric(filter(cor_summary, gap == min(gap), start_size == min(start_size)))
 #' plot_viol_sweep_metric(filter(wait_cor_summary, start_size == min(start_size)))
-plot_viol_sweep_metric <- function(df, output_filename = NA, file_type = "png", output_dir = NA) {
-  if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+plot_viol_sweep_metric <- function(df, output_filename = "viol_sweep_metric", file_type = "png", output_dir = NA) {
+  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
-  if(!is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 1000, height = 1000, res = 100)
-    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 500, height = 600)
+  if(!is.na(output_filename) & !is.na(output_dir)) {
+    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 400, height = 400, res = 100)
+    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 4, height = 4)
   }
     
   p <- ggplot(df, aes(factor(K), mean_autocor))
@@ -336,7 +352,7 @@ plot_viol_sweep_metric <- function(df, output_filename = NA, file_type = "png", 
   
   print(p)
   
-  if(!is.na(output_dir)) dev.off()
+  if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
 
 #' Plot R-squared versus mean sweep metric
@@ -353,12 +369,12 @@ plot_viol_sweep_metric <- function(df, output_filename = NA, file_type = "png", 
 #' 
 #' @examples
 #' plot_R2_verus_sweep_metric(wait_cor_summary)
-plot_R2_verus_sweep_metric <- function(df, output_filename = NA, file_type = "png", output_dir = NA) {
-  if(!is.na(output_filename)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+plot_R2_verus_sweep_metric <- function(df, output_filename = "R2_verus_sweep_metric", file_type = "png", output_dir = NA) {
+  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
-  if(!is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 1000, height = 1000, res = 100)
-    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 500, height = 600)
+  if(!is.na(output_filename) & !is.na(output_dir)) {
+    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 800, height = 500, res = 100)
+    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 8, height = 5)
   }
   
   qp2 <- qplot(
@@ -370,19 +386,16 @@ plot_R2_verus_sweep_metric <- function(df, output_filename = NA, file_type = "pn
     geom = "point")
   qp2 <- qp2 + scale_fill_brewer(palette="Set1") + #scale_colour_gradientn(colours=c(brewer.pal(5,"RdYlBu"), "#0000FF"), name = "K") +
     facet_wrap(~start_size) +
-    scale_x_continuous(name = "mean theta") +
+    scale_x_continuous(name = "mean sweep metric") +
     scale_y_continuous(name = "R-squared: diversity vs. waiting time", limits = c(-1,1)) +
     geom_smooth(size = 1) +
-    theme_classic()
+    theme_classic() + 
+    labs(colour = 'K')
   
   print(qp2)
   
-  if(!is.na(output_dir)) dev.off()
+  if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
-
-# Metrics (Analyse&PlotOutput)
-
-
 
 
 
