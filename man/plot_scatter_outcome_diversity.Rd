@@ -4,12 +4,14 @@
 \alias{plot_scatter_outcome_diversity}
 \title{Example scatter plots of outcome versus diversity}
 \usage{
-plot_scatter_outcome_diversity(df,
+plot_scatter_outcome_diversity(df, col_name = "DriverDiversity",
   output_filename = "scatter_outcome_diversity", file_type = "png",
   output_dir = NA)
 }
 \arguments{
 \item{df}{dataframe}
+
+\item{col_name}{name of column containing a diversity metric (default "DriverDiversity")}
 
 \item{output_filename}{name of output image file}
 

@@ -11,6 +11,8 @@ plot_trajectories_by_K(df, x_var = "gen_adj",
 \arguments{
 \item{df}{data frame}
 
+\item{x_var}{column name of the x-variable (default "gen_adj")}
+
 \item{output_filename}{name of output image file}
 
 \item{file_type}{either "pdf" or "png" (other values default to "pdf")}
