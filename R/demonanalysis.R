@@ -192,6 +192,7 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
 #' Plot a histogram of variant allele frequencies
 #' 
 #' @param df data frame containing "frequency" and "density" columns
+#' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' 
 #' @return plot displyed on screen
 #' 
@@ -203,8 +204,11 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
 #' 
 #' @examples
 #' plot_allele_hist(output_allele_hist)
-plot_allele_hist <- function(df) {
-  plot(log10(density) ~ qlogis(frequency), data = df, 
+plot_allele_hist <- function(df, generation = NA) {
+  if(!is.na(generation)) df <- filter(df, Generation == generation)
+  ncol <- dim(df)[2]
+  colnames(df)[(ncol - 1):ncol] <- c("Frequency", "Density")
+  plot(log10(Density) ~ qlogis(Frequency), data = df, 
        xaxt = "n", yaxt = "n", 
        xlim = c(qlogis(1E-5), qlogis(0.9999)), 
        ylim = c(-6, 6),
@@ -222,6 +226,7 @@ plot_allele_hist <- function(df) {
 #' Plot cumulative density of variant allele frequencies versus inverse allele frequency
 #' 
 #' @param df data frame containing "inverse_frequency" and "cumulative_count" columns
+#' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' 
 #' @return plot displyed on screen
 #' 
@@ -231,11 +236,14 @@ plot_allele_hist <- function(df) {
 #' 
 #' @examples
 #' plot_allele_cum_dist(output_allele_cum_dist)
-plot_allele_cum_dist <- function(df) {
-  plot(cumulative_count ~ inverse_frequency, data = df,
+plot_allele_cum_dist <- function(df, generation = NA) {
+  if(!is.na(generation)) df <- filter(df, Generation == generation)
+  ncol <- dim(df)[2]
+  colnames(df)[(ncol - 1):ncol] <- c("InverseFrequency", "CumulativeCount")
+  plot(CumulativeCount ~ InverseFrequency, data = df,
        xlim = c(0, 100), ylim = c(0, 500), type = "l", 
        xlab = "inverse allele frequency", ylab = "cumulative count")
-  subplot(plot(cumulative_count ~ inverse_frequency, data = df, 
+  subplot(plot(CumulativeCount ~ InverseFrequency, data = df, 
                xlim = c(0, 10), ylim = c(0, 50), xlab = "", ylab = "", type = "l"), 
           x = 12, y = 500, vadj = 1, hadj = 0, size = c(0.75, 0.75))
 }

@@ -4,10 +4,12 @@
 \alias{plot_allele_hist}
 \title{Plot a histogram of variant allele frequencies}
 \usage{
-plot_allele_hist(df)
+plot_allele_hist(df, generation = NA)
 }
 \arguments{
 \item{df}{data frame containing "frequency" and "density" columns}
+
+\item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 }
 \value{
 plot displyed on screen
