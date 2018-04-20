@@ -4,10 +4,10 @@
 \alias{plot_common_allele_counts}
 \title{Plot counts of variant allele frequencies for the most common alleles}
 \usage{
-plot_common_allele_counts(df)
+plot_common_allele_counts(hist)
 }
 \arguments{
-\item{df}{dataframe with columns named "allele_frequency" and "count"}
+\item{hist}{histogram}
 }
 \value{
 plot
@@ -16,7 +16,7 @@ plot
 Plot counts of variant allele frequencies for the most common alleles
 }
 \examples{
-df1 <- get_common_allele_counts(system.file("extdata", "output_allele_freqs.dat", 
+hist1 <- get_common_allele_counts(system.file("extdata", "output_allele_freqs.dat", 
 package = "demonanalysis", mustWork = TRUE))
-plot_common_allele_counts(df1)
+plot_common_allele_counts(hist1)
 }

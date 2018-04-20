@@ -7,7 +7,7 @@
 plot_allele_hist(df, generation = NA)
 }
 \arguments{
-\item{df}{name of file containing lists of genotype sizes}
+\item{df}{name of dataframe containing lists of genotype sizes}
 
 \item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 }

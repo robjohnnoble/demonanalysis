@@ -2,7 +2,7 @@
 % Please edit documentation in R/demonanalysis.R
 \name{get_common_allele_counts}
 \alias{get_common_allele_counts}
-\title{Get counts of variant allele frequencies for the most common alleles}
+\title{Get histogram of variant allele frequencies for the most common alleles}
 \usage{
 get_common_allele_counts(file, generation = NA)
 }
@@ -12,13 +12,13 @@ get_common_allele_counts(file, generation = NA)
 \item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 }
 \value{
-dataframe with columns "allele_frequency" and "count"
+histogram
 }
 \description{
-Get counts of variant allele frequencies for the most common alleles
+Get histogram of variant allele frequencies for the most common alleles
 }
 \examples{
-df1 <- get_common_allele_counts(system.file("extdata", "output_allele_freqs.dat", 
+hist1 <- get_common_allele_counts(system.file("extdata", "output_allele_freqs.dat", 
 package = "demonanalysis", mustWork = TRUE))
-plot_common_allele_counts(df1)
+plot_common_allele_counts(hist1)
 }

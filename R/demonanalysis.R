@@ -189,19 +189,19 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
   if(!is.na(output_filename)) print("Saved the plot", quote = FALSE)
 }
 
-#' Get counts of variant allele frequencies for the most common alleles
+#' Get histogram of variant allele frequencies for the most common alleles
 #' 
 #' @param file name of file containing lists of allele frequencies
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' 
-#' @return dataframe with columns "allele_frequency" and "count"
+#' @return histogram
 #' 
 #' @export
 #' 
 #' @examples
-#' df1 <- get_common_allele_counts(system.file("extdata", "output_allele_freqs.dat", 
+#' hist1 <- get_common_allele_counts(system.file("extdata", "output_allele_freqs.dat", 
 #' package = "demonanalysis", mustWork = TRUE))
-#' plot_common_allele_counts(df1)
+#' plot_common_allele_counts(hist1)
 get_common_allele_counts <- function(file, generation = NA) {
   df <- readLines(file)
   df <- strsplit(df, "\t")
@@ -210,33 +210,29 @@ get_common_allele_counts <- function(file, generation = NA) {
   if(is.na(generation)) generation <- max(gens_list)
   freqs_vector <- df[[which(gens_list == generation)]]
   freqs_vector <- freqs_vector[-1] # exclude the first entry, which is Generation
-  t1 <- as.data.frame(table(freqs_vector))
-  t1$freqs_vector <- as.numeric(levels(t1$freqs_vector))
-  colnames(t1) <- c("allele_frequency", "count")
-  return(t1)
+  return(hist(freqs_vector, breaks = seq(0, 1, length = 100), plot = FALSE))
 }
 
 #' Plot counts of variant allele frequencies for the most common alleles
 #' 
-#' @param df dataframe with columns named "allele_frequency" and "count"
+#' @param hist histogram
 #' 
 #' @return plot
 #' 
 #' @export
 #' 
 #' @examples
-#' df1 <- get_common_allele_counts(system.file("extdata", "output_allele_freqs.dat", 
+#' hist1 <- get_common_allele_counts(system.file("extdata", "output_allele_freqs.dat", 
 #' package = "demonanalysis", mustWork = TRUE))
-#' plot_common_allele_counts(df1)
-plot_common_allele_counts <- function(df) {
-  plot(count ~ allele_frequency, data = df, xlim = c(0, 1), ylim = c(0, max(count)), type = "h", 
-       xlab = "allele frequency", ylab = "count")
+#' plot_common_allele_counts(hist1)
+plot_common_allele_counts <- function(hist) {
+  plot(hist, xlim = c(0, 1), xlab = "allele frequency", ylab = "count", main = "")
   abline(v = 0.1, lty = 2, col = "red")
 }
 
 #' Plot a histogram of all variant allele frequencies
 #' 
-#' @param df name of file containing lists of genotype sizes
+#' @param df name of dataframe containing lists of genotype sizes
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' 
 #' @return plot displyed on screen
@@ -423,10 +419,21 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
   output_allele_hist <- read_delim(paste0(path, "output_allele_hist.dat"), "\t", trim_ws = TRUE)
-  output_allele_cum_dist <- read_delim(paste0(path, "output_allele_cum_dist.dat"), "\t", trim_ws = TRUE)
-  hist1 <- get_genotype_sizes_hist(paste0(path, "genotypes.dat"))
-  df1 <- get_common_allele_counts(paste0(path, "output_allele_freqs.dat"))
+  output_driver_allele_hist <- read_delim(paste0(path, "output_driver_allele_hist.dat"), "\t", trim_ws = TRUE)
+  output_allele_hist$Density <- output_allele_hist$Density + output_driver_allele_hist$Density
   
+  output_allele_cum_dist <- read_delim(paste0(path, "output_allele_cum_dist.dat"), "\t", trim_ws = TRUE)
+  output_driver_allele_cum_dist <- read_delim(paste0(path, "output_driver_allele_cum_dist.dat"), "\t", trim_ws = TRUE)
+  output_allele_cum_dist$CumulativeCount <- output_allele_cum_dist$CumulativeCount + output_driver_allele_cum_dist$CumulativeCount
+  
+  hist1 <- get_genotype_sizes_hist(paste0(path, "genotypes.dat"))
+  
+  hist_alleles <- get_common_allele_counts(paste0(path, "output_allele_freqs.dat"))
+  hist_driver_alleles <- get_common_allele_counts(paste0(path, "output_driver_allele_freqs.dat"))
+  hist_alleles$counts <- hist_alleles$counts + hist_driver_alleles$counts
+  hist_alleles$density <- hist_alleles$density + hist_driver_alleles$density
+  
+  df1 <- data.frame(freqs = hist_alleles$mids, count = hist_alleles$counts)
   div_alleles <- round(quadratic_diversity(df1, 0.025), 2)
   
   if(!is.na(output_filename) & !is.na(output_dir)) {
@@ -442,7 +449,7 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   plot_allele_cum_dist(output_allele_cum_dist)
   plot_genotype_sizes_hist(hist1, xmax)
   plot_first_inc_moment(hist1, xmax)
-  plot_common_allele_counts(df1)
+  plot_common_allele_counts(hist_alleles)
   text(1, 0.9 * max(df1$count), paste0("diversity = ", div_alleles), pos = 2)
   plot_driver_genotype_freq_hist(paste0(path, "driver_phylo.dat"))
   
