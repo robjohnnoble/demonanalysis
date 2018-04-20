@@ -205,7 +205,10 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
 #' @examples
 #' plot_allele_hist(output_allele_hist)
 plot_allele_hist <- function(df, generation = NA) {
-  if(!is.na(generation)) df <- filter(df, Generation == generation)
+  if("Generation" %in% colnames(df)) {
+    if(!is.na(generation)) generation <- max(df$Generation)
+    df <- filter(df, Generation == generation)
+  }
   ncol <- dim(df)[2]
   colnames(df)[(ncol - 1):ncol] <- c("Frequency", "Density")
   plot(log10(Density) ~ qlogis(Frequency), data = df, 
@@ -237,7 +240,10 @@ plot_allele_hist <- function(df, generation = NA) {
 #' @examples
 #' plot_allele_cum_dist(output_allele_cum_dist)
 plot_allele_cum_dist <- function(df, generation = NA) {
-  if(!is.na(generation)) df <- filter(df, Generation == generation)
+  if("Generation" %in% colnames(df)) {
+    if(!is.na(generation)) generation <- max(df$Generation)
+    df <- filter(df, Generation == generation)
+  }
   ncol <- dim(df)[2]
   colnames(df)[(ncol - 1):ncol] <- c("InverseFrequency", "CumulativeCount")
   plot(CumulativeCount ~ InverseFrequency, data = df,
