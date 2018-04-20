@@ -467,21 +467,21 @@ final_error_message <- function(input_dir, adjust = 0) {
   return(res[length(res) - abs(adjust)])
 }
 
-#' Return the final line of every error log in a batch of simulations.
+#' Return the final line (or an earlier line) of every error log in a batch of simulations.
 #' 
 #' @param input_dir base input directory name
+#' @param adjust number of lines prior to the final line (default 0)
 #' 
-#' @return final line of each error log
+#' @return one line from each error log
 #' 
 #' @export
-all_statuses <- function(input_dir) {
+all_statuses <- function(input_dir, adjust = 0) {
   pars <- parameter_names_and_values(input_dir)$name
   final_values <- parameter_names_and_values(input_dir)$final_value
   
   each_msg <- function(x) {
     full_dir <- make_dir(input_dir, pars, x)
-    msg <- final_error_message(full_dir)
-    if(!identical(msg, character(0))) if(msg == "Exit code 0") res <- final_error_message(full_dir)
+    return(final_error_message(full_dir, adjust))
   }
   apply_combinations(final_values, each_msg)
 }

@@ -2,16 +2,18 @@
 % Please edit documentation in R/demonanalysis.R
 \name{all_statuses}
 \alias{all_statuses}
-\title{Return the final line of every error log in a batch of simulations.}
+\title{Return the final line (or an earlier line) of every error log in a batch of simulations.}
 \usage{
-all_statuses(input_dir)
+all_statuses(input_dir, adjust = 0)
 }
 \arguments{
 \item{input_dir}{base input directory name}
+
+\item{adjust}{number of lines prior to the final line (default 0)}
 }
 \value{
-final line of each error log
+one line from each error log
 }
 \description{
-Return the final line of every error log in a batch of simulations.
+Return the final line (or an earlier line) of every error log in a batch of simulations.
 }

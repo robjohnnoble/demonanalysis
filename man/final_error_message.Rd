@@ -19,4 +19,5 @@ Return the final line (or an earlier line) of an error log of a simulation
 }
 \examples{
 final_error_message(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
+final_error_message(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 1)
 }
