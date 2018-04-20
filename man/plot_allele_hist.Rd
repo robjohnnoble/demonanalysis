@@ -2,12 +2,12 @@
 % Please edit documentation in R/demonanalysis.R
 \name{plot_allele_hist}
 \alias{plot_allele_hist}
-\title{Plot a histogram of variant allele frequencies}
+\title{Plot a histogram of all variant allele frequencies}
 \usage{
 plot_allele_hist(df, generation = NA)
 }
 \arguments{
-\item{df}{data frame containing "frequency" and "density" columns}
+\item{df}{name of file containing lists of genotype sizes}
 
 \item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 }
@@ -15,7 +15,7 @@ plot_allele_hist(df, generation = NA)
 plot displyed on screen
 }
 \description{
-Plot a histogram of variant allele frequencies
+Plot a histogram of all variant allele frequencies
 }
 \examples{
 plot_allele_hist(output_allele_hist)

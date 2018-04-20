@@ -4,10 +4,12 @@
 \alias{get_genotype_sizes_hist}
 \title{Get a histogram of genotype sizes}
 \usage{
-get_genotype_sizes_hist(file)
+get_genotype_sizes_hist(file, generation = NA)
 }
 \arguments{
 \item{file}{name of file containing lists of genotype sizes}
+
+\item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 }
 \value{
 histogram object
