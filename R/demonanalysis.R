@@ -300,7 +300,7 @@ plot_driver_genotype_freq_hist <- function(file, generation = NA) {
   phylo <- filter(phylo, CellsPerSample == -1, Generation == generation, Identity > 0)
   pop_df <- get_population_df(phylo)
   freqs <- pop_df$Population / pop_df$NumCells
-  freqs <- freqs[which(freqs > 0)]
+  freqs <- freqs[which(freqs > 0.1)]
   t1 <- as.data.frame(table(freqs))
   t1$freqs <- as.numeric(levels(t1$freqs))
   plot(Freq ~ freqs, data = t1, xlim = c(0.1, 1), type = "h", xlab = "driver genotype frequency", ylab = "count")
