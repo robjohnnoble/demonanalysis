@@ -226,3 +226,32 @@ geno_dist <- function(pop_df, generation = NA) {
   dist <- sort(pop_subdf$Frequency)
   return(dist)
 }
+
+#' Rao's quadratic diversity, using a binary distance measure, converted to the effective number of species
+#' 
+#' @param df Dataframe with two columns containing trait values and their frequencies or abundancies
+#' @param sigma Cutoff for considering two trait values to be identical
+#' 
+#' @return effective number of species
+#' 
+#' @export
+#' 
+#' @examples
+#' df <- data.frame(value = 1:5, count = 1:5)
+#' quadratic_diversity(df, 1)
+quadratic_diversity <- function(df, sigma) {
+  colnames(df) <- c("trait", "freq")
+  
+  df <- filter(df, freq > 0)
+  n <- length(df$freq)
+  if(n == 0) return(NA)
+  
+  df$freq <- df$freq / sum(df$freq)
+  
+  sum <- 0
+  for(i in 1:n) for(j in 1:n) {
+    d <- 1 - (abs(df$trait[j] - df$trait[i]) <= sigma)
+    sum <- sum + d * df$freq[i] * df$freq[j]
+  }
+  return(1 / (1 - sum))
+}

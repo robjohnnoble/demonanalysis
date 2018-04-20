@@ -414,6 +414,7 @@ plot_first_inc_moment <- function(hist, xmax = 1E4) {
 #' @importFrom grDevices pdf
 #' @importFrom grDevices png
 #' @importFrom graphics par
+#' @importFrom graphics text
 #' 
 #' @examples
 #' plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), xmax = 50)
@@ -425,6 +426,8 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   output_allele_cum_dist <- read_delim(paste0(path, "output_allele_cum_dist.dat"), "\t", trim_ws = TRUE)
   hist1 <- get_genotype_sizes_hist(paste0(path, "genotypes.dat"))
   df1 <- get_common_allele_counts(paste0(path, "output_allele_freqs.dat"))
+  
+  div_alleles <- round(quadratic_diversity(df1, 0.025), 2)
   
   if(!is.na(output_filename) & !is.na(output_dir)) {
     if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 600, height = 900, res = 100)
@@ -440,6 +443,7 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   plot_genotype_sizes_hist(hist1, xmax)
   plot_first_inc_moment(hist1, xmax)
   plot_common_allele_counts(df1)
+  text(1, 0.9 * max(df1$count), paste0("diversity = ", div_alleles), pos = 2)
   plot_driver_genotype_freq_hist(paste0(path, "driver_phylo.dat"))
   
   if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
