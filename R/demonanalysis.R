@@ -447,22 +447,24 @@ final_generation <- function(input_dir) {
   return(val[[1]][1])
 }
 
-#' Return the final line of an error log of a simulation
+#' Return the final line (or an earlier line) of an error log of a simulation
 #' 
 #' @param input_dir directory name
+#' @param adjust number of lines prior to the final line (default 0)
 #' 
-#' @return final line of error log
+#' @return line from error log file
 #' 
 #' @importFrom readr read_lines
 #' @export
 #' 
 #' @examples
 #' final_error_message(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-final_error_message <- function(input_dir) {
+#' final_error_message(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 1)
+final_error_message <- function(input_dir, adjust = 0) {
   if(substr(input_dir, nchar(input_dir), nchar(input_dir)) == "/") input_dir <- substr(input_dir, 1, nchar(input_dir) - 1)
   
   res <- read_lines(paste0(input_dir, "/error_log.dat"))
-  return(res[length(res)])
+  return(res[length(res) - abs(adjust)])
 }
 
 #' Return the final line of every error log in a batch of simulations.

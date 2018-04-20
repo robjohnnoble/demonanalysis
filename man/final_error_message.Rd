@@ -2,18 +2,20 @@
 % Please edit documentation in R/demonanalysis.R
 \name{final_error_message}
 \alias{final_error_message}
-\title{Return the final line of an error log of a simulation}
+\title{Return the final line (or an earlier line) of an error log of a simulation}
 \usage{
-final_error_message(input_dir)
+final_error_message(input_dir, adjust = 0)
 }
 \arguments{
 \item{input_dir}{directory name}
+
+\item{adjust}{number of lines prior to the final line (default 0)}
 }
 \value{
-final line of error log
+line from error log file
 }
 \description{
-Return the final line of an error log of a simulation
+Return the final line (or an earlier line) of an error log of a simulation
 }
 \examples{
 final_error_message(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
