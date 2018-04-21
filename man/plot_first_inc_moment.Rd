@@ -19,6 +19,6 @@ Plot first incomplete moment of genotype sizes
 }
 \examples{
 hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
-package = "demonanalysis", mustWork = TRUE))
+package = "demonanalysis", mustWork = TRUE), xmax = 50)
 plot_first_inc_moment(hist1, xmax = 50)
 }

@@ -5,7 +5,7 @@
 \title{Plot a set of charts representing allele frequencies and genotype sizes}
 \usage{
 plot_all_charts(path, output_filename = NA, file_type = "png",
-  output_dir = NA, xmax = 10000)
+  output_dir = NA, xmax = 10000, generation = NA)
 }
 \arguments{
 \item{path}{folder containing the input files}
@@ -17,6 +17,8 @@ plot_all_charts(path, output_filename = NA, file_type = "png",
 \item{output_dir}{folder in which to save the image file; if NA then plots are displayed on screen instead}
 
 \item{xmax}{maximum limit of x-axis in genotype size plots}
+
+\item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 }
 \value{
 plot displyed on screen

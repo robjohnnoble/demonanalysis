@@ -4,12 +4,10 @@
 \alias{plot_driver_genotype_freq_hist}
 \title{Plot a histogram of driver genotype frequencies for the most common driver genotypes}
 \usage{
-plot_driver_genotype_freq_hist(file, generation = NA)
+plot_driver_genotype_freq_hist(hist)
 }
 \arguments{
-\item{file}{name of "phylo" file}
-
-\item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
+\item{hist}{histogram}
 }
 \value{
 plot displyed on screen
@@ -18,6 +16,7 @@ plot displyed on screen
 Plot a histogram of driver genotype frequencies for the most common driver genotypes
 }
 \examples{
-plot_driver_genotype_freq_hist(system.file("extdata", "driver_phylo.dat", 
-package = "demonanalysis", mustWork = TRUE))
+hist1 <- get_genotype_sizes_hist(system.file("extdata", "driver_genotypes.dat", 
+package = "demonanalysis", mustWork = TRUE), xmax = NA, freqs = TRUE)
+plot_driver_genotype_freq_hist(hist1)
 }

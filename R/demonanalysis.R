@@ -30,6 +30,10 @@ apply_combinations <- function(vec, fn, ...){
 #' image_df <- image_df_from_grid_file(system.file("extdata", 
 #' "output_passengersgrid.dat", package = "demonanalysis", mustWork = TRUE))
 image_df_from_grid_file <- function(file, trim = -1) {
+  if(!file.exists(file)) {
+    warning(paste0(file, " not found"))
+    return(NA)
+  }
   res <- read_delim(file, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
   res <- data.matrix(res) # data frame to matrix
   res <- res[ , -ncol(res)] # drop extraneous columns
@@ -67,6 +71,10 @@ image_df_from_grid_file <- function(file, trim = -1) {
 #' Muller_df <- muller_df_from_file(system.file("extdata", 
 #' "driver_phylo.dat", package = "demonanalysis", mustWork = TRUE))
 muller_df_from_file <- function(file) {
+  if(!file.exists(file)) {
+    warning(paste0(file, " not found"))
+    return(NA)
+  }
   phylo <- read_delim(file, "\t", escape_double = FALSE, trim_ws = TRUE)
   phylo <- filter(phylo, CellsPerSample == -1)
   edges <- get_edges(phylo)
@@ -96,6 +104,7 @@ muller_df_from_file <- function(file) {
 #' "output_passengersgrid.dat", package = "demonanalysis", mustWork = TRUE))
 #' grid_plot(image_df)
 grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FALSE, legend_title = "") {
+  if(length(image_df) == 1) return(ggplot(data.frame()) + theme_classic())
   h2 <- ggplot(image_df, aes(x, y, fill = z)) + 
     geom_raster() +
     theme(legend.position = ifelse(add_legend, "right", "none")) + 
@@ -189,12 +198,13 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
   if(!is.na(output_filename)) print("Saved the plot", quote = FALSE)
 }
 
-#' Get histogram of variant allele frequencies for the most common alleles
+#' Get histogram or dataframe of variant allele frequencies for the most common alleles
 #' 
 #' @param file name of file containing lists of allele frequencies
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
+#' @param output either "hist" to return a histogram or "df" to return a dataframe
 #' 
-#' @return histogram
+#' @return histogram or dataframe
 #' 
 #' @export
 #' 
@@ -202,7 +212,11 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
 #' hist1 <- get_common_allele_counts(system.file("extdata", "output_allele_freqs.dat", 
 #' package = "demonanalysis", mustWork = TRUE))
 #' plot_common_allele_counts(hist1)
-get_common_allele_counts <- function(file, generation = NA) {
+get_common_allele_counts <- function(file, generation = NA, output = "hist") {
+  if(!file.exists(file)) {
+    warning(paste0(file, " not found"))
+    return(NA)
+  }
   df <- readLines(file)
   df <- strsplit(df, "\t")
   df <- lapply(df, as.numeric)
@@ -210,7 +224,13 @@ get_common_allele_counts <- function(file, generation = NA) {
   if(is.na(generation)) generation <- max(gens_list)
   freqs_vector <- df[[which(gens_list == generation)]]
   freqs_vector <- freqs_vector[-1] # exclude the first entry, which is Generation
-  return(hist(freqs_vector, breaks = seq(0, 1, length = 100), plot = FALSE))
+  
+  if(output == "hist") return(hist(freqs_vector, breaks = seq(0, 1, length = 100), plot = FALSE))
+  
+  t1 <- as.data.frame(table(freqs_vector))
+  t1$freqs_vector <- as.numeric(levels(t1$freqs_vector))
+  colnames(t1) <- c("allele_frequency", "count")
+  return(t1)
 }
 
 #' Plot counts of variant allele frequencies for the most common alleles
@@ -226,6 +246,10 @@ get_common_allele_counts <- function(file, generation = NA) {
 #' package = "demonanalysis", mustWork = TRUE))
 #' plot_common_allele_counts(hist1)
 plot_common_allele_counts <- function(hist) {
+  if(length(hist) == 1) {
+    plot(0, type = 'n', axes = FALSE, ann = FALSE)
+    return(NA)
+  }
   plot(hist, xlim = c(0, 1), xlab = "allele frequency", ylab = "count", main = "")
   abline(v = 0.1, lty = 2, col = "red")
 }
@@ -246,6 +270,10 @@ plot_common_allele_counts <- function(hist) {
 #' @examples
 #' plot_allele_hist(output_allele_hist)
 plot_allele_hist <- function(df, generation = NA) {
+  if(length(df) == 1) {
+    plot(0, type = 'n', axes = FALSE, ann = FALSE)
+    return(NA)
+  }
   if("Generation" %in% colnames(df)) {
     if(is.na(generation)) generation <- max(df$Generation)
     df <- filter(df, Generation == generation)
@@ -281,6 +309,10 @@ plot_allele_hist <- function(df, generation = NA) {
 #' @examples
 #' plot_allele_cum_dist(output_allele_cum_dist)
 plot_allele_cum_dist <- function(df, generation = NA) {
+  if(length(df) == 1) {
+    plot(0, type = 'n', axes = FALSE, ann = FALSE)
+    return(NA)
+  }
   if("Generation" %in% colnames(df)) {
     if(is.na(generation)) generation <- max(df$Generation)
     df <- filter(df, Generation == generation)
@@ -297,8 +329,7 @@ plot_allele_cum_dist <- function(df, generation = NA) {
 
 #' Plot a histogram of driver genotype frequencies for the most common driver genotypes
 #' 
-#' @param file name of "phylo" file
-#' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
+#' @param hist histogram
 #' 
 #' @return plot displyed on screen
 #' 
@@ -306,25 +337,23 @@ plot_allele_cum_dist <- function(df, generation = NA) {
 #' @export
 #' 
 #' @examples
-#' plot_driver_genotype_freq_hist(system.file("extdata", "driver_phylo.dat", 
-#' package = "demonanalysis", mustWork = TRUE))
-plot_driver_genotype_freq_hist <- function(file, generation = NA) {
-  phylo <- read_delim(file, "\t", escape_double = FALSE, trim_ws = TRUE)
-  if(is.na(generation)) generation <- max(phylo$Generation)
-  phylo <- filter(phylo, CellsPerSample == -1, Generation == generation, Identity > 0)
-  pop_df <- get_population_df(phylo)
-  freqs <- pop_df$Population / pop_df$NumCells
-  freqs <- freqs[which(freqs > 0)]
-  t1 <- as.data.frame(table(freqs))
-  t1$freqs <- as.numeric(levels(t1$freqs))
-  plot(Freq ~ freqs, data = t1, xlim = c(0, 1), ylim = c(0, max(Freq)), 
-       type = "h", xlab = "driver genotype frequency", ylab = "count")
+#' hist1 <- get_genotype_sizes_hist(system.file("extdata", "driver_genotypes.dat", 
+#' package = "demonanalysis", mustWork = TRUE), xmax = NA, freqs = TRUE)
+#' plot_driver_genotype_freq_hist(hist1)
+plot_driver_genotype_freq_hist <- function(hist) {
+  if(length(hist) == 1) {
+    plot(0, type = 'n', axes = FALSE, ann = FALSE)
+    return(NA)
+  }
+  plot(hist, xlim = c(0, 1), xlab = "driver genotype frequency", ylab = "count", main = "")
 }
 
 #' Get a histogram of genotype sizes
 #' 
 #' @param file name of file containing lists of genotype sizes
+#' @param xmax maximum genotype size (ignored if freqs is TRUE); default NA corresponds to population size
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
+#' @param freqs if TRUE then the histogram will be for frequencies, not abundancies
 #' 
 #' @return histogram object
 #' 
@@ -334,9 +363,13 @@ plot_driver_genotype_freq_hist <- function(file, generation = NA) {
 #' 
 #' @examples
 #' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
-#' package = "demonanalysis", mustWork = TRUE))
+#' package = "demonanalysis", mustWork = TRUE), xmax = 50)
 #' plot_genotype_sizes_hist(hist1, xmax = 50)
-get_genotype_sizes_hist <- function(file, generation = NA) {
+get_genotype_sizes_hist <- function(file, xmax = NA, generation = NA, freqs = FALSE) {
+  if(!file.exists(file)) {
+    warning(paste0(file, " not found"))
+    return(NA)
+  }
   df <- readLines(file)
   df <- strsplit(df, "\t")
   df <- lapply(df, as.numeric)
@@ -344,7 +377,12 @@ get_genotype_sizes_hist <- function(file, generation = NA) {
   if(is.na(generation)) generation <- max(gens_list)
   geno_vector <- df[[which(gens_list == generation)]]
   geno_vector <- geno_vector[-1] # exclude the first entry, which is Generation
-  hist1 <- hist(geno_vector, plot = FALSE, breaks = 50)
+  if(is.na(xmax)) xmax <- sum(geno_vector)
+  if(freqs) {
+    geno_vector <- geno_vector / sum(geno_vector)
+    hist1 <- hist(geno_vector, plot = FALSE, breaks = seq(0, 1, length = 100))
+  }
+  else hist1 <- hist(geno_vector, plot = FALSE, breaks = seq(0, xmax, length = 100))
   return(hist1)
 }
 
@@ -360,9 +398,13 @@ get_genotype_sizes_hist <- function(file, generation = NA) {
 #' 
 #' @examples
 #' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
-#' package = "demonanalysis", mustWork = TRUE))
+#' package = "demonanalysis", mustWork = TRUE), xmax = 50)
 #' plot_genotype_sizes_hist(hist1, xmax = 50)
 plot_genotype_sizes_hist <- function(hist, xmax = 1E4) {
+  if(length(hist) == 1) {
+    plot(0, type = 'n', axes = FALSE, ann = FALSE)
+    return(NA)
+  }
   plot(hist$density / sum(hist$density) ~ hist$mids, log = "y", 
        xlim = c(0, xmax), ylim = c(1E-5, 1), 
        xlab = "genotype size", ylab = "frequency")
@@ -379,9 +421,13 @@ plot_genotype_sizes_hist <- function(hist, xmax = 1E4) {
 #' 
 #' @examples
 #' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
-#' package = "demonanalysis", mustWork = TRUE))
+#' package = "demonanalysis", mustWork = TRUE), xmax = 50)
 #' plot_first_inc_moment(hist1, xmax = 50)
 plot_first_inc_moment <- function(hist, xmax = 1E4) { 
+  if(length(hist) == 1) {
+    plot(0, type = 'n', axes = FALSE, ann = FALSE)
+    return(NA)
+  }
   first_inc_moment <- function(sizes, counts, n) {
     mean_size <- sum(sizes * counts)
     sum1 <- sum(sizes[which(sizes >= n)] * counts[which(sizes >= n)])
@@ -400,6 +446,7 @@ plot_first_inc_moment <- function(hist, xmax = 1E4) {
 #' @param output_filename name of output image file
 #' @param file_type either "pdf" or "png" (other values default to "pdf")
 #' @param xmax maximum limit of x-axis in genotype size plots
+#' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' 
 #' @return plot displyed on screen
 #' 
@@ -414,7 +461,7 @@ plot_first_inc_moment <- function(hist, xmax = 1E4) {
 #' 
 #' @examples
 #' plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), xmax = 50)
-plot_all_charts <- function(path, output_filename = NA, file_type = "png", output_dir = NA, xmax = 1E4) {
+plot_all_charts <- function(path, output_filename = NA, file_type = "png", output_dir = NA, xmax = 1E4, generation = NA) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
@@ -426,15 +473,18 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   output_driver_allele_cum_dist <- read_delim(paste0(path, "output_driver_allele_cum_dist.dat"), "\t", trim_ws = TRUE)
   output_allele_cum_dist$CumulativeCount <- output_allele_cum_dist$CumulativeCount + output_driver_allele_cum_dist$CumulativeCount
   
-  hist1 <- get_genotype_sizes_hist(paste0(path, "genotypes.dat"))
+  hist_geno <- get_genotype_sizes_hist(paste0(path, "genotypes.dat"), xmax, generation = generation)
   
-  hist_alleles <- get_common_allele_counts(paste0(path, "output_allele_freqs.dat"))
-  hist_driver_alleles <- get_common_allele_counts(paste0(path, "output_driver_allele_freqs.dat"))
+  hist_driver_geno <- get_genotype_sizes_hist(paste0(path, "driver_genotypes.dat"), xmax = NA, freqs = TRUE, generation = generation)
+  
+  hist_alleles <- get_common_allele_counts(paste0(path, "output_allele_freqs.dat"), generation = generation)
+  hist_driver_alleles <- get_common_allele_counts(paste0(path, "output_driver_allele_freqs.dat"), generation = generation)
   hist_alleles$counts <- hist_alleles$counts + hist_driver_alleles$counts
   hist_alleles$density <- hist_alleles$density + hist_driver_alleles$density
   
-  df1 <- data.frame(freqs = hist_alleles$mids, count = hist_alleles$counts)
-  div_alleles <- round(quadratic_diversity(df1, 0.025), 2)
+  df1 <- get_common_allele_counts(paste0(path, "output_allele_freqs.dat"), output = "df", generation = generation)
+  df2 <- get_common_allele_counts(paste0(path, "output_driver_allele_freqs.dat"), output = "df", generation = generation)
+  div_alleles <- round(quadratic_diversity(rbind(df1, df2), 0.025), 2)
   
   if(!is.na(output_filename) & !is.na(output_dir)) {
     if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 600, height = 900, res = 100)
@@ -445,13 +495,13 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   par(mgp = c(2.2, 1, 0))
   par(mar = c(3.8, 3.8, 0.8, 0.8))
   
-  plot_allele_hist(output_allele_hist)
-  plot_allele_cum_dist(output_allele_cum_dist)
-  plot_genotype_sizes_hist(hist1, xmax)
-  plot_first_inc_moment(hist1, xmax)
+  plot_allele_hist(output_allele_hist, generation = generation)
+  plot_allele_cum_dist(output_allele_cum_dist, generation = generation)
+  plot_genotype_sizes_hist(hist_geno, xmax)
+  plot_first_inc_moment(hist_geno, xmax)
   plot_common_allele_counts(hist_alleles)
   text(1, 0.9 * max(df1$count), paste0("diversity = ", div_alleles), pos = 2)
-  plot_driver_genotype_freq_hist(paste0(path, "driver_phylo.dat"))
+  plot_driver_genotype_freq_hist(hist_driver_geno)
   
   if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
@@ -467,6 +517,10 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
 #' @examples
 #' plot_mutation_waves(output)
 plot_mutation_waves <- function(df) {
+  if(length(df) == 1) {
+    plot(0, type = 'n', axes = FALSE, ann = FALSE)
+    return(NA)
+  }
   start_ind <- which(colnames(df) == "CellsWith1Drivers")
   end_ind <- dim(df)[2]
   plot(CellsWith0Drivers ~ Generation, data = df, type = "l", 

@@ -4,12 +4,16 @@
 \alias{get_genotype_sizes_hist}
 \title{Get a histogram of genotype sizes}
 \usage{
-get_genotype_sizes_hist(file, generation = NA)
+get_genotype_sizes_hist(file, xmax = NA, generation = NA, freqs = FALSE)
 }
 \arguments{
 \item{file}{name of file containing lists of genotype sizes}
 
+\item{xmax}{maximum genotype size (ignored if freqs is TRUE); default NA corresponds to population size}
+
 \item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
+
+\item{freqs}{if TRUE then the histogram will be for frequencies, not abundancies}
 }
 \value{
 histogram object
@@ -19,6 +23,6 @@ Get a histogram of genotype sizes
 }
 \examples{
 hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
-package = "demonanalysis", mustWork = TRUE))
+package = "demonanalysis", mustWork = TRUE), xmax = 50)
 plot_genotype_sizes_hist(hist1, xmax = 50)
 }
