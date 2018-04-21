@@ -465,13 +465,24 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
-  output_allele_hist <- read_delim(paste0(path, "output_allele_hist.dat"), "\t", trim_ws = TRUE)
-  output_driver_allele_hist <- read_delim(paste0(path, "output_driver_allele_hist.dat"), "\t", trim_ws = TRUE)
-  output_allele_hist$Density <- output_allele_hist$Density + output_driver_allele_hist$Density
+  read_special <- function(file) {
+    file <- paste0(path, file)
+    if(file.exists(file)) out <- read_delim(file, "\t", trim_ws = TRUE)
+    else out <- NA
+    return(out)
+  }
   
-  output_allele_cum_dist <- read_delim(paste0(path, "output_allele_cum_dist.dat"), "\t", trim_ws = TRUE)
-  output_driver_allele_cum_dist <- read_delim(paste0(path, "output_driver_allele_cum_dist.dat"), "\t", trim_ws = TRUE)
-  output_allele_cum_dist$CumulativeCount <- output_allele_cum_dist$CumulativeCount + output_driver_allele_cum_dist$CumulativeCount
+  output_allele_hist <- read_special("output_allele_hist.dat")
+  output_driver_allele_hist <- read_special("output_driver_allele_hist.dat")
+  if(length(output_allele_hist) > 1 & length(output_driver_allele_hist) > 1) {
+    output_allele_hist$Density <- output_allele_hist$Density + output_driver_allele_hist$Density
+  }
+  
+  output_allele_cum_dist <- read_special("output_allele_cum_dist.dat")
+  output_driver_allele_cum_dist <- read_special("output_driver_allele_cum_dist.dat")
+  if(length(output_allele_cum_dist) > 1 & length(output_driver_allele_cum_dist) > 1) {
+    output_allele_cum_dist$CumulativeCount <- output_allele_cum_dist$CumulativeCount + output_driver_allele_cum_dist$CumulativeCount
+  }
   
   hist_geno <- get_genotype_sizes_hist(paste0(path, "genotypes.dat"), xmax, generation = generation)
   
@@ -479,12 +490,17 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   
   hist_alleles <- get_common_allele_counts(paste0(path, "output_allele_freqs.dat"), generation = generation)
   hist_driver_alleles <- get_common_allele_counts(paste0(path, "output_driver_allele_freqs.dat"), generation = generation)
-  hist_alleles$counts <- hist_alleles$counts + hist_driver_alleles$counts
-  hist_alleles$density <- hist_alleles$density + hist_driver_alleles$density
+  if(length(hist_alleles) > 1 & length(hist_driver_alleles) > 1) {
+    hist_alleles$counts <- hist_alleles$counts + hist_driver_alleles$counts
+    hist_alleles$density <- hist_alleles$density + hist_driver_alleles$density
+  }
   
   df1 <- get_common_allele_counts(paste0(path, "output_allele_freqs.dat"), output = "df", generation = generation)
   df2 <- get_common_allele_counts(paste0(path, "output_driver_allele_freqs.dat"), output = "df", generation = generation)
-  div_alleles <- round(quadratic_diversity(rbind(df1, df2), 0.025), 2)
+  if(length(df1) > 1 & length(df2) > 1) {
+    div_alleles <- round(quadratic_diversity(rbind(df1, df2), 0.025), 2)
+  }
+  else div_alleles <- ""
   
   if(!is.na(output_filename) & !is.na(output_dir)) {
     if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 600, height = 900, res = 100)
@@ -500,7 +516,7 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   plot_genotype_sizes_hist(hist_geno, xmax)
   plot_first_inc_moment(hist_geno, xmax)
   plot_common_allele_counts(hist_alleles)
-  text(1, 0.9 * max(df1$count), paste0("diversity = ", div_alleles), pos = 2)
+  if(length(df1) > 1) text(1, 0.9 * max(df1$count), paste0("diversity = ", div_alleles), pos = 2)
   plot_driver_genotype_freq_hist(hist_driver_geno)
   
   if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
