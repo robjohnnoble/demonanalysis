@@ -2,23 +2,26 @@
 % Please edit documentation in R/demonanalysis.R
 \name{plot_first_inc_moment}
 \alias{plot_first_inc_moment}
-\title{Plot first incomplete moment of genotype sizes}
+\title{Plot first incomplete moment from frequency data}
 \usage{
-plot_first_inc_moment(hist, xmax = 10000)
+plot_first_inc_moment(sizes, counts, ...)
 }
 \arguments{
-\item{hist}{histogram of genotype sizes}
+\item{sizes}{for example, midpoints of a histogram}
 
-\item{xmax}{maximum limit of x-axis}
+\item{counts}{counts corresponding to the sizes}
+
+\item{...}{other parameters passed to plot}
 }
 \value{
 plot displyed on screen
 }
 \description{
-Plot first incomplete moment of genotype sizes
+Plot first incomplete moment from frequency data
 }
 \examples{
 hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
 package = "demonanalysis", mustWork = TRUE), xmax = 50)
-plot_first_inc_moment(hist1, xmax = 50)
+plot_first_inc_moment(hist1$mids, hist1$density, xlim = c(0, 50), ylim = c(1E-3, 1), 
+xlab = "genotype size", ylab = "first incomplete moment")
 }

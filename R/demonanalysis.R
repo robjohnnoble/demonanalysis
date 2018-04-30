@@ -410,10 +410,31 @@ plot_genotype_sizes_hist <- function(hist, xmax = 1E4) {
        xlab = "genotype size", ylab = "frequency")
 }
 
-#' Plot first incomplete moment of genotype sizes
+#' Get the first incomplete moment from frequency data
 #' 
-#' @param hist histogram of genotype sizes
-#' @param xmax maximum limit of x-axis
+#' @param sizes for example, midpoints of a histogram
+#' @param counts counts corresponding to the sizes
+#' @param threshold lower bound of sizes to include
+#' 
+#' @return the first incomplete moment
+#' 
+#' @export
+#' 
+#' @examples
+#' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
+#' package = "demonanalysis", mustWork = TRUE), xmax = 50)
+#' first_inc_moment(hist1$mids, hist1$density, 6)
+first_inc_moment <- function(sizes, counts, threshold) {
+  mean_size <- sum(sizes * counts)
+  sum1 <- sum(sizes[which(sizes >= threshold)] * counts[which(sizes >= threshold)])
+  return(1 / mean_size * sum1)
+}
+
+#' Plot first incomplete moment from frequency data
+#' 
+#' @param sizes for example, midpoints of a histogram
+#' @param counts counts corresponding to the sizes
+#' @param ... other parameters passed to plot
 #' 
 #' @return plot displyed on screen
 #' 
@@ -422,21 +443,15 @@ plot_genotype_sizes_hist <- function(hist, xmax = 1E4) {
 #' @examples
 #' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
 #' package = "demonanalysis", mustWork = TRUE), xmax = 50)
-#' plot_first_inc_moment(hist1, xmax = 50)
-plot_first_inc_moment <- function(hist, xmax = 1E4) { 
-  if(length(hist) == 1) {
+#' plot_first_inc_moment(hist1$mids, hist1$density, xlim = c(0, 50), ylim = c(1E-3, 1), 
+#' xlab = "genotype size", ylab = "first incomplete moment")
+plot_first_inc_moment <- function(sizes, counts, ...) { 
+  if(length(sizes) <= 1) {
     plot(0, type = 'n', axes = FALSE, ann = FALSE)
     return(NA)
   }
-  first_inc_moment <- function(sizes, counts, n) {
-    mean_size <- sum(sizes * counts)
-    sum1 <- sum(sizes[which(sizes >= n)] * counts[which(sizes >= n)])
-    return(1 / mean_size * sum1)
-  }
-  mom <- sapply(hist$mids, first_inc_moment, counts = hist$density, sizes = hist$mids)
-  plot(mom ~ hist$mids, log = "y", 
-       xlim = c(0, xmax), ylim = c(1E-3, 1), 
-       xlab = "genotype size", ylab = "first incomplete moment")
+  mom <- sapply(sizes, first_inc_moment, sizes = sizes, counts = counts)
+  plot(mom ~ sizes, log = "y", ...)
 }
 
 #' Plot a set of charts representing allele frequencies and genotype sizes
@@ -465,21 +480,20 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
-  read_special <- function(file) {
-    file <- paste0(path, file)
+  read_delim_special <- function(file) {
     if(file.exists(file)) out <- read_delim(file, "\t", trim_ws = TRUE)
     else out <- NA
     return(out)
   }
   
-  output_allele_hist <- read_special("output_allele_hist.dat")
-  output_driver_allele_hist <- read_special("output_driver_allele_hist.dat")
+  output_allele_hist <- read_delim_special(paste0(path, "output_allele_hist.dat"))
+  output_driver_allele_hist <- read_delim_special(paste0(path, "output_driver_allele_hist.dat"))
   if(length(output_allele_hist) > 1 & length(output_driver_allele_hist) > 1) {
     output_allele_hist$Density <- output_allele_hist$Density + output_driver_allele_hist$Density
   }
   
-  output_allele_cum_dist <- read_special("output_allele_cum_dist.dat")
-  output_driver_allele_cum_dist <- read_special("output_driver_allele_cum_dist.dat")
+  output_allele_cum_dist <- read_delim_special(paste0(path, "output_allele_cum_dist.dat"))
+  output_driver_allele_cum_dist <- read_delim_special(paste0(path, "output_driver_allele_cum_dist.dat"))
   if(length(output_allele_cum_dist) > 1 & length(output_driver_allele_cum_dist) > 1) {
     output_allele_cum_dist$CumulativeCount <- output_allele_cum_dist$CumulativeCount + output_driver_allele_cum_dist$CumulativeCount
   }
@@ -514,7 +528,7 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   plot_allele_hist(output_allele_hist, generation = generation)
   plot_allele_cum_dist(output_allele_cum_dist, generation = generation)
   plot_genotype_sizes_hist(hist_geno, xmax)
-  plot_first_inc_moment(hist_geno, xmax)
+  plot_first_inc_moment(hist_geno$mids, hist_geno$density, xlim = c(0, xmax), ylim = c(1E-3, 1), xlab = "genotype size", ylab = "first incomplete moment")
   plot_common_allele_counts(hist_alleles)
   if(length(df1) > 1) text(1, 0.9 * max(df1$count), paste0("diversity = ", div_alleles), pos = 2)
   plot_driver_genotype_freq_hist(hist_driver_geno)
