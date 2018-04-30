@@ -460,13 +460,14 @@ plot_first_inc_moment <- function(sizes, counts, ...) {
 #' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
 #' @param output_filename name of output image file
 #' @param file_type either "pdf" or "png" (other values default to "pdf")
-#' @param xmax maximum limit of x-axis in genotype size plots
+#' @param xmax maximum limit of x-axis in genotype size plots=
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' 
 #' @return plot displyed on screen
 #' 
 #' @export
 #' 
+#' @import dplyr
 #' @importFrom readr read_delim
 #' @importFrom grDevices dev.off
 #' @importFrom grDevices pdf
@@ -488,9 +489,12 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   
   output_allele_hist <- read_delim_special(paste0(path, "output_allele_hist.dat"))
   output_allele_cum_dist <- read_delim_special(paste0(path, "output_allele_cum_dist.dat"))
+  output_allele_hist_linear <- read_delim_special(paste0(path, "output_allele_hist_linear.dat"))
+  output_allele_hist_linear <- filter(output_allele_hist_linear, Generation == max(Generation))
+  hist_alleles <- get_common_allele_counts(paste0(path, "output_allele_freqs.dat"), generation = generation)
+  
   hist_geno <- get_genotype_sizes_hist(paste0(path, "genotypes.dat"), xmax, generation = generation)
   hist_driver_geno <- get_genotype_sizes_hist(paste0(path, "driver_genotypes.dat"), xmax = NA, freqs = TRUE, generation = generation)
-  hist_alleles <- get_common_allele_counts(paste0(path, "output_allele_freqs.dat"), generation = generation)
   
   df1 <- get_common_allele_counts(paste0(path, "output_allele_freqs.dat"), output = "df", generation = generation)
   if(length(df1) > 1) {
@@ -499,20 +503,26 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   else div_alleles <- ""
   
   if(!is.na(output_filename) & !is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 600, height = 900, res = 100)
-    else pdf(paste0(output_dir,output_filename,".pdf"), width = 6, height = 9)
+    if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 800, height = 600, res = 100)
+    else pdf(paste0(output_dir,output_filename,".pdf"), width = 8, height = 6)
   }
   
-  par(mfrow = c(3, 2))
+  par(mfrow = c(2, 4))
   par(mgp = c(2.2, 1, 0))
   par(mar = c(3.8, 3.8, 0.8, 0.8))
   
+  # allele frequencies:
   plot_allele_hist(output_allele_hist, generation = generation)
   plot_allele_cum_dist(output_allele_cum_dist, generation = generation)
-  plot_genotype_sizes_hist(hist_geno, xmax)
-  plot_first_inc_moment(hist_geno$mids, hist_geno$density, xlim = c(0, xmax), ylim = c(1E-3, 1), xlab = "genotype size", ylab = "first incomplete moment")
+  plot_first_inc_moment(output_allele_hist_linear$Frequency, output_allele_hist_linear$Count, xlim = c(0, 1), ylim = c(1E-6, 1), 
+                        xlab = "allele count", ylab = "first incomplete moment", type = "l")
   plot_common_allele_counts(hist_alleles)
   if(length(df1) > 1) text(1, 0.9 * max(df1$count), paste0("diversity = ", div_alleles), pos = 2)
+  
+  # genotype sizes:
+  plot_genotype_sizes_hist(hist_geno, xmax)
+  plot_first_inc_moment(hist_geno$mids, hist_geno$density, xlim = c(0, xmax), ylim = c(1E-3, 1), 
+                        xlab = "genotype size", ylab = "first incomplete moment")
   plot_driver_genotype_freq_hist(hist_driver_geno)
   
   if(!is.na(output_filename) & !is.na(output_dir)) dev.off()

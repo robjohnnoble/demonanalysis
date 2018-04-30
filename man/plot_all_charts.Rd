@@ -16,7 +16,7 @@ plot_all_charts(path, output_filename = NA, file_type = "png",
 
 \item{output_dir}{folder in which to save the image file; if NA then plots are displayed on screen instead}
 
-\item{xmax}{maximum limit of x-axis in genotype size plots}
+\item{xmax}{maximum limit of x-axis in genotype size plots=}
 
 \item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 }
