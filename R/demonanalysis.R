@@ -487,32 +487,14 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   }
   
   output_allele_hist <- read_delim_special(paste0(path, "output_allele_hist.dat"))
-  output_driver_allele_hist <- read_delim_special(paste0(path, "output_driver_allele_hist.dat"))
-  if(length(output_allele_hist) > 1 & length(output_driver_allele_hist) > 1) {
-    output_allele_hist$Density <- output_allele_hist$Density + output_driver_allele_hist$Density
-  }
-  
   output_allele_cum_dist <- read_delim_special(paste0(path, "output_allele_cum_dist.dat"))
-  output_driver_allele_cum_dist <- read_delim_special(paste0(path, "output_driver_allele_cum_dist.dat"))
-  if(length(output_allele_cum_dist) > 1 & length(output_driver_allele_cum_dist) > 1) {
-    output_allele_cum_dist$CumulativeCount <- output_allele_cum_dist$CumulativeCount + output_driver_allele_cum_dist$CumulativeCount
-  }
-  
   hist_geno <- get_genotype_sizes_hist(paste0(path, "genotypes.dat"), xmax, generation = generation)
-  
   hist_driver_geno <- get_genotype_sizes_hist(paste0(path, "driver_genotypes.dat"), xmax = NA, freqs = TRUE, generation = generation)
-  
   hist_alleles <- get_common_allele_counts(paste0(path, "output_allele_freqs.dat"), generation = generation)
-  hist_driver_alleles <- get_common_allele_counts(paste0(path, "output_driver_allele_freqs.dat"), generation = generation)
-  if(length(hist_alleles) > 1 & length(hist_driver_alleles) > 1) {
-    hist_alleles$counts <- hist_alleles$counts + hist_driver_alleles$counts
-    hist_alleles$density <- hist_alleles$density + hist_driver_alleles$density
-  }
   
   df1 <- get_common_allele_counts(paste0(path, "output_allele_freqs.dat"), output = "df", generation = generation)
-  df2 <- get_common_allele_counts(paste0(path, "output_driver_allele_freqs.dat"), output = "df", generation = generation)
-  if(length(df1) > 1 & length(df2) > 1) {
-    div_alleles <- round(quadratic_diversity(rbind(df1, df2), 0.025), 2)
+  if(length(df1) > 1) {
+    div_alleles <- round(quadratic_diversity(df1, 0.025), 2)
   }
   else div_alleles <- ""
   
