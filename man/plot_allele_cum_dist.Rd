@@ -4,10 +4,10 @@
 \alias{plot_allele_cum_dist}
 \title{Plot cumulative density of variant allele frequencies versus inverse allele frequency}
 \usage{
-plot_allele_cum_dist(df, generation = NA)
+plot_allele_cum_dist(file, generation = NA)
 }
 \arguments{
-\item{df}{data frame containing "inverse_frequency" and "cumulative_count" columns}
+\item{file}{file containing columns "Frequency" and "Count"}
 
 \item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 }
@@ -18,5 +18,6 @@ plot displyed on screen
 Plot cumulative density of variant allele frequencies versus inverse allele frequency
 }
 \examples{
-plot_allele_cum_dist(output_allele_cum_dist)
+plot_allele_cum_dist(system.file("extdata", "output_allele_counts.dat", 
+package = "demonanalysis", mustWork = TRUE))
 }

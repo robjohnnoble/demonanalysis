@@ -4,14 +4,24 @@
 \alias{create_plots_batch}
 \title{Create image files for every simulation in a batch}
 \usage{
-create_plots_batch(input_dir, output_dir = NA, type = "plot")
+create_plots_batch(input_dir, type = "plot", file_type = "png",
+  output_dir = NA, max_genotype_size = 10000, max_allele_count = NA,
+  generation = NA)
 }
 \arguments{
 \item{input_dir}{base input directory name}
 
+\item{type}{what type of images to create: "plot" or "chart" or c("plot", "chart")}
+
+\item{file_type}{either "pdf" or "png" (other values default to "pdf")}
+
 \item{output_dir}{folder in which to save the image files}
 
-\item{type}{what type of images to create: "plot" or "chart" or c("plot", "chart")}
+\item{max_genotype_size}{maximum limit of x-axis in genotype size plots}
+
+\item{max_allele_count}{maximum allele count (default NA corresponds to plotting frequencies, not counts)}
+
+\item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 }
 \value{
 a set of image files

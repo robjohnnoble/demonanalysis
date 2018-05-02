@@ -4,12 +4,14 @@
 \alias{plot_genotype_sizes_hist}
 \title{Plot a histogram of genotype sizes}
 \usage{
-plot_genotype_sizes_hist(hist, xmax = 10000)
+plot_genotype_sizes_hist(hist, xmax = 10000, ...)
 }
 \arguments{
 \item{hist}{histogram of genotype sizes}
 
 \item{xmax}{maximum limit of x-axis}
+
+\item{...}{other parameters passed to plot}
 }
 \value{
 plot displyed on screen
@@ -20,5 +22,5 @@ Plot a histogram of genotype sizes
 \examples{
 hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
 package = "demonanalysis", mustWork = TRUE), xmax = 50)
-plot_genotype_sizes_hist(hist1, xmax = 50)
+plot_genotype_sizes_hist(hist1, xmax = 50, xlab = "genotype size")
 }

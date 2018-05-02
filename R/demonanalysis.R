@@ -16,6 +16,23 @@ apply_combinations <- function(vec, fn, ...){
   apply(tmp, 1, fn, ...)
 }
 
+#' Attempt to read a tab-delimited file and return the contents, or NA if the file doesn't exist
+#' 
+#' @param file tab-delimited file
+#' 
+#' @return the contents, or NA if the file doesn't exist
+#' 
+#' @export
+#' 
+#' @examples
+#' read_delim_special(system.file("extdata", "output_allele_hist.dat", 
+#' package = "demonanalysis", mustWork = TRUE))
+read_delim_special <- function(file) {
+  if(file.exists(file)) out <- read_delim(file, "\t", trim_ws = TRUE)
+  else out <- NA
+  return(out)
+}
+
 #' Read a file containing grid states and process it into a dataframe for plotting.
 #' 
 #' @param file file name including path
@@ -114,11 +131,11 @@ grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FAL
           panel.background=element_blank(),panel.border=element_blank(),panel.grid.major=element_blank(),
           panel.grid.minor=element_blank(),plot.background=element_blank())
   if(discrete) {
-    if(!is.na(palette)) h2 <- h2 + scale_fill_manual(name = legend_title, values = palette) +
+    if(!is.na(palette[1])) h2 <- h2 + scale_fill_manual(name = legend_title, values = palette) +
       scale_color_manual(values = palette)
   }
   else {
-    if(is.na(palette)) {
+    if(is.na(palette[1])) {
       h2 <- h2 + scale_fill_distiller(name = legend_title, palette ="RdBu", direction = -1, na.value="white") + 
         scale_color_distiller(palette ="RdBu", na.value="white")
     }
@@ -198,93 +215,74 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
   if(!is.na(output_filename)) print("Saved the plot", quote = FALSE)
 }
 
-#' Get histogram or dataframe of variant allele frequencies for the most common alleles
+#' Plot counts of variant allele frequencies on linear scales
 #' 
-#' @param file name of file containing lists of allele frequencies
-#' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
-#' @param output either "hist" to return a histogram or "df" to return a dataframe
-#' 
-#' @return histogram or dataframe
-#' 
-#' @export
-#' 
-#' @examples
-#' hist1 <- get_common_allele_counts(system.file("extdata", "output_allele_freqs.dat", 
-#' package = "demonanalysis", mustWork = TRUE))
-#' plot_common_allele_counts(hist1)
-get_common_allele_counts <- function(file, generation = NA, output = "hist") {
-  if(!file.exists(file)) {
-    warning(paste0(file, " not found"))
-    return(NA)
-  }
-  df <- readLines(file)
-  df <- strsplit(df, "\t")
-  df <- lapply(df, as.numeric)
-  gens_list <- sapply(df, "[[", 1)
-  if(is.na(generation)) generation <- max(gens_list)
-  freqs_vector <- df[[which(gens_list == generation)]]
-  freqs_vector <- freqs_vector[-1] # exclude the first entry, which is Generation
-  
-  if(output == "hist") return(hist(freqs_vector, breaks = seq(0, 1, length = 100), plot = FALSE))
-  
-  t1 <- as.data.frame(table(freqs_vector))
-  t1$freqs_vector <- as.numeric(levels(t1$freqs_vector))
-  colnames(t1) <- c("allele_frequency", "count")
-  return(t1)
-}
-
-#' Plot counts of variant allele frequencies for the most common alleles
-#' 
-#' @param hist histogram
-#' 
-#' @return plot
-#' 
-#' @export
-#' 
-#' @examples
-#' hist1 <- get_common_allele_counts(system.file("extdata", "output_allele_freqs.dat", 
-#' package = "demonanalysis", mustWork = TRUE))
-#' plot_common_allele_counts(hist1)
-plot_common_allele_counts <- function(hist) {
-  if(length(hist) == 1) {
-    plot(0, type = 'n', axes = FALSE, ann = FALSE)
-    return(NA)
-  }
-  plot(hist, xlim = c(0, 1), xlab = "allele frequency", ylab = "count", main = "")
-  abline(v = 0.1, lty = 2, col = "red")
-}
-
-#' Plot a histogram of all variant allele frequencies
-#' 
-#' @param df name of dataframe containing lists of genotype sizes
+#' @param file file containing columns "Frequency" and "Count"
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' 
 #' @return plot displyed on screen
 #' 
 #' @export
+#' 
+#' @examples
+#' plot_common_allele_counts(system.file("extdata", "output_allele_counts.dat", 
+#' package = "demonanalysis", mustWork = TRUE))
+plot_common_allele_counts <- function(file, generation = NA) {
+  if(!file.exists(file)) {
+    warning(paste0(file, " not found"))
+    plot(0, type = 'n', axes = FALSE, ann = FALSE)
+    return(NA)
+  }
+  df <- read_delim_special(file)
+  if("Generation" %in% colnames(df)) {
+    if(is.na(generation)) generation <- max(df$Generation)
+    df <- filter(df, Generation == generation)
+  }
+  hist <- with(df, hist(rep(x = Frequency, times = Count), plot = FALSE, breaks = seq(0, 1, length = 100)))
+  plot(hist, xlim = c(0, 1), ylim = c(0, 10), xlab = "allele frequency", ylab = "count", main = "")
+  abline(v = 0.1, lty = 2, col = "red")
+}
+
+#' Plot a histogram of variant allele frequencies with logit x-axis and log y-axis
+#' 
+#' @param file file containing columns "Frequency" and "Count"
+#' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
+#' 
+#' @return plot displyed on screen
+#' 
+#' @export
+#' @import dplyr
 #' @importFrom stats plogis
 #' @importFrom stats qlogis
 #' @importFrom graphics axis
 #' @importFrom graphics lines
 #' 
 #' @examples
-#' plot_allele_hist(output_allele_hist)
-plot_allele_hist <- function(df, generation = NA) {
-  if(length(df) == 1) {
+#' plot_allele_hist(system.file("extdata", "output_allele_counts.dat", 
+#' package = "demonanalysis", mustWork = TRUE))
+plot_allele_hist <- function(file, generation = NA) {
+  if(!file.exists(file)) {
+    warning(paste0(file, " not found"))
     plot(0, type = 'n', axes = FALSE, ann = FALSE)
     return(NA)
   }
+  df <- read_delim_special(file)
   if("Generation" %in% colnames(df)) {
     if(is.na(generation)) generation <- max(df$Generation)
     df <- filter(df, Generation == generation)
   }
-  ncol <- dim(df)[2]
-  colnames(df)[(ncol - 1):ncol] <- c("Frequency", "Density")
-  plot(log10(Density) ~ qlogis(Frequency), data = df, 
+  
+  df <- filter(df, Frequency < 1, Frequency > plogis(-11))
+  
+  logit_breaks <- plogis(-11 + 0:80 * 24.0 / 78)
+  hist <- with(df, hist(rep(x = Frequency, times = Count), plot = FALSE, breaks = logit_breaks))
+  
+  plot(log10(hist$density) ~ qlogis(hist$mids), 
        xaxt = "n", yaxt = "n", 
        xlim = c(qlogis(1E-5), qlogis(0.9999)), 
        ylim = c(-6, 6),
        xlab = "allele frequency", ylab = "density")
+  
   xshort <- c(1E-4, 1E-2, 0.5, 0.99, 0.9999)
   axis(1, at = qlogis(xshort), labels = xshort)
   yshort <- -4:10
@@ -297,7 +295,7 @@ plot_allele_hist <- function(df, generation = NA) {
 
 #' Plot cumulative density of variant allele frequencies versus inverse allele frequency
 #' 
-#' @param df data frame containing "inverse_frequency" and "cumulative_count" columns
+#' @param file file containing columns "Frequency" and "Count"
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' 
 #' @return plot displyed on screen
@@ -307,22 +305,32 @@ plot_allele_hist <- function(df, generation = NA) {
 #' @importFrom TeachingDemos subplot
 #' 
 #' @examples
-#' plot_allele_cum_dist(output_allele_cum_dist)
-plot_allele_cum_dist <- function(df, generation = NA) {
-  if(length(df) == 1) {
+#' plot_allele_cum_dist(system.file("extdata", "output_allele_counts.dat", 
+#' package = "demonanalysis", mustWork = TRUE))
+plot_allele_cum_dist <- function(file, generation = NA) {
+  if(!file.exists(file)) {
+    warning(paste0(file, " not found"))
     plot(0, type = 'n', axes = FALSE, ann = FALSE)
     return(NA)
   }
-  if("Generation" %in% colnames(df)) {
-    if(is.na(generation)) generation <- max(df$Generation)
-    df <- filter(df, Generation == generation)
+  df1 <- read_delim_special(file)
+  if("Generation" %in% colnames(df1)) {
+    if(is.na(generation)) generation <- max(df1$Generation)
+    df1 <- filter(df1, Generation == generation)
   }
-  ncol <- dim(df)[2]
-  colnames(df)[(ncol - 1):ncol] <- c("InverseFrequency", "CumulativeCount")
-  plot(CumulativeCount ~ InverseFrequency, data = df,
+  
+  cum_count <- function(df, d) {
+    indices <- which(df$Frequency > d)
+    if(length(indices) == 0) return(0)
+    else return(sum(df[indices, "Count"]))
+  }
+  InverseFrequency <- seq(1, 110, by = 0.1)
+  CumulativeCount <- sapply(1/InverseFrequency, cum_count, df = df1)
+  
+  plot(CumulativeCount ~ InverseFrequency, 
        xlim = c(0, 100), ylim = c(0, 500), type = "l", 
        xlab = "inverse allele frequency", ylab = "cumulative count")
-  subplot(plot(CumulativeCount ~ InverseFrequency, data = df, 
+  subplot(plot(CumulativeCount ~ InverseFrequency, 
                xlim = c(0, 10), ylim = c(0, 50), xlab = "", ylab = "", type = "l"), 
           x = 12, y = 500, vadj = 1, hadj = 0, size = c(0.75, 0.75))
 }
@@ -370,19 +378,22 @@ get_genotype_sizes_hist <- function(file, xmax = NA, generation = NA, freqs = FA
     warning(paste0(file, " not found"))
     return(NA)
   }
-  df <- readLines(file)
-  df <- strsplit(df, "\t")
-  df <- lapply(df, as.numeric)
-  gens_list <- sapply(df, "[[", 1)
-  if(is.na(generation)) generation <- max(gens_list)
-  geno_vector <- df[[which(gens_list == generation)]]
-  geno_vector <- geno_vector[-1] # exclude the first entry, which is Generation
+  df <- readLines(file) # read all lines of the file to get a list
+  df <- strsplit(df, "\t") # split at tabs to get a list of vectors
+  df <- lapply(df, as.numeric) # convert to numbers
+  gens_list <- sapply(df, "[[", 1) # get the first entry of each list item
+  if(is.na(generation)) generation <- max(gens_list) # generation for filtering
+  geno_vector <- df[[which(gens_list == generation)]] # filter data for chosen generation
+  geno_vector <- geno_vector[-1] # exclude the first entry, which is the generation value
   if(is.na(xmax)) xmax <- sum(geno_vector)
   if(freqs) {
     geno_vector <- geno_vector / sum(geno_vector)
     hist1 <- hist(geno_vector, plot = FALSE, breaks = seq(0, 1, length = 100))
   }
-  else hist1 <- hist(geno_vector, plot = FALSE, breaks = seq(0, xmax, length = 100))
+  else {
+    geno_vector <- geno_vector[which(geno_vector <= xmax)]
+    hist1 <- hist(geno_vector, plot = FALSE, breaks = seq(0, xmax, length = 100))
+  }
   return(hist1)
 }
 
@@ -390,6 +401,7 @@ get_genotype_sizes_hist <- function(file, xmax = NA, generation = NA, freqs = FA
 #' 
 #' @param hist histogram of genotype sizes
 #' @param xmax maximum limit of x-axis
+#' @param ... other parameters passed to plot
 #' 
 #' @return plot displyed on screen
 #' 
@@ -399,15 +411,17 @@ get_genotype_sizes_hist <- function(file, xmax = NA, generation = NA, freqs = FA
 #' @examples
 #' hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
 #' package = "demonanalysis", mustWork = TRUE), xmax = 50)
-#' plot_genotype_sizes_hist(hist1, xmax = 50)
-plot_genotype_sizes_hist <- function(hist, xmax = 1E4) {
+#' plot_genotype_sizes_hist(hist1, xmax = 50, xlab = "genotype size")
+plot_genotype_sizes_hist <- function(hist, xmax = 1E4, ...) {
   if(length(hist) == 1) {
     plot(0, type = 'n', axes = FALSE, ann = FALSE)
     return(NA)
   }
-  plot(hist$density / sum(hist$density) ~ hist$mids, log = "y", 
+  mids <- hist$mids[which(hist$density > 0)]
+  density <- hist$density[which(hist$density > 0)]
+  plot(density / sum(density) ~ mids, log = "y", 
        xlim = c(0, xmax), ylim = c(1E-5, 1), 
-       xlab = "genotype size", ylab = "frequency")
+       ylab = "frequency", ...)
 }
 
 #' Get the first incomplete moment from frequency data
@@ -451,16 +465,19 @@ plot_first_inc_moment <- function(sizes, counts, ...) {
     return(NA)
   }
   mom <- sapply(sizes, first_inc_moment, sizes = sizes, counts = counts)
+  sizes <- sizes[which(mom > 0)]
+  mom <- mom[which(mom > 0)]
   plot(mom ~ sizes, log = "y", ...)
 }
 
 #' Plot a set of charts representing allele frequencies and genotype sizes
 #' 
 #' @param path folder containing the input files
-#' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
 #' @param output_filename name of output image file
 #' @param file_type either "pdf" or "png" (other values default to "pdf")
-#' @param xmax maximum limit of x-axis in genotype size plots=
+#' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
+#' @param max_genotype_size maximum limit of x-axis in genotype size plots
+#' @param max_allele_count maximum allele count (default NA corresponds to plotting frequencies, not counts)
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' 
 #' @return plot displyed on screen
@@ -476,54 +493,53 @@ plot_first_inc_moment <- function(sizes, counts, ...) {
 #' @importFrom graphics text
 #' 
 #' @examples
-#' plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), xmax = 50)
-plot_all_charts <- function(path, output_filename = NA, file_type = "png", output_dir = NA, xmax = 1E4, generation = NA) {
+#' plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
+#' max_genotype_size = 50)
+plot_all_charts <- function(path, output_filename = NA, file_type = "png", output_dir = NA, max_genotype_size = 1E4, max_allele_count = NA, generation = NA) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
-  read_delim_special <- function(file) {
-    if(file.exists(file)) out <- read_delim(file, "\t", trim_ws = TRUE)
-    else out <- NA
-    return(out)
-  }
-  
-  output_allele_hist <- read_delim_special(paste0(path, "output_allele_hist.dat"))
-  output_allele_cum_dist <- read_delim_special(paste0(path, "output_allele_cum_dist.dat"))
-  output_allele_hist_linear <- read_delim_special(paste0(path, "output_allele_hist_linear.dat"))
-  output_allele_hist_linear <- filter(output_allele_hist_linear, Generation == max(Generation))
-  hist_alleles <- get_common_allele_counts(paste0(path, "output_allele_freqs.dat"), generation = generation)
-  
-  hist_geno <- get_genotype_sizes_hist(paste0(path, "genotypes.dat"), xmax, generation = generation)
+  hist_geno <- get_genotype_sizes_hist(paste0(path, "genotypes.dat"), xmax = max_genotype_size, generation = generation)
   hist_driver_geno <- get_genotype_sizes_hist(paste0(path, "driver_genotypes.dat"), xmax = NA, freqs = TRUE, generation = generation)
   
-  df1 <- get_common_allele_counts(paste0(path, "output_allele_freqs.dat"), output = "df", generation = generation)
-  if(length(df1) > 1) {
-    div_alleles <- round(quadratic_diversity(df1, 0.025), 2)
-  }
+  df1 <- read_delim_special(paste0(path, "output_allele_counts.dat"))
+  if(is.na(generation)) generation <- max(df1$Generation)
+  df1 <- filter(df1, Generation == generation)
+  
+  if(length(df1) > 1) div_alleles <- round(quadratic_diversity(df1[, c("Frequency", "Count")], 0.025, threshold = 0.1), 2)
   else div_alleles <- ""
   
+  if(is.na(max_allele_count)) width <- 4
+  else width <- 3
+  
   if(!is.na(output_filename) & !is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 800, height = 600, res = 100)
-    else pdf(paste0(output_dir,output_filename,".pdf"), width = 8, height = 6)
+    if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 200*width, height = 600, res = 100)
+    else pdf(paste0(output_dir,output_filename,".pdf"), width = 2*width, height = 6)
   }
   
-  par(mfrow = c(2, 4))
+  par(mfrow = c(2, width))
   par(mgp = c(2.2, 1, 0))
   par(mar = c(3.8, 3.8, 0.8, 0.8))
   
   # allele frequencies:
-  plot_allele_hist(output_allele_hist, generation = generation)
-  plot_allele_cum_dist(output_allele_cum_dist, generation = generation)
-  plot_first_inc_moment(output_allele_hist_linear$Frequency, output_allele_hist_linear$Count, xlim = c(0, 1), ylim = c(1E-6, 1), 
-                        xlab = "allele count", ylab = "first incomplete moment", type = "l")
-  plot_common_allele_counts(hist_alleles)
-  if(length(df1) > 1) text(1, 0.9 * max(df1$count), paste0("diversity = ", div_alleles), pos = 2)
-  
+  plot_allele_hist(paste0(path, "output_allele_counts.dat"), generation = generation)
+  if(is.na(max_allele_count)) {
+    plot_allele_cum_dist(paste0(path, "output_allele_counts.dat"), generation = generation)
+    plot_first_inc_moment(df1$Frequency, df1$Count, xlim = c(0, 1), ylim = c(1e-3, 1), xlab = "allele frequency", ylab = "first incomplete moment")
+    plot_common_allele_counts(paste0(path, "output_allele_counts.dat"))
+    if(length(df1) > 1) text(1, 9, paste0("diversity = ", div_alleles), pos = 2)
+  }
+  else {
+    plot_first_inc_moment(df1$Size, df1$Count, xlim = c(0, max_allele_count), ylim = c(1e-3, 1), xlab = "allele count", ylab = "first incomplete moment")
+    plot(0, type = 'n', axes = FALSE, ann = FALSE)
+  }
+
   # genotype sizes:
-  plot_genotype_sizes_hist(hist_geno, xmax)
-  plot_first_inc_moment(hist_geno$mids, hist_geno$density, xlim = c(0, xmax), ylim = c(1E-3, 1), 
+  plot_genotype_sizes_hist(hist_geno, xmax = max_genotype_size, xlab = "genotype size")
+  plot_first_inc_moment(hist_geno$mids, hist_geno$density, xlim = c(0, max_genotype_size), ylim = c(1E-3, 1), 
                         xlab = "genotype size", ylab = "first incomplete moment")
-  plot_driver_genotype_freq_hist(hist_driver_geno)
+  if(is.na(max_allele_count)) plot_driver_genotype_freq_hist(hist_driver_geno)
+  else plot_genotype_sizes_hist(hist_driver_geno, xmax = max_genotype_size, xlab = "driver genotype size")
   
   if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
@@ -650,13 +666,17 @@ all_statuses <- function(input_dir, adjust = 0) {
 #' Create image files for every simulation in a batch
 #' 
 #' @param input_dir base input directory name
-#' @param output_dir folder in which to save the image files
 #' @param type what type of images to create: "plot" or "chart" or c("plot", "chart")
+#' @param file_type either "pdf" or "png" (other values default to "pdf")
+#' @param output_dir folder in which to save the image files
+#' @param max_genotype_size maximum limit of x-axis in genotype size plots
+#' @param max_allele_count maximum allele count (default NA corresponds to plotting frequencies, not counts)
+#' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' 
 #' @return a set of image files
 #' 
 #' @export
-create_plots_batch <- function(input_dir, output_dir = NA, type = "plot") {
+create_plots_batch <- function(input_dir, type = "plot", file_type = "png", output_dir = NA, max_genotype_size = 1E4, max_allele_count = NA, generation = NA) {
   pars <- parameter_names_and_values(input_dir)$name
   final_values <- parameter_names_and_values(input_dir)$final_value
   
@@ -664,8 +684,8 @@ create_plots_batch <- function(input_dir, output_dir = NA, type = "plot") {
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
     if(!identical(msg, character(0))) if(msg == "Exit code 0") {
-      if("plot" %in% type) plot_all_images(full_dir, make_image_file_name("plot", pars, x), "png", output_dir)
-      if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, x), "png", output_dir)
+      if("plot" %in% type) plot_all_images(full_dir, make_image_file_name("plot", pars, x), file_type, output_dir, max_genotype_size, max_allele_count, generation)
+      if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, x), file_type, output_dir, max_genotype_size, max_allele_count, generation)
     }
   }
   apply_combinations(final_values, each_plot)

@@ -33,7 +33,7 @@ setwd("/cluster/work/bewi/members/lebidm_nobelr/demon")
 ``` r
 library(demonanalysis)
 
-subfolder_name <- "April_6th_batch1" # batch name
+subfolder_name <- "XXX" # insert name of top-level folder
 
 input_dir <- paste0("all_results/", subfolder_name) # folder containing results of the batch
 num_parameters <- count_parameters(input_dir) # number of simulation parameters (first columns in data)
@@ -43,8 +43,22 @@ output_dir_data <- paste0("data/", subfolder_name) # folder containing data file
 
 ### Create plots
 
+For growing tumours, to plot charts of variant allele frequencies and genotype sizes:
+
 ``` r
-create_plots_batch(input_dir, output_dir_plots, type = "chart") # change type to "chart", "plot" or c("chart", "plot") as needed
+create_plots_batch(input_dir, output_dir_plots, type = "chart")
+```
+
+For normal tissue, to plot charts of variant allele frequencies and genotype sizes:
+
+``` r
+create_plots_batch(input_dir, output_dir_plots, type = "chart", max_genotype_size = 50, max_allele_count = 50)
+```
+
+To plot Muller plots and grids:
+
+``` r
+create_plots_batch(input_dir, output_dir_plots, type = "plot")
 ```
 
 ### Get general-purpose data

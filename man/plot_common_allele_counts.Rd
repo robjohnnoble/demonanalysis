@@ -2,21 +2,22 @@
 % Please edit documentation in R/demonanalysis.R
 \name{plot_common_allele_counts}
 \alias{plot_common_allele_counts}
-\title{Plot counts of variant allele frequencies for the most common alleles}
+\title{Plot counts of variant allele frequencies on linear scales}
 \usage{
-plot_common_allele_counts(hist)
+plot_common_allele_counts(file, generation = NA)
 }
 \arguments{
-\item{hist}{histogram}
+\item{file}{file containing columns "Frequency" and "Count"}
+
+\item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 }
 \value{
-plot
+plot displyed on screen
 }
 \description{
-Plot counts of variant allele frequencies for the most common alleles
+Plot counts of variant allele frequencies on linear scales
 }
 \examples{
-hist1 <- get_common_allele_counts(system.file("extdata", "output_allele_freqs.dat", 
+plot_common_allele_counts(system.file("extdata", "output_allele_counts.dat", 
 package = "demonanalysis", mustWork = TRUE))
-plot_common_allele_counts(hist1)
 }

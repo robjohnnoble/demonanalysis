@@ -5,7 +5,8 @@
 \title{Plot a set of charts representing allele frequencies and genotype sizes}
 \usage{
 plot_all_charts(path, output_filename = NA, file_type = "png",
-  output_dir = NA, xmax = 10000, generation = NA)
+  output_dir = NA, max_genotype_size = 10000, max_allele_count = NA,
+  generation = NA)
 }
 \arguments{
 \item{path}{folder containing the input files}
@@ -16,7 +17,9 @@ plot_all_charts(path, output_filename = NA, file_type = "png",
 
 \item{output_dir}{folder in which to save the image file; if NA then plots are displayed on screen instead}
 
-\item{xmax}{maximum limit of x-axis in genotype size plots=}
+\item{max_genotype_size}{maximum limit of x-axis in genotype size plots}
+
+\item{max_allele_count}{maximum allele count (default NA corresponds to plotting frequencies, not counts)}
 
 \item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 }
@@ -27,5 +30,6 @@ plot displyed on screen
 Plot a set of charts representing allele frequencies and genotype sizes
 }
 \examples{
-plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), xmax = 50)
+plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
+max_genotype_size = 50)
 }

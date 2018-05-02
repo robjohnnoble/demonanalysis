@@ -4,12 +4,14 @@
 \alias{quadratic_diversity}
 \title{Rao's quadratic diversity, using a binary distance measure, converted to the effective number of species}
 \usage{
-quadratic_diversity(df, sigma)
+quadratic_diversity(df, sigma, threshold = 0.1)
 }
 \arguments{
 \item{df}{Dataframe with two columns containing trait values and their frequencies or abundancies}
 
 \item{sigma}{Cutoff for considering two trait values to be identical}
+
+\item{threshold}{minimum trait value to include in calculation}
 }
 \value{
 effective number of species
