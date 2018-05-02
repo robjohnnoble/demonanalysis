@@ -41,7 +41,13 @@ output_dir_plots <- paste0("plots/", subfolder_name) # folder to receive image f
 output_dir_data <- paste0("data/", subfolder_name) # folder containing data files
 ```
 
-### Create plots
+### Create plots for a single simulation
+
+To plot charts of variant allele frequencies and genotype sizes use `plot_all_images`. For normal tissue, you should specify a value for `max_allele_count` so that the axes are appropriately scaled.
+
+To plot Muller plots and grids use `plot_all_images`.
+
+### Create plots for a batch of simulations
 
 For growing tumours, to plot charts of variant allele frequencies and genotype sizes:
 
