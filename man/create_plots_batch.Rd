@@ -6,7 +6,7 @@
 \usage{
 create_plots_batch(input_dir, type = "plot", file_type = "png",
   output_dir = NA, max_genotype_size = 10000, max_allele_count = NA,
-  generation = NA)
+  min_inc_moment = 0.001, generation = NA)
 }
 \arguments{
 \item{input_dir}{base input directory name}
@@ -20,6 +20,8 @@ create_plots_batch(input_dir, type = "plot", file_type = "png",
 \item{max_genotype_size}{maximum limit of x-axis in genotype size plots}
 
 \item{max_allele_count}{maximum allele count (default NA corresponds to plotting frequencies, not counts)}
+
+\item{min_inc_moment}{minimum limit of y-axis in plot of the first incomplete moment of the allele frequency}
 
 \item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 }

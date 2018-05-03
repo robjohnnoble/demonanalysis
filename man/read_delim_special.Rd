@@ -16,6 +16,6 @@ the contents, or NA if the file doesn't exist
 Attempt to read a tab-delimited file and return the contents, or NA if the file doesn't exist
 }
 \examples{
-read_delim_special(system.file("extdata", "output_allele_hist.dat", 
+read_delim_special(system.file("extdata", "output_allele_counts.dat", 
 package = "demonanalysis", mustWork = TRUE))
 }

@@ -25,7 +25,7 @@ apply_combinations <- function(vec, fn, ...){
 #' @export
 #' 
 #' @examples
-#' read_delim_special(system.file("extdata", "output_allele_hist.dat", 
+#' read_delim_special(system.file("extdata", "output_allele_counts.dat", 
 #' package = "demonanalysis", mustWork = TRUE))
 read_delim_special <- function(file) {
   if(file.exists(file)) out <- read_delim(file, "\t", trim_ws = TRUE)
@@ -239,7 +239,7 @@ plot_common_allele_counts <- function(file, generation = NA) {
     df <- filter(df, Generation == generation)
   }
   hist <- with(df, hist(rep(x = Frequency, times = Count), plot = FALSE, breaks = seq(0, 1, length = 100)))
-  plot(hist, xlim = c(0, 1), ylim = c(0, 10), xlab = "allele frequency", ylab = "count", main = "")
+  plot(hist, xlim = c(0, 1), ylim = c(0, 10), xlab = "allele frequency", ylab = "abundance", main = "")
   abline(v = 0.1, lty = 2, col = "red")
 }
 
@@ -353,7 +353,7 @@ plot_driver_genotype_freq_hist <- function(hist) {
     plot(0, type = 'n', axes = FALSE, ann = FALSE)
     return(NA)
   }
-  plot(hist, xlim = c(0, 1), xlab = "driver genotype frequency", ylab = "count", main = "")
+  plot(hist, xlim = c(0, 1), xlab = "driver genotype frequency", ylab = "abundance", main = "")
 }
 
 #' Get a histogram of genotype sizes
@@ -478,6 +478,7 @@ plot_first_inc_moment <- function(sizes, counts, ...) {
 #' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
 #' @param max_genotype_size maximum limit of x-axis in genotype size plots
 #' @param max_allele_count maximum allele count (default NA corresponds to plotting frequencies, not counts)
+#' @param min_inc_moment minimum limit of y-axis in plot of the first incomplete moment of the allele frequency
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' 
 #' @return plot displyed on screen
@@ -495,12 +496,12 @@ plot_first_inc_moment <- function(sizes, counts, ...) {
 #' @examples
 #' plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
 #' max_genotype_size = 50)
-plot_all_charts <- function(path, output_filename = NA, file_type = "png", output_dir = NA, max_genotype_size = 1E4, max_allele_count = NA, generation = NA) {
+plot_all_charts <- function(path, output_filename = NA, file_type = "png", output_dir = NA, max_genotype_size = 1E4, 
+                            max_allele_count = NA, min_inc_moment = 1e-3, generation = NA) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
   hist_geno <- get_genotype_sizes_hist(paste0(path, "genotypes.dat"), xmax = max_genotype_size, generation = generation)
-  hist_driver_geno <- get_genotype_sizes_hist(paste0(path, "driver_genotypes.dat"), xmax = NA, freqs = TRUE, generation = generation)
   
   df1 <- read_delim_special(paste0(path, "output_allele_counts.dat"))
   if(is.na(generation)) generation <- max(df1$Generation)
@@ -525,21 +526,27 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   plot_allele_hist(paste0(path, "output_allele_counts.dat"), generation = generation)
   if(is.na(max_allele_count)) {
     plot_allele_cum_dist(paste0(path, "output_allele_counts.dat"), generation = generation)
-    plot_first_inc_moment(df1$Frequency, df1$Count, xlim = c(0, 1), ylim = c(1e-3, 1), xlab = "allele frequency", ylab = "first incomplete moment")
+    plot_first_inc_moment(df1$Frequency, df1$Count, xlim = c(0, 1), ylim = c(min_inc_moment, 1), xlab = "allele frequency", ylab = "first incomplete moment")
     plot_common_allele_counts(paste0(path, "output_allele_counts.dat"))
     if(length(df1) > 1) text(1, 9, paste0("diversity = ", div_alleles), pos = 2)
   }
   else {
-    plot_first_inc_moment(df1$Size, df1$Count, xlim = c(0, max_allele_count), ylim = c(1e-3, 1), xlab = "allele count", ylab = "first incomplete moment")
-    plot(0, type = 'n', axes = FALSE, ann = FALSE)
+    plot(Count ~ Size, data = df1, xlim = c(0, max_allele_count), ylim = c(0, 10), xlab = "allele count", ylab = "abundance", main = "")
+    plot_first_inc_moment(df1$Size, df1$Count, xlim = c(0, max_allele_count), ylim = c(min_inc_moment, 1), xlab = "allele count", ylab = "first incomplete moment")
   }
 
   # genotype sizes:
   plot_genotype_sizes_hist(hist_geno, xmax = max_genotype_size, xlab = "genotype size")
   plot_first_inc_moment(hist_geno$mids, hist_geno$density, xlim = c(0, max_genotype_size), ylim = c(1E-3, 1), 
                         xlab = "genotype size", ylab = "first incomplete moment")
-  if(is.na(max_allele_count)) plot_driver_genotype_freq_hist(hist_driver_geno)
-  else plot_genotype_sizes_hist(hist_driver_geno, xmax = max_genotype_size, xlab = "driver genotype size")
+  if(is.na(max_allele_count)) {
+    hist_driver_geno <- get_genotype_sizes_hist(paste0(path, "driver_genotypes.dat"), xmax = NA, freqs = TRUE, generation = generation)
+    plot_driver_genotype_freq_hist(hist_driver_geno)
+  }
+  else {
+    hist_driver_geno <- get_genotype_sizes_hist(paste0(path, "driver_genotypes.dat"), xmax = max_genotype_size, generation = generation)
+    plot_genotype_sizes_hist(hist_driver_geno, xmax = max_genotype_size, xlab = "driver genotype size")
+  }
   
   if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
@@ -671,12 +678,13 @@ all_statuses <- function(input_dir, adjust = 0) {
 #' @param output_dir folder in which to save the image files
 #' @param max_genotype_size maximum limit of x-axis in genotype size plots
 #' @param max_allele_count maximum allele count (default NA corresponds to plotting frequencies, not counts)
+#' @param min_inc_moment minimum limit of y-axis in plot of the first incomplete moment of the allele frequency
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' 
 #' @return a set of image files
 #' 
 #' @export
-create_plots_batch <- function(input_dir, type = "plot", file_type = "png", output_dir = NA, max_genotype_size = 1E4, max_allele_count = NA, generation = NA) {
+create_plots_batch <- function(input_dir, type = "plot", file_type = "png", output_dir = NA, max_genotype_size = 1E4, max_allele_count = NA, min_inc_moment = 1e-3, generation = NA) {
   pars <- parameter_names_and_values(input_dir)$name
   final_values <- parameter_names_and_values(input_dir)$final_value
   
@@ -684,8 +692,8 @@ create_plots_batch <- function(input_dir, type = "plot", file_type = "png", outp
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
     if(!identical(msg, character(0))) if(msg == "Exit code 0") {
-      if("plot" %in% type) plot_all_images(full_dir, make_image_file_name("plot", pars, x), file_type, output_dir, max_genotype_size, max_allele_count, generation)
-      if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, x), file_type, output_dir, max_genotype_size, max_allele_count, generation)
+      if("plot" %in% type) plot_all_images(full_dir, make_image_file_name("plot", pars, x), file_type, output_dir)
+      if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, x), file_type, output_dir, max_genotype_size, max_allele_count, min_inc_moment, generation)
     }
   }
   apply_combinations(final_values, each_plot)
