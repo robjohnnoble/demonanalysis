@@ -3,6 +3,16 @@ demonanalysis
 
 Analysis and plotting of demon data
 
+## From a single simulation
+
+### Create a set of plots
+
+To plot charts of variant allele frequencies and genotype sizes use `plot_all_images`. For normal tissue, you should specify a value for `max_allele_count` so that the axes are appropriately scaled.
+
+To plot Muller plots and grids use `plot_all_images`.
+
+## From a batch of simulations run on Euler
+
 ### Updating
 
 To pull the latest github version into an Euler folder (using terminal):
@@ -40,12 +50,6 @@ num_parameters <- count_parameters(input_dir) # number of simulation parameters 
 output_dir_plots <- paste0("plots/", subfolder_name) # folder to receive image files
 output_dir_data <- paste0("data/", subfolder_name) # folder containing data files
 ```
-
-### Create plots for a single simulation
-
-To plot charts of variant allele frequencies and genotype sizes use `plot_all_images`. For normal tissue, you should specify a value for `max_allele_count` so that the axes are appropriately scaled.
-
-To plot Muller plots and grids use `plot_all_images`.
 
 ### Create plots for a batch of simulations
 
