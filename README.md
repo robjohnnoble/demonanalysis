@@ -7,7 +7,7 @@ Analysis and plotting of demon data
 
 ### Create a set of plots
 
-To plot charts of variant allele frequencies and genotype sizes use `plot_all_images`. For normal tissue, you should specify a value for `max_allele_count` so that the axes are appropriately scaled.
+To plot charts of variant allele frequencies and genotype sizes use `plot_all_charts`. For normal tissue, you should specify a value for `max_allele_count` so that the axes are appropriately scaled.
 
 To plot Muller plots and grids use `plot_all_images`.
 
