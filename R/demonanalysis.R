@@ -228,7 +228,7 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
 #' 
 #' @examples
 #' plot_counts(system.file("extdata", "output_allele_counts.dat", 
-#' package = "demonanalysis", mustWork = TRUE))
+#' package = "demonanalysis", mustWork = TRUE), ylim = c(0, 10))
 plot_counts <- function(file, generation = NA, ...) {
   if(!file.exists(file)) {
     warning(paste0(file, " not found"))
@@ -241,7 +241,7 @@ plot_counts <- function(file, generation = NA, ...) {
     df <- filter(df, Generation == generation)
   }
   hist <- with(df, hist(rep(x = Frequency, times = Count), plot = FALSE, breaks = seq(0, 1, length = 100)))
-  plot(hist, xlim = c(0, 1), ylim = c(0, 10), ylab = "count", main = "", ...)
+  plot(hist, xlim = c(0, 1), ylab = "count", main = "", ...)
   abline(v = 0.1, lty = 2, col = "red")
 }
 
@@ -275,18 +275,18 @@ plot_logit_freq_dist <- function(file, generation = NA, ...) {
     df <- filter(df, Generation == generation)
   }
   
-  df <- filter(df, Frequency < 1, Frequency > plogis(-11))
+  df <- filter(df, Frequency < 1, Frequency > plogis(-14))
   
-  logit_breaks <- plogis(-11 + 0:80 * 24.0 / 78)
+  logit_breaks <- plogis(-14 + 0:100 * 26 / 100)
   hist <- with(df, hist(rep(x = Frequency, times = Count), plot = FALSE, breaks = logit_breaks))
   
   plot(log10(hist$density) ~ qlogis(hist$mids), 
        xaxt = "n", yaxt = "n", 
-       xlim = c(qlogis(1E-5), qlogis(0.9999)), 
+       xlim = c(qlogis(1E-6), qlogis(0.9999)), 
        ylim = c(-6, 6),
        ylab = "density", ...)
   
-  xshort <- c(1E-4, 1E-2, 0.5, 0.99, 0.9999)
+  xshort <- c(1E-6, 1E-4, 1E-2, 0.5, 0.99, 0.9999)
   axis(1, at = qlogis(xshort), labels = xshort)
   yshort <- -4:10
   axis(2, at = yshort, labels = 10^yshort)
@@ -375,6 +375,7 @@ first_inc_moment <- function(sizes, counts, threshold) {
 #' 
 #' @param sizes for example, midpoints of a histogram
 #' @param counts counts corresponding to the sizes
+#' @param max_size maximum size (default 1)
 #' @param ... other parameters passed to plot
 #' 
 #' @return plot displyed on screen
@@ -384,7 +385,7 @@ first_inc_moment <- function(sizes, counts, threshold) {
 #' @examples
 #' df_test <- data.frame(size = 1:20, count = exp(-(1:20)))
 #' plot_first_inc_moment(df_test$size, df_test$count)
-plot_first_inc_moment <- function(sizes, counts, ...) { 
+plot_first_inc_moment <- function(sizes, counts, max_size = 1, ...) { 
   if(length(sizes) <= 1) {
     plot(0, type = 'n', axes = FALSE, ann = FALSE)
     return(NA)
@@ -392,7 +393,12 @@ plot_first_inc_moment <- function(sizes, counts, ...) {
   mom <- sapply(sizes, first_inc_moment, sizes = sizes, counts = counts)
   sizes <- sizes[which(mom > 0)]
   mom <- mom[which(mom > 0)]
-  plot(mom ~ sizes, log = "y", ylab = "first incomplete moment", ...)
+  
+  mom <- mom[which(sizes <= max_size)]
+  sizes <- sizes[which(sizes <= max_size)]
+  
+  plot(mom ~ sizes, log = "y", ylab = "first incomplete moment", 
+       xlim = c(0, max_size), ylim = c(min(mom), 1), ...)
 }
 
 #' Plot a set of charts representing allele frequencies and genotype sizes
@@ -441,7 +447,7 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
     df1 <- filter(df1, Generation == generation)
     
     # plot 1:
-    plot_counts(paste0(path, files_list[i]), xlab = paste0(axis_lab[i], " frequency"))
+    plot_counts(paste0(path, files_list[i]), xlab = paste0(axis_lab[i], " frequency"), ylim = c(0, 10))
     if(length(df1) > 1) div_alleles <- round(quadratic_diversity(df1[, c("Frequency", "Count")], 0.025, threshold = 0.1), 2)
     else div_alleles <- ""
     if(length(df1) > 1) text(1, 9, paste0("modes = ", div_alleles), pos = 2)
@@ -450,11 +456,8 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
     plot_logit_freq_dist(paste0(path, files_list[i]), generation = generation, xlab = paste0(axis_lab[i], " frequency"))
     
     # plot 3:
-    if(is.na(max_size)) plot_first_inc_moment(df1$Frequency, df1$Count, xlim = c(0, 1), xlab = paste0(axis_lab[i], " frequency"))
-    else {
-      df1_censored <- filter(df1, Size <= max_size)
-      plot_first_inc_moment(df1_censored$Size, df1_censored$Count, xlab = paste0(axis_lab2[i], " size"))
-    }
+    if(is.na(max_size)) plot_first_inc_moment(df1$Frequency, df1$Count, xlab = paste0(axis_lab[i], " frequency"))
+    else plot_first_inc_moment(df1$Size, df1$Count, xlab = paste0(axis_lab2[i], " size"), max_size = max_size)
     
     # plot 4:
     plot_cum_dist(paste0(path, files_list[i]), generation = generation, xlab = paste0("inverse ", axis_lab[i], " frequency"))

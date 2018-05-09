@@ -4,12 +4,14 @@
 \alias{plot_first_inc_moment}
 \title{Plot first incomplete moment from frequency data}
 \usage{
-plot_first_inc_moment(sizes, counts, ...)
+plot_first_inc_moment(sizes, counts, max_size = 1, ...)
 }
 \arguments{
 \item{sizes}{for example, midpoints of a histogram}
 
 \item{counts}{counts corresponding to the sizes}
+
+\item{max_size}{maximum size (default 1)}
 
 \item{...}{other parameters passed to plot}
 }

@@ -21,5 +21,5 @@ Plot counts of variant allele frequencies on linear scales
 }
 \examples{
 plot_counts(system.file("extdata", "output_allele_counts.dat", 
-package = "demonanalysis", mustWork = TRUE))
+package = "demonanalysis", mustWork = TRUE), ylim = c(0, 10))
 }
