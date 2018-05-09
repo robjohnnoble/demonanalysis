@@ -20,8 +20,6 @@ plot displyed on screen
 Plot first incomplete moment from frequency data
 }
 \examples{
-hist1 <- get_genotype_sizes_hist(system.file("extdata", "genotypes.dat", 
-package = "demonanalysis", mustWork = TRUE), xmax = 50)
-plot_first_inc_moment(hist1$mids, hist1$density, xlim = c(0, 50), ylim = c(1E-3, 1), 
-xlab = "genotype size", ylab = "first incomplete moment")
+df_test <- data.frame(size = 1:20, count = exp(-(1:20)))
+plot_first_inc_moment(df_test$size, df_test$count)
 }

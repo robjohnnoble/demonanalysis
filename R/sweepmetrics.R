@@ -245,7 +245,7 @@ quadratic_diversity <- function(df, sigma, threshold = 0.1) {
   
   df <- filter(df, x > threshold, y > 0)
   n <- length(df$y)
-  if(n == 0) return(NA)
+  if(n == 0) return(0)
   
   df$y <- df$y / sum(df$y)
   
