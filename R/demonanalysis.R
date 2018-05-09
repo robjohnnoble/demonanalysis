@@ -429,8 +429,8 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
   if(!is.na(output_filename) & !is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1000, height = 1000, res = 100)
-    else pdf(paste0(output_dir,output_filename,".pdf"), width = 10, height = 10)
+    if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1100, height = 1100, res = 100)
+    else pdf(paste0(output_dir,output_filename,".pdf"), width = 11, height = 11)
   }
   
   par(mfrow = c(4, 4))
