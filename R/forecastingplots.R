@@ -369,7 +369,7 @@ plot_trajectories_faceted <- function(df, num_parameters, x_var = "gen_adj", out
   dims <- wrap_dims(n_panels)
   
   if(!is.na(output_filename) & !is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir_plots, "/trajectories_log10.png"), width = 300 * dims[2], height = 300 * dims[1], res = 100)
+    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 300 * dims[2], height = 300 * dims[1], res = 100)
     else pdf(paste0(output_dir, output_filename, ".pdf"), width = 4 * dims[2], height = 3 * dims[1])
   }
   
