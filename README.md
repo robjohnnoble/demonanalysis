@@ -72,7 +72,7 @@ create_plots_batch(input_dir, output_dir_plots, type = "plot")
 ### Check which simulations completed successfully
 
 ``` r
-all_statuses(input_dir) # should be "Exit code 0"
+all_statuses(input_dir, summary = TRUE) # all should be "Exit code 0"
 ```
 
 ### Get general-purpose data

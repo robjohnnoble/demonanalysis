@@ -570,11 +570,12 @@ final_error_message <- function(input_dir, adjust = 0) {
 #' 
 #' @param input_dir base input directory name
 #' @param adjust number of lines prior to the final line (default 0)
+#' @param summary if TRUE then return a table instead of a list (default FALSE)
 #' 
 #' @return one line from each error log
 #' 
 #' @export
-all_statuses <- function(input_dir, adjust = 0) {
+all_statuses <- function(input_dir, adjust = 0, summary = FALSE) {
   pars_and_values <- parameter_names_and_values(input_dir)
   if(is.na(pars_and_values[1])) stop("input_dir should contain results of a batch of simulations")
   pars <- pars_and_values$name
@@ -584,7 +585,13 @@ all_statuses <- function(input_dir, adjust = 0) {
     full_dir <- make_dir(input_dir, pars, x)
     return(final_error_message(full_dir, adjust))
   }
-  apply_combinations(final_values, each_msg)
+  stats <- apply_combinations(final_values, each_msg)
+  
+  if(!summary) return(stats)
+  else {
+    stats <- lapply(stats, function(x) if(identical("character(0)", character(0))) NA_character_ else x)
+    return(table(unlist(stats)))
+  }
 }
 
 #' Create image files for every simulation in a batch
