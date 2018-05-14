@@ -69,11 +69,21 @@ To plot Muller plots and grids:
 create_plots_batch(input_dir, output_dir_plots, type = "plot")
 ```
 
+### Check which simulations completed successfully
+
+``` r
+all_statuses(input_dir) # should be "Exit code 0"
+```
+
 ### Get general-purpose data
 
 ``` r
 data <- all_output(input_dir, include_diversities = FALSE) # combined data for a batch of simulations, excluding diversity columns
 ```
+
+### Plot all trajectories (using dataframe)
+
+plot_trajectories_faceted(data, num_parameters, x_var = "Generation", output_dir = output_dir_plots)
 
 ### Get additional data for forecasting
 
