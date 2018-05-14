@@ -177,7 +177,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE) {
 #' @export
 all_output <- function(input_dir, include_diversities = TRUE) {
   pars_and_values <- parameter_names_and_values(input_dir)
-  if(is.na(pars_and_values[1])) stop("input_dir should contain results of a batch of simulations")
+  if(is.na(pars_and_values)[1]) stop("input_dir should contain results of a batch of simulations")
   pars <- pars_and_values$name
   final_values <- pars_and_values$final_value
   

@@ -577,7 +577,7 @@ final_error_message <- function(input_dir, adjust = 0) {
 #' @export
 all_statuses <- function(input_dir, adjust = 0, summary = FALSE) {
   pars_and_values <- parameter_names_and_values(input_dir)
-  if(is.na(pars_and_values[1])) stop("input_dir should contain results of a batch of simulations")
+  if(is.na(pars_and_values)[1]) stop("input_dir should contain results of a batch of simulations")
   pars <- pars_and_values$name
   final_values <- pars_and_values$final_value
   
@@ -589,7 +589,7 @@ all_statuses <- function(input_dir, adjust = 0, summary = FALSE) {
   
   if(!summary) return(stats)
   else {
-    stats <- lapply(stats, function(x) if(identical("character(0)", character(0))) NA_character_ else x)
+    stats <- lapply(stats, function(x) if(identical(x, character(0))) "character(0)" else x)
     return(table(unlist(stats)))
   }
 }
@@ -610,7 +610,7 @@ all_statuses <- function(input_dir, adjust = 0, summary = FALSE) {
 #' @export
 create_plots_batch <- function(input_dir, type = "plot", file_type = "png", output_dir = NA, max_genotype_size = 1E4, max_allele_count = NA, min_inc_moment = 1e-3, generation = NA) {
   pars_and_values <- parameter_names_and_values(input_dir)
-  if(is.na(pars_and_values[1])) stop("input_dir should contain results of a batch of simulations")
+  if(is.na(pars_and_values)[1]) stop("input_dir should contain results of a batch of simulations")
   pars <- pars_and_values$name
   final_values <- pars_and_values$final_value
   
