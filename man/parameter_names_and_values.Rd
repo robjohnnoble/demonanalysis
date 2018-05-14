@@ -10,7 +10,7 @@ parameter_names_and_values(input_dir)
 \item{input_dir}{base input directory name}
 }
 \value{
-dataframe of parameter names and values
+dataframe of parameter names and values, or NA if input_dir contains results of a single simulation
 }
 \description{
 Find the names and final values of parameters that were varied in a batch of simulations

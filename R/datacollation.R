@@ -31,7 +31,7 @@ count_parameters <- function(full_dir) {
 #' 
 #' @param input_dir base input directory name
 #' 
-#' @return dataframe of parameter names and values
+#' @return dataframe of parameter names and values, or NA if input_dir contains results of a single simulation
 #' 
 #' @export
 parameter_names_and_values <- function(input_dir) {
@@ -39,6 +39,8 @@ parameter_names_and_values <- function(input_dir) {
   if(substr(input_dir, nchar(input_dir), nchar(input_dir)) == "/") input_dir <- substr(input_dir, 1, nchar(input_dir) - 1)
   
   parent_dir <- input_dir
+  
+  if("output.dat" %in% list.files(parent_dir, recursive = FALSE, full.names = FALSE)) return(NA)
   
   out_df <- data.frame("name" = NULL, "final_value" = NULL)
   
@@ -174,8 +176,10 @@ combine_dfs <- function(full_dir, include_diversities = TRUE) {
 #' 
 #' @export
 all_output <- function(input_dir, include_diversities = TRUE) {
-  pars <- parameter_names_and_values(input_dir)$name
-  final_values <- parameter_names_and_values(input_dir)$final_value
+  pars_and_values <- parameter_names_and_values(input_dir)
+  if(is.na(pars_and_values)) stop("input_dir should contain results of a batch of simulations")
+  pars <- pars_and_values$name
+  final_values <- pars_and_values$final_value
   
   each_check <- function(x, res) {
     full_dir <- make_dir(input_dir, pars, x)
