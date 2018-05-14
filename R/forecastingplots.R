@@ -365,7 +365,7 @@ plot_trajectories_faceted <- function(df, num_parameters, x_var = "gen_adj", out
     scale_y_continuous(name = "tumour size", trans='log10') +
     theme_classic()
   
-  n_panels <- length(unique(ggplot_build(q)$df[[1]]$PANEL))
+  n_panels <- length(unique(ggplot_build(q)$data[[1]]$PANEL))
   dims <- wrap_dims(n_panels)
   
   if(!is.na(output_filename) & !is.na(output_dir)) {
