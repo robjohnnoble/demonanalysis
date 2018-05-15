@@ -60,19 +60,19 @@ all_statuses(input_dir, summary = TRUE) # all should be "Exit code 0"
 For growing tumours, to plot charts of variant allele frequencies and genotype sizes:
 
 ``` r
-create_plots_batch(input_dir, output_dir_plots, type = "chart")
+create_plots_batch(input_dir, output_dir = output_dir_plots, type = "chart")
 ```
 
 For normal tissue, to plot charts of variant allele frequencies and genotype sizes:
 
 ``` r
-create_plots_batch(input_dir, output_dir_plots, type = "chart", max_genotype_size = 50, max_allele_count = 50)
+create_plots_batch(input_dir, output_dir = output_dir_plots, type = "chart", max_genotype_size = 50, max_allele_count = 50)
 ```
 
 To plot Muller plots and grids:
 
 ``` r
-create_plots_batch(input_dir, output_dir_plots, type = "plot")
+create_plots_batch(input_dir, output_dir = output_dir_plots, type = "plot")
 ```
 
 ### Get general-purpose data
