@@ -344,6 +344,7 @@ plot_trajectories_by_diversity <- function(df, output_filename = "trajectories_b
 #' 
 #' @export
 #' @import ggplot2
+#' @importFrom rlang sym
 #' 
 #' @examples 
 #' plot_curves_faceted(data, 16)
@@ -356,6 +357,8 @@ plot_curves_faceted <- function(df, num_parameters, x_var = "gen_adj", y_var= "N
   pars <- pars[pars != "init_migration_rate"]
   
   pars_without_K <- pars[pars != "K"]
+  
+  df <- filter(df, !is.na(!!rlang::sym(y_var)))
   
   q <- ggplot(df, aes_string(x = x_var, y = y_var, group = paste0("interaction(", paste0(pars_without_K, collapse =  ", "), ")"))) + geom_line()
   
