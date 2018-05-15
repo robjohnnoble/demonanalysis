@@ -84,7 +84,8 @@ data <- all_output(input_dir, include_diversities = FALSE) # combined data for a
 ### Plot relationships between variables (using dataframe)
 
 ``` r
-plot_curves_faceted(data, num_parameters, x_var = "Generation", y_var = "MeanBirthRate", output_dir = output_dir_plots) # change x_var and y_var as appropriate
+plot_curves_faceted(data, num_parameters, x_var = "Generation", y_var = "MeanBirthRate", output_filename = "curves", output_dir = output_dir_plots)
+# change x_var, y_var and output_filename as appropriate
 ```
 
 ### Get additional data for forecasting
