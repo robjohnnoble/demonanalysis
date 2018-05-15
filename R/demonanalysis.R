@@ -216,6 +216,31 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
   if(!is.na(output_filename)) print("Saved the plot", quote = FALSE)
 }
 
+#' Plot allele count versus origin time, coloured by birth rate
+#' 
+#' @param file file containing columns "AlleleCount", "OriginTime and "BirthRate"
+#' 
+#' @return plot displyed on screen
+#' 
+#' @export
+#' 
+#' @examples
+#' plot_allelecount_vs_origintime(system.file("extdata", "output_genotype_properties.dat", 
+#' package = "demonanalysis", mustWork = TRUE))
+plot_allelecount_vs_origintime <- function(file) {
+  if(!file.exists(file)) {
+    warning(paste0(file, " not found"))
+    plot(0, type = 'n', axes = FALSE, ann = FALSE)
+    return(NA)
+  }
+  df <- read_delim_special(file)
+  
+  ggplot(filter(df, AlleleCount > 0), aes(OriginTime, AlleleCount, size = BirthRate, colour = log10(BirthRate))) + 
+    geom_point(alpha = 0.5) + 
+    scale_color_continuous(low = "blue", high = "red") + 
+    theme_classic()
+}
+
 #' Plot counts of variant allele frequencies on linear scales
 #' 
 #' @param file file containing columns "Frequency" and "Count"

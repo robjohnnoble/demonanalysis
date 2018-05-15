@@ -114,7 +114,8 @@ write.csv(data, paste0(output_dir_data, "/data.csv"), row.names = FALSE)
 ### Read data
 
 ``` r
-data <- read.csv(paste0(output_dir_data, "/data.csv"), guess_max = 1E4) # large value of guess_max improves guessing of column types
+library(readr)
+data <- read_csv(paste0(output_dir_data, "/data.csv"), guess_max = 1E4) # large value of guess_max improves guessing of column types
 ```
 
 ### Copy plots from Euler
