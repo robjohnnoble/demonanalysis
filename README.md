@@ -81,9 +81,11 @@ all_statuses(input_dir, summary = TRUE) # all should be "Exit code 0"
 data <- all_output(input_dir, include_diversities = FALSE) # combined data for a batch of simulations, excluding diversity columns
 ```
 
-### Plot all trajectories (using dataframe)
+### Plot relationships between variables (using dataframe)
 
-plot_trajectories_faceted(data, num_parameters, x_var = "Generation", output_dir = output_dir_plots)
+``` r
+plot_curves_faceted(data, num_parameters, x_var = "Generation", y_var = "MeanBirthRate", output_dir = output_dir_plots) # change x_var and y_var as appropriate
+```
 
 ### Get additional data for forecasting
 
