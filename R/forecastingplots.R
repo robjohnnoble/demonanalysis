@@ -329,11 +329,13 @@ plot_trajectories_by_diversity <- function(df, output_filename = "trajectories_b
   if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
 
-#' Plot growth trajectories faceted by K (rows) and combinations of other parameters (columns)
+#' Plot relationship between two variavles faceted by K (rows) and combinations of other parameters (columns)
 #' 
 #' @param df data frame
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' @param x_var column name of the x-variable (default "gen_adj")
+#' @param y_var column name of the y-variable (default "NumCells")
+#' @param log if TRUE then y-axis will be log-transformed (default FALSE)
 #' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
 #' @param output_filename name of output image file
 #' @param file_type either "pdf" or "png" (other values default to "pdf")
@@ -344,9 +346,9 @@ plot_trajectories_by_diversity <- function(df, output_filename = "trajectories_b
 #' @import ggplot2
 #' 
 #' @examples 
-#' plot_trajectories_faceted(data, 16)
-#' plot_trajectories_faceted(data, 16, x_var = "Generation")
-plot_trajectories_faceted <- function(df, num_parameters, x_var = "gen_adj", output_filename = "trajectories_faceted", file_type = "png", output_dir = NA) {
+#' plot_curves_faceted(data, 16)
+#' plot_curves_faceted(data, 16, x_var = "Generation", y_var = "MeanBirthRate")
+plot_curves_faceted <- function(df, num_parameters, x_var = "gen_adj", y_var= "NumCells", log = FALSE, output_filename = NA, file_type = "png", output_dir = NA) {
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
   pars <- colnames(df)[1:num_parameters]
@@ -355,15 +357,17 @@ plot_trajectories_faceted <- function(df, num_parameters, x_var = "gen_adj", out
   
   pars_without_K <- pars[pars != "K"]
   
-  q <- ggplot(df, aes_string(x = x_var, y = "NumCells", group = paste0("interaction(", paste0(pars_without_K, collapse =  ", "), ")"))) + geom_line()
+  q <- ggplot(df, aes_string(x = x_var, y = y_var, group = paste0("interaction(", paste0(pars_without_K, collapse =  ", "), ")"))) + geom_line()
   
   pars_without_K_seed <- pars_without_K[pars_without_K != "seed"]
   
   q <- q +
     facet_grid(paste0("K ~ ", paste0("interaction(", paste0(pars_without_K_seed, collapse =  ", "), ")"))) + 
-    scale_x_continuous(name = "generations") +
-    scale_y_continuous(name = "tumour size", trans='log10') +
+    scale_x_continuous(name = x_var) +
     theme_classic()
+  
+  if(log) q <- q + scale_y_continuous(name = y_var, trans = 'log10')
+  else q <- q + scale_y_continuous(name = y_var)
   
   n_panels <- length(unique(ggplot_build(q)$data[[1]]$PANEL))
   dims <- wrap_dims(n_panels)
