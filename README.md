@@ -49,6 +49,12 @@ output_dir_plots <- paste0("plots/", subfolder_name) # folder to receive image f
 output_dir_data <- paste0("data/", subfolder_name) # folder containing data files
 ```
 
+### Check which simulations completed successfully
+
+``` r
+all_statuses(input_dir, summary = TRUE) # all should be "Exit code 0"
+```
+
 ### Create plots for a batch of simulations
 
 For growing tumours, to plot charts of variant allele frequencies and genotype sizes:
@@ -67,12 +73,6 @@ To plot Muller plots and grids:
 
 ``` r
 create_plots_batch(input_dir, output_dir_plots, type = "plot")
-```
-
-### Check which simulations completed successfully
-
-``` r
-all_statuses(input_dir, summary = TRUE) # all should be "Exit code 0"
 ```
 
 ### Get general-purpose data
