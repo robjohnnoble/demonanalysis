@@ -600,15 +600,13 @@ all_statuses <- function(input_dir, adjust = 0, summary = FALSE) {
 #' @param type what type of images to create: "plot" or "chart" or c("plot", "chart")
 #' @param file_type either "pdf" or "png" (other values default to "pdf")
 #' @param output_dir folder in which to save the image files
-#' @param max_genotype_size maximum limit of x-axis in genotype size plots
-#' @param max_allele_count maximum allele count (default NA corresponds to plotting frequencies, not counts)
-#' @param min_inc_moment minimum limit of y-axis in plot of the first incomplete moment of the allele frequency
+#' @param max_size maximum size (default NA corresponds to plotting frequencies, not sizes)
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' 
 #' @return a set of image files
 #' 
 #' @export
-create_plots_batch <- function(input_dir, type = "plot", file_type = "png", output_dir = NA, max_genotype_size = 1E4, max_allele_count = NA, min_inc_moment = 1e-3, generation = NA) {
+create_plots_batch <- function(input_dir, type = "plot", file_type = "png", output_dir = NA, max_size = NA, generation = NA) {
   pars_and_values <- parameter_names_and_values(input_dir)
   if(is.na(pars_and_values)[1]) stop("input_dir should contain results of a batch of simulations")
   pars <- pars_and_values$name
@@ -619,7 +617,7 @@ create_plots_batch <- function(input_dir, type = "plot", file_type = "png", outp
     msg <- final_error_message(full_dir)
     if(!identical(msg, character(0))) if(msg == "Exit code 0") {
       if("plot" %in% type) plot_all_images(full_dir, make_image_file_name("plot", pars, x), file_type, output_dir)
-      if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, x), file_type, output_dir, max_genotype_size, max_allele_count, min_inc_moment, generation)
+      if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, x), file_type, output_dir, max_size, generation)
     }
   }
   apply_combinations(final_values, each_plot)
