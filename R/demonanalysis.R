@@ -651,7 +651,7 @@ create_plots_batch <- function(input_dir, type = "plot", file_type = "png", outp
       if("origintimes" %in% type) {
         if(!is.na(output_dir)) {
           fname <- make_image_file_name("origintimes", pars, x)
-          if(file_type == "png") png(paste0(fname, ".png"), width = 700, height = 500, res = 100)
+          if(file_type == "png") png(paste0(output_dir, "/", fname, ".png"), width = 700, height = 500, res = 100)
           else pdf(paste0(fname, ".pdf"), width = 7, height = 5)
         }
         plot_allelecount_vs_origintime(paste0(full_dir, "output_genotype_properties.dat"))
