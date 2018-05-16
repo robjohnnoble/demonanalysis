@@ -219,6 +219,7 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
 #' Plot allele count versus origin time, coloured by birth rate
 #' 
 #' @param file file containing columns "AlleleCount", "OriginTime and "BirthRate"
+#' @param log if TRUE then y-axis will be log-transformed (default FALSE)
 #' 
 #' @return plot displyed on screen
 #' 
@@ -227,7 +228,7 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
 #' @examples
 #' plot_allelecount_vs_origintime(system.file("extdata", "output_genotype_properties.dat", 
 #' package = "demonanalysis", mustWork = TRUE))
-plot_allelecount_vs_origintime <- function(file) {
+plot_allelecount_vs_origintime <- function(file, log = FALSE) {
   if(!file.exists(file)) {
     warning(paste0(file, " not found"))
     plot(0, type = 'n', axes = FALSE, ann = FALSE)
@@ -235,10 +236,14 @@ plot_allelecount_vs_origintime <- function(file) {
   }
   df <- read_delim_special(file)
   
-  ggplot(filter(df, AlleleCount > 0), aes(OriginTime, AlleleCount, size = BirthRate, colour = log10(BirthRate))) + 
+  q <- ggplot(filter(df, AlleleCount > 0), aes(OriginTime, AlleleCount, size = BirthRate, colour = log10(BirthRate))) + 
     geom_point(alpha = 0.5) + 
     scale_color_continuous(low = "blue", high = "red") + 
     theme_classic()
+  
+  if(log) q <- q + scale_y_continuous(trans = 'log10')
+  
+  print(q)
 }
 
 #' Plot counts of variant allele frequencies on linear scales
@@ -622,7 +627,7 @@ all_statuses <- function(input_dir, adjust = 0, summary = FALSE) {
 #' Create image files for every simulation in a batch
 #' 
 #' @param input_dir base input directory name
-#' @param type what type of images to create: "plot" or "chart" or c("plot", "chart")
+#' @param type what type of images to create: "plot", "chart" or "origintimes" (or a vector containing two or more of these strings)
 #' @param file_type either "pdf" or "png" (other values default to "pdf")
 #' @param output_dir folder in which to save the image files
 #' @param max_size maximum size (default NA corresponds to plotting frequencies, not sizes)
@@ -643,6 +648,15 @@ create_plots_batch <- function(input_dir, type = "plot", file_type = "png", outp
     if(!identical(msg, character(0))) if(msg == "Exit code 0") {
       if("plot" %in% type) plot_all_images(full_dir, make_image_file_name("plot", pars, x), file_type, output_dir)
       if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, x), file_type, output_dir, max_size, generation)
+      if("origintimes" %in% type) {
+        if(!is.na(output_dir)) {
+          fname <- make_image_file_name("origintimes", pars, x)
+          if(file_type == "png") png(paste0(fname, ".png"), width = 700, height = 500, res = 100)
+          else pdf(paste0(fname, ".pdf"), width = 7, height = 5)
+        }
+        plot_allelecount_vs_origintime(paste0(full_dir, "output_genotype_properties.dat"))
+        if(!is.na(output_dir)) dev.off()
+      }
     }
   }
   apply_combinations(final_values, each_plot)

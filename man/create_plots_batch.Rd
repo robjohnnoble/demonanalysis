@@ -10,7 +10,7 @@ create_plots_batch(input_dir, type = "plot", file_type = "png",
 \arguments{
 \item{input_dir}{base input directory name}
 
-\item{type}{what type of images to create: "plot" or "chart" or c("plot", "chart")}
+\item{type}{what type of images to create: "plot", "chart" or "origintimes" (or a vector containing two or more of these strings)}
 
 \item{file_type}{either "pdf" or "png" (other values default to "pdf")}
 

@@ -4,10 +4,12 @@
 \alias{plot_allelecount_vs_origintime}
 \title{Plot allele count versus origin time, coloured by birth rate}
 \usage{
-plot_allelecount_vs_origintime(file)
+plot_allelecount_vs_origintime(file, log = FALSE)
 }
 \arguments{
 \item{file}{file containing columns "AlleleCount", "OriginTime and "BirthRate"}
+
+\item{log}{if TRUE then y-axis will be log-transformed (default FALSE)}
 }
 \value{
 plot displyed on screen
