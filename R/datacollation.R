@@ -59,7 +59,7 @@ parameter_names_and_values <- function(input_dir) {
     
     parent_dir <- paste0(parent_dir, "/", final_dir)
     
-    if("output.dat" %in% list.files(parent_dir, recursive = FALSE, full.names = FALSE)) break
+    if("init_conf_file.dat" %in% list.files(parent_dir, recursive = FALSE, full.names = FALSE)) break
   }
   return(out_df)
 }
