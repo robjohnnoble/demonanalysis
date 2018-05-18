@@ -592,8 +592,12 @@ final_generation <- function(input_dir) {
 final_error_message <- function(input_dir, adjust = 0) {
   if(substr(input_dir, nchar(input_dir), nchar(input_dir)) == "/") input_dir <- substr(input_dir, 1, nchar(input_dir) - 1)
   
-  res <- read_lines(paste0(input_dir, "/error_log.dat"))
-  return(res[length(res) - abs(adjust)])
+  fname <- paste0(input_dir, "/error_log.dat")
+  if(file.exists(fname))  {
+    res <- read_lines(fname)
+    return(res[length(res) - abs(adjust)])
+  }
+  else return("no file")
 }
 
 #' Return the final line (or an earlier line) of every error log in a batch of simulations.
