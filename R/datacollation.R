@@ -200,9 +200,7 @@ all_output <- function(input_dir, include_diversities = TRUE) {
   }
   res <- do.call(rbind, apply_combinations(final_values, each_df))
   
-  # report number of replicates per parameter set:
-  num_parameters = count_parameters(make_dir(input_dir, pars, final_values))
-  print(paste0("num_parameters: ", num_parameters), quote = FALSE)
+  # report seed counts:
   print("Number of seeds:", quote = FALSE)
   print(count_seeds(res, num_parameters))
   
