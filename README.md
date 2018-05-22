@@ -94,7 +94,7 @@ plot_curves_faceted(data, num_parameters, x_var = "Generation", y_var = "MeanBir
 data <- all_output(input_dir) # combined data for a batch of simulations, including diversity columns
 data <- add_relative_time(data, start_size = 5500, num_parameters = num_parameters) # add columns useful for plotting trajectories
 
-start_size_range <- 500 + (0:5) * 1000 # NumCells at time of initial measurement for forecasting
+start_size_range <- 500 * 2^(0:8) # NumCells at time of initial measurement for forecasting
 gap_range <- (1:10)/10 # gap between time of initial measurement and second measurement
 final_size <- 1E5 # waiting time is measured until tumour reaches this NumCells value
 

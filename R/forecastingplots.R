@@ -18,26 +18,29 @@
 plot_corr_outcome_versus_period <- function(df, col_name = "DriverDiversity", output_filename = "corr_outcome_versus_period", file_type = "png", output_dir = NA) {
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
+  start_size_range <- unique(df$start_size)
+  K_range <- unique(df$K)
+  
+  panel_cols <- ceiling(length(start_size_range) / 2)
+  
   if(!is.na(output_filename) & !is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir, output_filename,".png"), width = 800, height = 500, res = 100)
-    else pdf(paste0(output_dir, output_filename,".pdf"), width = 8, height = 5)
+    if(file_type == "png") png(paste0(output_dir, output_filename,".png"), width = 300 * panel_cols, height = 500, res = 100)
+    else pdf(paste0(output_dir, output_filename,".pdf"), width = 3 * panel_cols, height = 5)
   }
   
   if(substr(col_name, 1, 4) != "Cor_") col_name <- paste0("Cor_", col_name)
   col_name_suffix <- substr(col_name, 5, nchar(col_name))
   
-  start_size_range <- unique(df$start_size)
-  K_range <- unique(df$K)
-  
   cols <- rainbow(length(K_range))
   
-  par(mfrow=c(2, ceiling(length(start_size_range) / 2)))
+  par(mfrow=c(2, panel_cols))
   par(mar=c(4.5, 5, 1.5, 1))
   for(i in 1:length(start_size_range)) {
     start_size_val <- start_size_range[i]
     title <- paste("Measure at ", start_size_val, " cells", sep = "")
-    for(K_val in K_range) {
-      if(K_val == K_range[1]) {
+    for(j in 1:length(K_range)) {
+      K_val <- K_range[j]
+      if(j == 1) {
         plot(1, type = "n", xlim = c(0, 1), ylim = c(-1, 1),
              main = title, xlab = "projection period", ylab = paste0("correlation coefficient:\n", col_name_suffix, " vs tumour size"))
         if(i == 1) legend("bottomleft", as.character(K_range), title = "K", ncol = 3, 
@@ -45,7 +48,7 @@ plot_corr_outcome_versus_period <- function(df, col_name = "DriverDiversity", ou
       }
       df_filtered <- filter(df, start_size == start_size_val, K == K_val)
       lines(df_filtered[[col_name]] ~ df_filtered$gap, 
-            col = cols[log2(df_filtered$K) + 1], lwd = 2)
+            col = cols[j], lwd = 2)
       abline(h = 0, untf = FALSE, lty = 3)
     }
   }
@@ -88,16 +91,17 @@ plot_corr_waiting_time_versus_start_size <- function(df, col_name = "DriverDiver
   
   par(mfrow=c(1, 1))
   par(mar=c(4, 4, 2, 2))
-  for(K_val in K_range) {
-    if(K_val == K_range[1]) {
-      plot(1, type = "n", xlim = c(0, 6E3), ylim = c(-1, 1),
+  for(j in 1:length(K_range)) {
+    K_val <- K_range[j]
+    if(j == 1) {
+      plot(1, type = "n", xlim = c(0, max(start_size_range)), ylim = c(-1, 1),
            main = "", xlab = "tumour size at measurement", ylab = paste0("correlation coefficient:\n", col_name_suffix, " vs waiting time"))
       legend("topleft", as.character(K_range), title = "K", ncol = 3, lwd = 2, 
              xpd = TRUE, horiz = FALSE, inset = c(0, 0), bty = "n", lty = 1, col = cols)
       }
     df_filtered <- filter(df, K == K_val)
     lines(df_filtered[[col_name]] ~ df_filtered$start_size, 
-          col = cols[log2(df_filtered$K) + 1], lwd = 2)
+          col = cols[j], lwd = 2)
     abline(h = 0, untf = FALSE, lty = 3)
     }
   
@@ -168,13 +172,16 @@ plot_corr_waiting_time_versus_depth <- function(df, col_prefix, output_filename 
 plot_scatter_outcome_diversity <- function(df, col_name = "DriverDiversity", output_filename = "scatter_outcome_diversity", file_type = "png", output_dir = NA) {
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
+  gap_list <- unique(df$gap)
+  
+  panel_cols <- ceiling(length(gap_list) / 2)
+  
   if(!is.na(output_filename) & !is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 1000, height = 400, res = 100)
-    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 10, height = 4)
+    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 200 * panel_cols, height = 400, res = 100)
+    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 2 * panel_cols, height = 4)
   }
   
-  gap_list <- unique(df$gap)
-  par(mfrow=c(2, ceiling(length(gap_list)/2)))
+  par(mfrow=c(2, panel_cols))
   par(mar=c(4.5,5,2,1))
   for(gap in gap_list) {
     plot_data <- df[which(df$gap == gap), ]
@@ -211,13 +218,16 @@ plot_scatter_outcome_diversity <- function(df, col_name = "DriverDiversity", out
 plot_scatter_waiting_time_diversity <- function(df, col_name = "DriverDiversity", output_filename = "scatter_waiting_time_diversity", file_type = "png", output_dir = NA) {
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
+  start_list <- unique(df$start_size)
+  
+  panel_cols <- ceiling(length(start_list) / 2)
+  
   if(!is.na(output_filename) & !is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 600, height = 400, res = 100)
-    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 6, height = 4)
+    if(file_type == "png") png(paste0(output_dir, output_filename, ".png"), width = 200 * panel_cols, height = 400, res = 100)
+    else pdf(paste0(output_dir, output_filename, ".pdf"), width = 2 * panel_cols, height = 4)
   }
   
-  start_list <- unique(df$start_size)
-  par(mfrow=c(2, ceiling(length(start_list)/2)))
+  par(mfrow=c(2, panel_cols))
   par(mar=c(4.5,5,2,1))
   for(start_size in start_list) {
     plot_data <- df[which(df$start_size == start_size), ]
@@ -329,7 +339,7 @@ plot_trajectories_by_diversity <- function(df, output_filename = "trajectories_b
   if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
 
-#' Plot relationship between two variavles faceted by K (rows) and combinations of other parameters (columns)
+#' Plot relationship between two variables faceted by K (rows) and combinations of other parameters (columns)
 #' 
 #' @param df data frame
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
@@ -455,8 +465,8 @@ plot_R2_verus_sweep_metric <- function(df, col_name = "DriverDiversity", output_
     scale_fill_brewer(palette="Set1") + 
     facet_wrap(~start_size) +
     scale_x_continuous(name = "mean sweep metric") +
-    scale_y_continuous(name = paste0("R-squared: ", col_name_suffix, " vs. waiting time"), limits = c(-1,1)) +
-    geom_smooth(size = 1) +
+    scale_y_continuous(name = paste0("R-squared: ", col_name_suffix, " vs. waiting time")) +
+    geom_smooth(size = 1, method = lm) +
     theme_classic() + 
     labs(colour = 'K')
   

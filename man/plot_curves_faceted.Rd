@@ -2,7 +2,7 @@
 % Please edit documentation in R/forecastingplots.R
 \name{plot_curves_faceted}
 \alias{plot_curves_faceted}
-\title{Plot relationship between two variavles faceted by K (rows) and combinations of other parameters (columns)}
+\title{Plot relationship between two variables faceted by K (rows) and combinations of other parameters (columns)}
 \usage{
 plot_curves_faceted(df, num_parameters, x_var = "gen_adj",
   y_var = "NumCells", log = FALSE, output_filename = NA,
@@ -29,7 +29,7 @@ plot_curves_faceted(df, num_parameters, x_var = "gen_adj",
 a plot object
 }
 \description{
-Plot relationship between two variavles faceted by K (rows) and combinations of other parameters (columns)
+Plot relationship between two variables faceted by K (rows) and combinations of other parameters (columns)
 }
 \examples{
 plot_curves_faceted(data, 16)

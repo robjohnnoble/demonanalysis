@@ -327,7 +327,7 @@ find_correlations <- function(summary, factor1, factor2, result_name, min_count)
     mutate_(count1 = interp(~length(var1), var1 = as.name(factor1)), 
             count2 = interp(~length(var2), var2 = as.name(factor2))) %>% 
     filter(count1 >= min_count, count2 >= min_count) %>% 
-    summarise_(temp_name = interp(~cor(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2))) %>% 
+    summarise_(temp_name = interp(~cor(var1, var2, method = "spearman"), var1 = as.name(factor1), var2 = as.name(factor2))) %>% 
     rename_(.dots = setNames("temp_name", paste0(result_name)))
 }
 
@@ -408,6 +408,9 @@ get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_co
   cor_summary_list <- list()
   for(i in 1:length(col_names_list)) cor_summary_list[[i]] <- find_correlations(summary, "waiting_time", col_names_list[i], result_names_list[i], min_count)
   for(i in 1:length(col_names_list)) cor_summary <- merge(cor_summary, cor_summary_list[[i]], all.x = TRUE)
+  
+  cor_summary <- arrange(cor_summary, K, migration_type, migration_edge_only, start_size)
+  
   return(cor_summary)
 }
 
