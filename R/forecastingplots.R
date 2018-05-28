@@ -271,7 +271,7 @@ plot_trajectories_by_K <- function(df, x_var = "gen_adj", output_filename = "tra
   }
   
   q <- ggplot(df, aes(x = get(x_var), y = NumCells, colour = factor(K), group = interaction(K, seed)))
-  q <- q + geom_line() +
+  q <- q + geom_line(alpha = 0.5) +
     scale_x_continuous(name = "relative time") +
     scale_y_continuous(name = "tumour size") +
     theme_classic() + 
@@ -426,7 +426,7 @@ plot_viol_sweep_metric <- function(df, output_filename = "viol_sweep_metric", fi
   else p <- p + geom_point()
   
   p <- p + scale_x_discrete(name = "K") +
-    scale_y_log10(name = "mean autocorrelation") +
+    scale_y_log10(name = "turnover metric", limits = c(1e-6, 1)) +
     theme_classic()
   
   print(p)
