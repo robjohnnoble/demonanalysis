@@ -618,7 +618,7 @@ all_statuses <- function(input_dir, adjust = 0, summary = FALSE, with_names = FA
   
   each_msg <- function(x) {
     full_dir <- make_dir(input_dir, pars, x)
-    if(!summary & with_names) return(paste0(full_dir, " ", final_error_message(full_dir, adjust), quote = FALSE))
+    if(!summary & with_names) return(paste0(full_dir, " ", final_error_message(full_dir, adjust)))
     else return(final_error_message(full_dir, adjust))
   }
   stats <- apply_combinations(final_values, each_msg)
