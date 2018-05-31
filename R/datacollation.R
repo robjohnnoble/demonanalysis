@@ -49,7 +49,10 @@ parameter_names_and_values <- function(input_dir) {
     
     if(identical(dirs_list, character(0))) stop(paste0("Invalid folder name (", parent_dir), ")")
     
-    final_dir <- dirs_list[length(dirs_list)] # final subfolder (with largest parameter value)
+    list_splits <- strsplit(dirs_list, "_")
+    values <- lapply(dirs_list_split, function (x) x[length(x)])
+    values <- as.numeric(unlist(values))
+    final_dir <- dirs_list[which.max(values)] # final subfolder (with largest parameter value)
     
     splits <- strsplit(final_dir, "_")[[1]]
     parameter_val <- as.numeric(splits[length(splits)])
