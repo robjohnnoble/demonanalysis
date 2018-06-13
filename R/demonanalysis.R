@@ -474,7 +474,11 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   for(i in 1:4) {
     df1 <- read_delim_special(paste0(path, files_list[i]))
     if(is.na(generation)) generation <- max(df1$Generation)
-    df1 <- filter(df1, Generation == generation)
+    # find closest generation to user input
+    df1 <- filter(df1, abs(Generation - generation) == min(abs(Generation - generation)))
+    generation <- unique(df1$Generation)[1]
+    # make sure only one generation is used
+    df1 <- filter(df1, Generation == generation) 
     
     # plot 1:
     plot_counts(paste0(path, files_list[i]), xlab = paste0(axis_lab[i], " frequency"), ylim = c(0, 10))
