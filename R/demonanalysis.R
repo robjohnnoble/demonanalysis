@@ -474,10 +474,14 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   for(i in 1:4) {
     df1 <- read_delim_special(paste0(path, files_list[i]))
     if(is.na(generation)) generation <- max(df1$Generation)
-    df1 <- filter(df1, Generation == generation)
+    # find closest generation to user input
+    df1 <- filter(df1, abs(Generation - generation) == min(abs(Generation - generation)))
+    generation <- unique(df1$Generation)[1]
+    # make sure only one generation is used
+    df1 <- filter(df1, Generation == generation) 
     
     # plot 1:
-    plot_counts(paste0(path, files_list[i]), xlab = paste0(axis_lab[i], " frequency"), ylim = c(0, 10))
+    plot_counts(paste0(path, files_list[i]), xlab = paste0(axis_lab[i], " frequency"), generation = generation, ylim = c(0, 10))
     if(length(df1) > 1) div_alleles <- round(quadratic_diversity(df1[, c("Frequency", "Count")], 0.025, threshold = 0.1), 2)
     else div_alleles <- ""
     if(length(df1) > 1) text(1, 9, paste0("modes = ", div_alleles), pos = 2)
