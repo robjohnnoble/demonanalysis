@@ -629,7 +629,8 @@ all_statuses <- function(input_dir, adjust = 0, summary = FALSE, with_names = FA
   
   if(!summary) return(stats)
   else {
-    stats <- lapply(stats, function(x) if(identical(x, character(0))) "character(0)" else x)
+    stats <- lapply(stats, function(x) if(identical(x, character(0))) "So far no status" else x)
+    if(length(stats) == 0) return("So far no statuses to report")
     return(table(unlist(stats)))
   }
 }
