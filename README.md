@@ -52,7 +52,7 @@ output_dir_data <- paste0("data/", subfolder_name) # folder containing data file
 ### Check which simulations completed successfully
 
 ``` r
-all_statuses(input_dir, summary = TRUE) # should be "Exit code 0" (when finished) or "character(0)" (while running)
+all_statuses(input_dir, summary = TRUE) # should be "Exit code 0" (when finished) or "So far no status" (while running)
 ```
 
 ### Create plots for a batch of simulations
