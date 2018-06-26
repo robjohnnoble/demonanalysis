@@ -148,6 +148,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE) {
   df_driver_phylo <- read_delim(file_driver_phylo, "\t")
   
   df_driver_phylo <- filter(df_driver_phylo, CellsPerSample == -1, NumSamples == 1, SampleDepth == -1)
+  df_driver_phylo <- df_driver_phylo[!duplicated(df_driver_phylo), ]
   pop_df <- get_population_df(df_driver_phylo)
   
   if(include_diversities) temp <- merge(df_out, df_div, all = TRUE)
