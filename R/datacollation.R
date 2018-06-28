@@ -141,17 +141,26 @@ combine_dfs <- function(full_dir, include_diversities = TRUE) {
   file_out <- paste0(full_dir, "/output.dat")
   file_div <- paste0(full_dir, "/output_diversities.dat")
   file_driver_phylo <- paste0(full_dir, "/driver_phylo.dat")
+  file_allele_counts <- paste0(full_dir, "/output_allele_counts.dat")
   
   df_pars <- read_delim(file_pars, "\t")
   df_out <- read_delim(file_out, "\t")
-  if(include_diversities) df_div <- read_delim(file_div, "\t")
+  if(include_diversities) {
+    df_div <- read_delim(file_div, "\t")
+    df_allele_counts <- read_delim(file_allele_counts, "\t")
+    df_allele_counts <- filter(df_allele_counts, Generation == max(Generation))
+  }
   df_driver_phylo <- read_delim(file_driver_phylo, "\t")
   
   df_driver_phylo <- filter(df_driver_phylo, CellsPerSample == -1, NumSamples == 1, SampleDepth == -1)
   df_driver_phylo <- df_driver_phylo[!duplicated(df_driver_phylo), ]
   pop_df <- get_population_df(df_driver_phylo)
   
-  if(include_diversities) temp <- merge(df_out, df_div, all = TRUE)
+  if(include_diversities) {
+    temp <- merge(df_out, df_div, all = TRUE)
+    quad_div <- quadratic_diversity(df_allele_counts[, c("Frequency", "Count")], 0.025, threshold = 0.1)
+    temp <- mutate(temp, quad_div = quad_div)
+  }
   else temp <- df_out
   
   temp <- cbind(df_pars, temp)
