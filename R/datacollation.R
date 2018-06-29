@@ -271,10 +271,10 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
     for(gap in gap_range) {
       if(start_size < final_size) {
         new_summary1 <- data %>% 
-          filter(NumCells >= start_size, !is.na(DriverDiversity)) %>% 
+          filter(NumCells >= start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
           summarise(start_time = min(gen_adj, na.rm = TRUE))
         new_summary2 <- data %>% 
-          filter(NumCells >= final_size, !is.na(DriverDiversity)) %>% 
+          filter(NumCells >= final_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
           summarise(end_time = min(gen_adj, na.rm = TRUE))
         new_summary12 <- merge(new_summary1, new_summary2, all.x = TRUE)
         new_summary12 <- new_summary12 %>% 
@@ -282,19 +282,19 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
       }
       else {
         new_summary12 <- data %>% 
-          filter(NumCells >= start_size, !is.na(DriverDiversity)) %>% 
+          filter(NumCells >= start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
           summarise(waiting_time = NA, start_time = NA, end_time = NA)
       }
       new_summary3 <- data %>% 
-        filter(NumCells > start_size, !is.na(DriverDiversity)) %>% 
+        filter(NumCells > start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
         filter(gen_adj < min(gen_adj, na.rm = TRUE) + gap) %>% 
         summarise(outcome = max(NumCells, na.rm = TRUE))
       new_summary3a <- data %>% 
-        filter(NumCells > start_size, !is.na(DriverDiversity)) %>% 
+        filter(NumCells > start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
         summarise(outcome = max(NumCells, na.rm = TRUE))
       new_summary3$outcome <- ifelse(new_summary3$outcome == new_summary3a$outcome, NA, new_summary3$outcome)
       new_summary4 <- data %>% 
-        filter(NumCells > start_size, !is.na(DriverDiversity)) %>% 
+        filter(NumCells > start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
         filter(gen_adj == min(gen_adj, na.rm = TRUE)) %>%
         mutate(gap = gap, start_size = start_size)
       summary <- rbind(summary, merge(merge(new_summary12, new_summary3, all.x = TRUE), new_summary4, all.x = TRUE))
