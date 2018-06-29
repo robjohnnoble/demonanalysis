@@ -192,7 +192,7 @@ plot_scatter_outcome_diversity <- function(df, col_name = "DriverDiversity", out
       plot(plot_data$outcome ~ plot_data[[col_name]], col = "black",
          main = "", xlab = col_name, ylab = "final tumour size")
       mod1 <- lm(plot_data$outcome ~ plot_data[[col_name]])
-      abline(mod1, lty = 2)
+      if(!is.na(mod1$coefficients[2])) abline(mod1, lty = 2)
     }
     title(title, line = 0.5)
   }
@@ -238,7 +238,7 @@ plot_scatter_waiting_time_diversity <- function(df, col_name = "DriverDiversity"
       plot(plot_data$outcome ~ plot_data[[col_name]], col = "black",
            main = "", xlab = col_name, ylab = "waiting time")
       mod1 <- lm(plot_data$outcome ~ plot_data[[col_name]])
-      abline(mod1, lty = 2)
+      if(!is.na(mod1$coefficients[2])) abline(mod1, lty = 2)
     }
     title(title, line = 0.5)
   }

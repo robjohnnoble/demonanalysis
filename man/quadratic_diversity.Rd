@@ -4,10 +4,12 @@
 \alias{quadratic_diversity}
 \title{Rao's quadratic diversity, using a binary distance measure, converted to the effective number of species}
 \usage{
-quadratic_diversity(df, sigma, threshold = 0.1)
+quadratic_diversity(value, freq, sigma, threshold = 0.1)
 }
 \arguments{
-\item{df}{Dataframe with two columns containing trait values and their frequencies or abundancies}
+\item{value}{vector of trait values}
+
+\item{freq}{vector of frequencies or abundances}
 
 \item{sigma}{Cutoff for considering two trait values to be identical}
 
@@ -20,6 +22,5 @@ effective number of species
 Rao's quadratic diversity, using a binary distance measure, converted to the effective number of species
 }
 \examples{
-df <- data.frame(value = 1:5, count = 1:5)
-quadratic_diversity(df, 1)
+quadratic_diversity(1:5, 1:5, 1)
 }
