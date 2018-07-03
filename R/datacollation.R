@@ -183,9 +183,13 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
       }
       df_driver_genotype_properties$pop_size <- (df_out %>% filter(Generation == max(Generation)) %>% select(NumCells))$NumCells
       df_driver_genotype_properties$VAF <- calc_VAF(df_driver_genotype_properties)
-      df_driver_genotype_properties <- driver_genotype_properties_sim %>% filter(VAF >= cut_off, Identity != 0)
+      df_driver_genotype_properties <- df_driver_genotype_properties %>% filter(VAF >= cut_off, Identity != 0)
       # TODO: check that at least one row remains, otherwise nothing would be appended
-      temp <- cbind(df_pars, df_driver_genotype_properties)
+      if(nrow(df_driver_genotype_properties) == 0){
+        temp <- NULL
+      } else {
+        temp <- cbind(df_pars, df_driver_genotype_properties)
+      }
   } else if(df_type == "genotype_properties"){
       # already perform synthetic mutation calling, i.e. remove genotypes with VAF < cut_off (approx. coverage 500x)  
       df_genotype_properties <- read_delim(paste0(full_dir, "/output_genotype_properties.dat"), "\t")
@@ -201,7 +205,11 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
       df_genotype_properties$VAF <- calc_VAF(df_genotype_properties)
       df_genotype_properties <- df_genotype_properties %>% filter(VAF >= cut_off, Identity != 0)
       # TODO: check that at least one row remains, otherwise nothing would be appended
-      temp <- cbind(df_pars, df_genotype_properties)
+      if(nrow(df_genotype_properties) == 0){
+        temp <- NULL
+      } else {
+        temp <- cbind(df_pars, df_genotype_properties)
+      }
   }
   
   print(paste0("Result of combine_dfs has dimensions ", dim(temp)[1], " x ", dim(temp)[2]), quote = FALSE)
