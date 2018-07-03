@@ -133,7 +133,7 @@ add_relative_time <- function(df, start_size, num_parameters) {
 #' 
 #' @examples
 #' combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-combine_dfs <- function(full_dir, include_diversities = TRUE) {
+combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output") {
   
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
   
@@ -151,19 +151,58 @@ combine_dfs <- function(full_dir, include_diversities = TRUE) {
   df_driver_phylo <- df_driver_phylo[!duplicated(df_driver_phylo), ]
   pop_df <- get_population_df(df_driver_phylo)
   
-  if(include_diversities) temp <- merge(df_out, df_div, all = TRUE)
-  else temp <- df_out
-  
-  temp <- cbind(df_pars, temp)
-  
-  num_parameters <- count_parameters(full_dir)
-  temp <- add_columns(temp, num_parameters)
-  
-  sweep_seq <- sweep_sequence(pop_df, lag_type = "proportions", breaks = 10)
-  temp <- mutate(temp, mean_autocor = mean(sweep_seq), 
-                   log_mean_autocor = log(mean(sweep_seq)), 
-                   sqrt_mean_autocor = sqrt(mean(sweep_seq)), 
-                   skewness = skewness(sweep_seq))
+  if (df_type == "output"){
+    # procedure for 'traditional' df_out (output.dat)
+    if(include_diversities) temp <- merge(df_out, df_div, all = TRUE)
+    else temp <- df_out
+    
+    # creates df of df_out plus the parameters
+    temp <- cbind(df_pars, temp)
+    
+    # adds maxgen and gen_adj columns
+    num_parameters <- count_parameters(full_dir)
+    temp <- add_columns(temp, num_parameters) 
+    
+    # add sweep_seq columns (specific for output.dat?)
+    sweep_seq <- sweep_sequence(pop_df, lag_type = "proportions", breaks = 10)
+    temp <- mutate(temp, mean_autocor = mean(sweep_seq), 
+                     log_mean_autocor = log(mean(sweep_seq)), 
+                     sqrt_mean_autocor = sqrt(mean(sweep_seq)), 
+                     skewness = skewness(sweep_seq))
+  } else if (df_type == "driver_genotype_properties"){
+      # already perform synthetic mutation calling, i.e. remove genotypes with VAF < cut_off (approx. coverage 500x)
+      df_driver_genotype_properties <- read_delim(paste0(full_dir, "/output_driver_genotype_properties.dat"), "\t")
+      colnames(df_driver_genotype_properties) <- c("Population", "Parent", "Identity", "DriverMutations", "MigrationMutations", "Immortal", "PassengerMutations", "BirthRate", "MigrationRate", "OriginTime", "AlleleCount")
+      cut_off <- 0.002 # cut off for VAF; corresponds to a coverage of 500x
+      # data contains columns AlleleCount and pop_size
+      calc_VAF <- function(data){
+        alpha <- 1
+        coverage <- data$pop_size * alpha
+        VAF <- data$AlleleCount / coverage
+        return(VAF)
+      }
+      df_driver_genotype_properties$pop_size <- (df_out %>% filter(Generation == max(Generation)) %>% select(NumCells))$NumCells
+      df_driver_genotype_properties$VAF <- calc_VAF(df_driver_genotype_properties)
+      df_driver_genotype_properties <- driver_genotype_properties_sim %>% filter(VAF >= cut_off, Identity != 0)
+      # TODO: check that at least one row remains, otherwise nothing would be appended
+      temp <- cbind(df_pars, df_driver_genotype_properties)
+  } else if(df_type == "genotype_properties"){
+      # already perform synthetic mutation calling, i.e. remove genotypes with VAF < cut_off (approx. coverage 500x)  
+      df_genotype_properties <- read_delim(paste0(full_dir, "/output_genotype_properties.dat"), "\t")
+      cut_off <- 0.002 # cut off for VAF; corresponds to a coverage of 500x
+      # data contains columns AlleleCount and pop_size
+      calc_VAF <- function(data){
+        alpha <- 1
+        coverage <- data$pop_size * alpha
+        VAF <- data$AlleleCount / coverage
+        return(VAF)
+      }
+      df_genotype_properties$pop_size <- (df_out %>% filter(Generation == max(Generation)) %>% select(NumCells))$NumCells
+      df_genotype_properties$VAF <- calc_VAF(df_genotype_properties)
+      df_genotype_properties <- df_genotype_properties %>% filter(VAF >= cut_off, Identity != 0)
+      # TODO: check that at least one row remains, otherwise nothing would be appended
+      temp <- cbind(df_pars, df_genotype_properties)
+  }
   
   print(paste0("Result of combine_dfs has dimensions ", dim(temp)[1], " x ", dim(temp)[2]), quote = FALSE)
   
@@ -179,7 +218,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE) {
 #' @return a combined dataframe
 #' 
 #' @export
-all_output <- function(input_dir, include_diversities = TRUE) {
+all_output <- function(input_dir, include_diversities = TRUE, df_type = "output") {
   pars_and_values <- parameter_names_and_values(input_dir)
   if(is.na(pars_and_values)[1]) stop("input_dir should contain results of a batch of simulations")
   pars <- pars_and_values$name
@@ -199,7 +238,7 @@ all_output <- function(input_dir, include_diversities = TRUE) {
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
     print(paste0(full_dir, " ", msg), quote = FALSE)
-    if(!identical(msg, character(0))) if(msg == "Exit code 0") return(combine_dfs(full_dir, include_diversities))
+    if(!identical(msg, character(0))) if(msg == "Exit code 0") return(combine_dfs(full_dir, include_diversities, df_type))
     return(data.frame())
   }
   res <- do.call(rbind, apply_combinations(final_values, each_df))
