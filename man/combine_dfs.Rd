@@ -5,12 +5,17 @@
 \title{Combine data for one simulation, including population metrics, parameter values 
 and (optionally) diversity metrics, and with added columns containing derived variables.}
 \usage{
-combine_dfs(full_dir, include_diversities = TRUE)
+combine_dfs(full_dir, include_diversities = TRUE, df_type = "output",
+  vaf_cut_off = NA)
 }
 \arguments{
 \item{full_dir}{base input directory name}
 
 \item{include_diversities}{boolean whether to include diversity metrics}
+
+\item{df_type}{which dataframes to combine}
+
+\item{vaf_cut_off}{exclude genotypes with vaf lower cut off from combined_df}
 }
 \value{
 the combined dataframe

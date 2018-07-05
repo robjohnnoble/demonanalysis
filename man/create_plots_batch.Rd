@@ -5,7 +5,7 @@
 \title{Create image files for every simulation in a batch}
 \usage{
 create_plots_batch(input_dir, type = "plot", file_type = "png",
-  output_dir = NA, max_size = NA, generation = NA)
+  output_dir = NA, max_size = NA, generation = NA, numcells = NA)
 }
 \arguments{
 \item{input_dir}{base input directory name}
@@ -19,6 +19,8 @@ create_plots_batch(input_dir, type = "plot", file_type = "png",
 \item{max_size}{maximum size (default NA corresponds to plotting frequencies, not sizes)}
 
 \item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
+
+\item{numcells}{Number of cells at which to make the measurement (takes precedent over generation; default NA corresponds to the final size)}
 }
 \value{
 a set of image files

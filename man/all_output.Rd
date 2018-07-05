@@ -5,12 +5,17 @@
 \title{Create a composite dataframe for a batch of simulations, derived from multiple 
 data files per simulation.}
 \usage{
-all_output(input_dir, include_diversities = TRUE)
+all_output(input_dir, include_diversities = TRUE, df_type = "output",
+  vaf_cut_off = NA)
 }
 \arguments{
 \item{input_dir}{base input directory name}
 
 \item{include_diversities}{boolean whether to include diversity metrics}
+
+\item{df_type}{which dataframes to combine}
+
+\item{vaf_cut_off}{exclude genotypes with vaf lower cut off from combined_df}
 }
 \value{
 a combined dataframe

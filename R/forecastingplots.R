@@ -314,7 +314,7 @@ plot_trajectories_by_diversity <- function(df, output_filename = "trajectories_b
     NumCells,
     group = interaction(seed, K),
     data = df,
-    colour = rank_div0,
+    colour = div0,
     geom = "line") + 
     scale_colour_distiller(palette = "RdYlBu", name = "diversity at periphery") +
     facet_grid(.~K, scales = "free") +

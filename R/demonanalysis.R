@@ -439,6 +439,7 @@ plot_first_inc_moment <- function(sizes, counts, max_size = 1, ...) {
 #' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
 #' @param max_size maximum size (default NA corresponds to plotting frequencies, not sizes)
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
+#' @param numcells Number of cells at which to make the measurement (takes precedent over generation; default NA corresponds to the final size)
 #' 
 #' @return plot displyed on screen
 #' 
@@ -454,7 +455,7 @@ plot_first_inc_moment <- function(sizes, counts, max_size = 1, ...) {
 #' 
 #' @examples
 #' plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-plot_all_charts <- function(path, output_filename = NA, file_type = "png", output_dir = NA, max_size = NA, generation = NA) {
+plot_all_charts <- function(path, output_filename = NA, file_type = "png", output_dir = NA, max_size = NA, generation = NA, numcells = NA) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
@@ -473,12 +474,21 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   
   for(i in 1:4) {
     df1 <- read_delim_special(paste0(path, files_list[i]))
-    if(is.na(generation)) generation <- max(df1$Generation)
-    # find closest generation to user input
-    df1 <- filter(df1, abs(Generation - generation) == min(abs(Generation - generation)))
-    generation <- unique(df1$Generation)[1]
-    # make sure only one generation is used
-    df1 <- filter(df1, Generation == generation) 
+    
+    if(!is.na(numcells)) {
+      df1 <- filter(df1, abs(NumCells - numcells) == min(abs(NumCells - numcells)))
+      numcells <- unique(df1$NumCells)[1]
+      # make sure only one NumCells is used
+      df1 <- filter(df1, NumCells == numcells)
+    }
+    else {
+      if(is.na(generation)) generation <- max(df1$Generation)
+      # find closest generation to user input
+      df1 <- filter(df1, abs(Generation - generation) == min(abs(Generation - generation)))
+      generation <- unique(df1$Generation)[1]
+      # make sure only one generation is used
+      df1 <- filter(df1, Generation == generation)
+    }
     
     # plot 1:
     plot_counts(paste0(path, files_list[i]), xlab = paste0(axis_lab[i], " frequency"), generation = generation, ylim = c(0, 10))
@@ -643,11 +653,12 @@ all_statuses <- function(input_dir, adjust = 0, summary = FALSE, with_names = FA
 #' @param output_dir folder in which to save the image files
 #' @param max_size maximum size (default NA corresponds to plotting frequencies, not sizes)
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
+#' @param numcells Number of cells at which to make the measurement (takes precedent over generation; default NA corresponds to the final size)
 #' 
 #' @return a set of image files
 #' 
 #' @export
-create_plots_batch <- function(input_dir, type = "plot", file_type = "png", output_dir = NA, max_size = NA, generation = NA) {
+create_plots_batch <- function(input_dir, type = "plot", file_type = "png", output_dir = NA, max_size = NA, generation = NA, numcells = NA) {
   pars_and_values <- parameter_names_and_values(input_dir)
   if(is.na(pars_and_values)[1]) stop("input_dir should contain results of a batch of simulations")
   pars <- pars_and_values$name
@@ -658,7 +669,7 @@ create_plots_batch <- function(input_dir, type = "plot", file_type = "png", outp
     msg <- final_error_message(full_dir)
     if(!identical(msg, character(0))) if(msg == "Exit code 0") {
       if("plot" %in% type) plot_all_images(full_dir, make_image_file_name("plot", pars, x), file_type, output_dir)
-      if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, x), file_type, output_dir, max_size, generation)
+      if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, x), file_type, output_dir, max_size, generation, numcells)
       if("origintimes" %in% type) {
         if(!is.na(output_dir)) {
           fname <- make_image_file_name("origintimes", pars, x)

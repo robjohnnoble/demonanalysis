@@ -5,7 +5,7 @@
 \title{Plot a set of charts representing allele frequencies and genotype sizes}
 \usage{
 plot_all_charts(path, output_filename = NA, file_type = "png",
-  output_dir = NA, max_size = NA, generation = NA)
+  output_dir = NA, max_size = NA, generation = NA, numcells = NA)
 }
 \arguments{
 \item{path}{folder containing the input files}
@@ -19,6 +19,8 @@ plot_all_charts(path, output_filename = NA, file_type = "png",
 \item{max_size}{maximum size (default NA corresponds to plotting frequencies, not sizes)}
 
 \item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
+
+\item{numcells}{Number of cells at which to make the measurement (takes precedent over generation; default NA corresponds to the final size)}
 }
 \value{
 plot displyed on screen
