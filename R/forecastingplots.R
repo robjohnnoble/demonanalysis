@@ -308,33 +308,20 @@ plot_trajectories_by_diversity <- function(df, output_filename = "trajectories_b
   }
   
   K_list <- unique(df$K)
-  mid_K <- K_list[floor(length(K_list) / 2)]
   
   qp1 <- qplot(
     new_time,
     NumCells,
     group = interaction(seed, K),
-    data = filter(df, K <= mid_K),
-    colour = div0,
-    geom = "line")
-  qp2 <- qplot(
-    new_time,
-    NumCells,
-    group = interaction(seed, K),
-    data = filter(df, K > mid_K),
-    colour = div0,
-    geom = "line")
-  qp1 <- qp1 + scale_colour_gradientn(colours = c(brewer.pal(5, "RdYlBu"), "#0000FF"), name = "diversity at periphery") +
+    data = df,
+    colour = rank_div0,
+    geom = "line") + 
+    scale_colour_distiller(palette = "RdYlBu", name = "diversity at periphery") +
     facet_grid(.~K, scales = "free") +
     scale_x_continuous(name = "relative time") +
     scale_y_continuous(name = "tumour size") +
     theme_classic()
-  qp2 <- qp2 + scale_colour_gradientn(colours = c(brewer.pal(5, "RdYlBu"), "#0000FF"), name = "diversity at periphery") +
-    facet_grid(.~K, scales = "free") +
-    scale_x_continuous(name = "relative time") +
-    scale_y_continuous(name = "tumour size") +
-    theme_classic()
-  print(grid.arrange(qp1, qp2, nrow = 2))
+  print(qp1)
   
   if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
@@ -345,7 +332,12 @@ plot_trajectories_by_diversity <- function(df, output_filename = "trajectories_b
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' @param x_var column name of the x-variable (default "gen_adj")
 #' @param y_var column name of the y-variable (default "NumCells")
-#' @param log if TRUE then y-axis will be log-transformed (default FALSE)
+#' @param log if this contains "x" (resp "y") then x-axis (resp y-axis) will be log-transformed (default NA)
+#' @param xlimits limits for x-axis
+#' @param ylimits limits for y-axis
+#' @param line_col line colour or column name of variable to colour by
+#' @param alpha line transparency level (if line_col is not specified)
+#' @param xintercept position of vertical dashed line (default NA means no line)
 #' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
 #' @param output_filename name of output image file
 #' @param file_type either "pdf" or "png" (other values default to "pdf")
@@ -354,12 +346,15 @@ plot_trajectories_by_diversity <- function(df, output_filename = "trajectories_b
 #' 
 #' @export
 #' @import ggplot2
+#' @import RColorBrewer
 #' @importFrom rlang sym
 #' 
 #' @examples 
 #' plot_curves_faceted(data, 16)
 #' plot_curves_faceted(data, 16, x_var = "Generation", y_var = "MeanBirthRate")
-plot_curves_faceted <- function(df, num_parameters, x_var = "gen_adj", y_var= "NumCells", log = FALSE, output_filename = NA, file_type = "png", output_dir = NA) {
+plot_curves_faceted <- function(df, num_parameters, x_var = "gen_adj", y_var= "NumCells", 
+                                log = NA, xlimits = NULL, ylimits = NULL, line_col = "#00000005", alpha = 0.1, xintercept = NA, 
+                                output_filename = NA, file_type = "png", output_dir = NA) {
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
   pars <- colnames(df)[1:num_parameters]
@@ -370,17 +365,26 @@ plot_curves_faceted <- function(df, num_parameters, x_var = "gen_adj", y_var= "N
   
   df <- filter(df, !is.na(!!rlang::sym(y_var)))
   
-  q <- ggplot(df, aes_string(x = x_var, y = y_var, group = paste0("interaction(", paste0(pars_without_K, collapse =  ", "), ")"))) + geom_line()
+  q <- ggplot(df, aes_string(x = x_var, y = y_var, 
+                             group = paste0("interaction(", paste0(pars_without_K, collapse =  ", "), ")")))
+  
+  if(!is.na(xintercept)) q <- q + geom_vline(aes(xintercept = xintercept), linetype = "dashed")
+  
+  if(line_col %in% colnames(df)) q <- q + geom_line(aes_string(col = line_col), alpha = alpha) + 
+    scale_colour_distiller(palette = "RdYlBu")
+  else q <- q + geom_line(col = line_col)
   
   pars_without_K_seed <- pars_without_K[pars_without_K != "seed"]
   
   q <- q +
     facet_grid(paste0("K ~ ", paste0("interaction(", paste0(pars_without_K_seed, collapse =  ", "), ")"))) + 
-    scale_x_continuous(name = x_var) +
     theme_classic()
   
-  if(log) q <- q + scale_y_continuous(name = y_var, trans = 'log10')
-  else q <- q + scale_y_continuous(name = y_var)
+  if(grepl("y", log)) q <- q + scale_y_continuous(name = y_var, trans = 'log10', limits = ylimits)
+  else q <- q + scale_y_continuous(name = y_var, limits = ylimits)
+  
+  if(grepl("x", log)) q <- q + scale_x_continuous(name = x_var, trans = 'log10', limits = xlimits)
+  else q <- q + scale_x_continuous(name = x_var, limits = xlimits)
   
   n_panels <- length(unique(ggplot_build(q)$data[[1]]$PANEL))
   dims <- wrap_dims(n_panels)
