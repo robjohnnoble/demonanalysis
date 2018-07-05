@@ -122,18 +122,21 @@ add_relative_time <- function(df, start_size, num_parameters) {
 #' 
 #' @param full_dir base input directory name
 #' @param include_diversities boolean whether to include diversity metrics
+#' @param df_type which dataframes to combine
+#' @param vaf_cut_off exclude genotypes with vaf lower cut off from combined_df
 #' 
 #' @return the combined dataframe
 #' 
 #' @importFrom readr read_delim
 #' @importFrom dplyr bind_cols
+#' @importFrom data.table fread
 #' @importFrom moments skewness
 #' 
 #' @export
 #' 
 #' @examples
 #' combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output") {
+combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output", vaf_cut_off = NA) {
   
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
   
@@ -142,10 +145,10 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
   file_div <- paste0(full_dir, "/output_diversities.dat")
   file_driver_phylo <- paste0(full_dir, "/driver_phylo.dat")
   
-  df_pars <- read_delim(file_pars, "\t")
-  df_out <- read_delim(file_out, "\t")
-  if(include_diversities) df_div <- read_delim(file_div, "\t")
-  df_driver_phylo <- read_delim(file_driver_phylo, "\t")
+  df_pars <- fread(file_pars)
+  df_out <- fread(file_out)
+  if(include_diversities) df_div <- fread(file_div)
+  df_driver_phylo <- fread(file_driver_phylo)
   
   df_driver_phylo <- filter(df_driver_phylo, CellsPerSample == -1, NumSamples == 1, SampleDepth == -1)
   df_driver_phylo <- df_driver_phylo[!duplicated(df_driver_phylo), ]
@@ -170,10 +173,8 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
                      sqrt_mean_autocor = sqrt(mean(sweep_seq)), 
                      skewness = skewness(sweep_seq))
   } else if (df_type == "driver_genotype_properties"){
-      # already perform synthetic mutation calling, i.e. remove genotypes with VAF < cut_off (approx. coverage 500x)
-      df_driver_genotype_properties <- read_delim(paste0(full_dir, "/output_driver_genotype_properties.dat"), "\t")
+      df_driver_genotype_properties <- fread(paste0(full_dir, "/output_driver_genotype_properties.dat"))
       colnames(df_driver_genotype_properties) <- c("Population", "Parent", "Identity", "DriverMutations", "MigrationMutations", "Immortal", "PassengerMutations", "BirthRate", "MigrationRate", "OriginTime", "AlleleCount")
-      cut_off <- 0.002 # cut off for VAF; corresponds to a coverage of 500x
       # data contains columns AlleleCount and pop_size
       calc_VAF <- function(data){
         alpha <- 1
@@ -183,18 +184,16 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
       }
       df_driver_genotype_properties$pop_size <- (df_out %>% filter(Generation == max(Generation)) %>% select(NumCells))$NumCells
       df_driver_genotype_properties$VAF <- calc_VAF(df_driver_genotype_properties)
-      df_driver_genotype_properties <- df_driver_genotype_properties %>% filter(VAF >= cut_off, Identity != 0)
-      # TODO: check that at least one row remains, otherwise nothing would be appended
+      if(!is.na(vaf_cut_off)) {
+        df_driver_genotype_properties <- df_genotype_properties %>% filter(VAF >= vaf_cut_off | Population > 0)
+      }
       if(nrow(df_driver_genotype_properties) == 0){
         temp <- NULL
       } else {
         temp <- cbind(df_pars, df_driver_genotype_properties)
       }
   } else if(df_type == "genotype_properties"){
-      # already perform synthetic mutation calling, i.e. remove genotypes with VAF < cut_off (approx. coverage 500x)  
-      df_genotype_properties <- read_delim(paste0(full_dir, "/output_genotype_properties.dat"), "\t")
-      cut_off <- 0.002 # cut off for VAF; corresponds to a coverage of 500x
-      # data contains columns AlleleCount and pop_size
+      df_genotype_properties <- fread(paste0(full_dir, "/output_genotype_properties.dat"))
       calc_VAF <- function(data){
         alpha <- 1
         coverage <- data$pop_size * alpha
@@ -203,13 +202,17 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
       }
       df_genotype_properties$pop_size <- (df_out %>% filter(Generation == max(Generation)) %>% select(NumCells))$NumCells
       df_genotype_properties$VAF <- calc_VAF(df_genotype_properties)
-      df_genotype_properties <- df_genotype_properties %>% filter(VAF >= cut_off, Identity != 0)
-      # TODO: check that at least one row remains, otherwise nothing would be appended
+      # filter out too low VAF but keep rows with pop > 0
+      if(!is.na(vaf_cut_off)) {
+        df_genotype_properties <- df_genotype_properties %>% filter(VAF >= vaf_cut_off | Population > 0)
+      }
       if(nrow(df_genotype_properties) == 0){
         temp <- NULL
       } else {
         temp <- cbind(df_pars, df_genotype_properties)
       }
+  } else {
+    stop("no valid df_type argument was passed")
   }
   
   print(paste0("Result of combine_dfs has dimensions ", dim(temp)[1], " x ", dim(temp)[2]), quote = FALSE)
@@ -222,11 +225,13 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 #' 
 #' @param input_dir base input directory name
 #' @param include_diversities boolean whether to include diversity metrics
+#' @param df_type which dataframes to combine
+#' @param vaf_cut_off exclude genotypes with vaf lower cut off from combined_df
 #' 
 #' @return a combined dataframe
 #' 
 #' @export
-all_output <- function(input_dir, include_diversities = TRUE, df_type = "output") {
+all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", vaf_cut_off = NA) {
   pars_and_values <- parameter_names_and_values(input_dir)
   if(is.na(pars_and_values)[1]) stop("input_dir should contain results of a batch of simulations")
   pars <- pars_and_values$name
@@ -246,10 +251,10 @@ all_output <- function(input_dir, include_diversities = TRUE, df_type = "output"
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
     print(paste0(full_dir, " ", msg), quote = FALSE)
-    if(!identical(msg, character(0))) if(msg == "Exit code 0") return(combine_dfs(full_dir, include_diversities, df_type))
+    if(!identical(msg, character(0))) if(msg == "Exit code 0") return(combine_dfs(full_dir, include_diversities, df_type, vaf_cut_off))
     return(data.frame())
   }
-  res <- do.call(rbind, apply_combinations(final_values, each_df))
+  res <- rbindlist(apply_combinations(final_values, each_df))
   
   # report seed counts:
   print("Number of seeds:", quote = FALSE)
