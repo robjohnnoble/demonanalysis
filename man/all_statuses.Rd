@@ -4,7 +4,7 @@
 \alias{all_statuses}
 \title{Return the final line (or an earlier line) of every error log in a batch of simulations.}
 \usage{
-all_statuses(input_dir, adjust = 0, summary = FALSE)
+all_statuses(input_dir, adjust = 0, summary = FALSE, with_names = FALSE)
 }
 \arguments{
 \item{input_dir}{base input directory name}
@@ -12,6 +12,8 @@ all_statuses(input_dir, adjust = 0, summary = FALSE)
 \item{adjust}{number of lines prior to the final line (default 0)}
 
 \item{summary}{if TRUE then return a table instead of a list (default FALSE)}
+
+\item{with_names}{if TRUE (and if summary is FALSE) then include directory name with each result}
 }
 \value{
 one line from each error log

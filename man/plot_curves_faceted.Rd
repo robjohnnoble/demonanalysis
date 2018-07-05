@@ -5,8 +5,9 @@
 \title{Plot relationship between two variables faceted by K (rows) and combinations of other parameters (columns)}
 \usage{
 plot_curves_faceted(df, num_parameters, x_var = "gen_adj",
-  y_var = "NumCells", log = FALSE, output_filename = NA,
-  file_type = "png", output_dir = NA)
+  y_var = "NumCells", log = NA, xlimits = NULL, ylimits = NULL,
+  line_col = "#00000005", alpha = 0.1, xintercept = NA,
+  output_filename = NA, file_type = "png", output_dir = NA)
 }
 \arguments{
 \item{df}{data frame}
@@ -17,7 +18,17 @@ plot_curves_faceted(df, num_parameters, x_var = "gen_adj",
 
 \item{y_var}{column name of the y-variable (default "NumCells")}
 
-\item{log}{if TRUE then y-axis will be log-transformed (default FALSE)}
+\item{log}{if this contains "x" (resp "y") then x-axis (resp y-axis) will be log-transformed (default NA)}
+
+\item{xlimits}{limits for x-axis}
+
+\item{ylimits}{limits for y-axis}
+
+\item{line_col}{line colour or column name of variable to colour by}
+
+\item{alpha}{line transparency level (if line_col is not specified)}
+
+\item{xintercept}{position of vertical dashed line (default NA means no line)}
 
 \item{output_filename}{name of output image file}
 
