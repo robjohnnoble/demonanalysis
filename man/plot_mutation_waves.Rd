@@ -2,7 +2,7 @@
 % Please edit documentation in R/demonanalysis.R
 \name{plot_mutation_waves}
 \alias{plot_mutation_waves}
-\title{Plot numers of cells with n mutations for each value of n}
+\title{Plot numbers of cells with n mutations for each value of n}
 \usage{
 plot_mutation_waves(df)
 }
@@ -13,7 +13,7 @@ plot_mutation_waves(df)
 plot displyed on screen
 }
 \description{
-Plot numers of cells with n mutations for each value of n
+Plot numbers of cells with n mutations for each value of n
 }
 \examples{
 plot_mutation_waves(output)

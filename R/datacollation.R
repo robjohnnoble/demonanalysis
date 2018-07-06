@@ -231,6 +231,8 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 #' 
 #' @return a combined dataframe
 #' 
+#' @importFrom data.table rbindlist
+#' 
 #' @export
 all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", vaf_cut_off = NA) {
   pars_and_values <- parameter_names_and_values(input_dir)
