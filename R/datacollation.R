@@ -14,13 +14,11 @@ count_parameters <- function(full_dir) {
   
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
   
-  files_list = list.files(full_dir, recursive = TRUE)
+  files_list = list.files(full_dir, recursive = TRUE, pattern = "parameters.dat")
+
+  if(identical(files_list, character(0))) stop("Cannot find a parameters file")
   
-  present_file = grepl("parameters.dat", files_list)
-  
-  if(sum(present_file) == 0) stop("Cannot find a parameters file")
-  
-  file_pars <- files_list[present_file][1]
+  file_pars <- files_list[1]
   
   df_pars <- read_delim(paste0(full_dir, "/", file_pars), "\t")
   
@@ -62,7 +60,7 @@ parameter_names_and_values <- function(input_dir) {
     
     parent_dir <- paste0(parent_dir, "/", final_dir)
     
-    if("init_conf_file.dat" %in% list.files(parent_dir, recursive = FALSE, full.names = FALSE)) break
+    if("parameters.dat" %in% list.files(parent_dir, recursive = FALSE, full.names = FALSE)) break
   }
   return(out_df)
 }
@@ -136,6 +134,10 @@ add_relative_time <- function(df, start_size, num_parameters) {
 #' 
 #' @examples
 #' combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
+#' combine_dfs(full_dir = system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
+#' df_type = "driver_genotype_properties")
+#' combine_dfs(full_dir = system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
+#' df_type = "genotype_properties", vaf_cut_off = 0.002)
 combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output", vaf_cut_off = NA) {
   
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
@@ -146,17 +148,18 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
   file_driver_phylo <- paste0(full_dir, "/driver_phylo.dat")
   file_allele_counts <- paste0(full_dir, "/output_allele_counts.dat")
   
-  df_pars <- fread(file_pars)
   df_out <- fread(file_out)
-  if(include_diversities) df_div <- fread(file_div)
-  df_driver_phylo <- fread(file_driver_phylo)
-  
-  df_driver_phylo <- filter(df_driver_phylo, CellsPerSample == -1, NumSamples == 1, SampleDepth == -1)
-  df_driver_phylo <- df_driver_phylo[!duplicated(df_driver_phylo), ]
-  pop_df <- get_population_df(df_driver_phylo)
+  df_pars <- fread(file_pars)
   
   if (df_type == "output"){
     # procedure for 'traditional' df_out (output.dat)
+    if(include_diversities) df_div <- fread(file_div)
+    df_driver_phylo <- fread(file_driver_phylo)
+    
+    df_driver_phylo <- filter(df_driver_phylo, CellsPerSample == -1, NumSamples == 1, SampleDepth == -1)
+    df_driver_phylo <- df_driver_phylo[!duplicated(df_driver_phylo), ]
+    pop_df <- get_population_df(df_driver_phylo)
+    
     if(include_diversities) temp <- merge(df_out, df_div, all = TRUE)
     else temp <- df_out
     
@@ -164,7 +167,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
     temp <- cbind(df_pars, temp)
     
     # adds maxgen and gen_adj columns
-    num_parameters <- count_parameters(full_dir)
+    if(!exists("num_parameters")) num_parameters <- count_parameters(full_dir)
     temp <- add_columns(temp, num_parameters) 
     
     # add sweep_seq columns (specific for output.dat?)
@@ -186,7 +189,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
       df_driver_genotype_properties$pop_size <- (df_out %>% filter(Generation == max(Generation)) %>% select(NumCells))$NumCells
       df_driver_genotype_properties$VAF <- calc_VAF(df_driver_genotype_properties)
       if(!is.na(vaf_cut_off)) {
-        df_driver_genotype_properties <- df_genotype_properties %>% filter(VAF >= vaf_cut_off | Population > 0)
+        df_driver_genotype_properties <- df_driver_genotype_properties %>% filter(VAF >= vaf_cut_off | Population > 0)
       }
       if(nrow(df_driver_genotype_properties) == 0){
         temp <- NULL
@@ -213,6 +216,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
         temp <- cbind(df_pars, df_genotype_properties)
       }
   } else {
+    warning
     stop("no valid df_type argument was passed")
   }
   
@@ -234,7 +238,18 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 #' @importFrom data.table rbindlist
 #' 
 #' @export
+#' 
+#' @examples
+#' all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE))
+#' all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
+#' df_type = "driver_genotype_properties")
+#' all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
+#' df_type = "genotype_properties", vaf_cut_off = 0.002)
 all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", vaf_cut_off = NA) {
+  
+  df_type_list <- c("output", "driver_genotype_properties", "genotype_properties")
+  stopifnot(df_type %in% df_type_list)
+  
   pars_and_values <- parameter_names_and_values(input_dir)
   if(is.na(pars_and_values)[1]) stop("input_dir should contain results of a batch of simulations")
   pars <- pars_and_values$name
@@ -250,6 +265,7 @@ all_output <- function(input_dir, include_diversities = TRUE, df_type = "output"
   
   print("Finished checking", quote = FALSE)
   
+  num_parameters <- count_parameters(input_dir)
   each_df <- function(x, res) {
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)

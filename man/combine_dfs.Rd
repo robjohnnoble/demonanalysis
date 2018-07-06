@@ -26,4 +26,8 @@ and (optionally) diversity metrics, and with added columns containing derived va
 }
 \examples{
 combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
+combine_dfs(full_dir = system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
+df_type = "driver_genotype_properties")
+combine_dfs(full_dir = system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
+df_type = "genotype_properties", vaf_cut_off = 0.002)
 }

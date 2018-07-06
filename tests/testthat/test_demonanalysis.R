@@ -43,8 +43,45 @@ test_that("find_correlations perfect fit", {
   expect_equal(find_correlations(s1, "a", "b", "c", 3)$c, 1)
 })
 
+test_that("combine_dfs() returns the desired output files", {
+  full_dir <- system.file("extdata", "", package = "demonanalysis", mustWork = TRUE)
+  # test dimensions output.dat
+  expect_equal(dim(combine_dfs(full_dir = full_dir, include_diversities = TRUE)), c(32, 128))
+  expect_equal(dim(combine_dfs(full_dir = full_dir, include_diversities = FALSE)), c(32, 53))
+  
+  # test driver_genotype_properties
+  expect_equal(dim(combine_dfs(full_dir = full_dir, df_type = "driver_genotype_properties")), c(122,29))
+  # with vaf_cut_off
+  df_cut <- combine_dfs(full_dir = full_dir, df_type = "driver_genotype_properties", vaf_cut_off = 0.002)
+  expect_equal(dim(df_cut), c(112,29))
+  expect_equal(nrow(df_cut %>% filter(Population == 0, VAF < 0.002)), 0)
 
+  # test genotype_properties
+  expect_equal(dim(combine_dfs(full_dir = full_dir, df_type = "genotype_properties")), c(1219,29))
+  df_cut <- combine_dfs(full_dir = full_dir, df_type = "genotype_properties", vaf_cut_off = 0.002)
+  expect_equal(dim(df_cut), c(724,29))
+  expect_equal(nrow(df_cut %>% filter(Population == 0, VAF < 0.002)), 0)
+  
+  # test wrong user input
+  expect_error(combine_dfs(full_dir, df_type = "not a type"))
+})
 
+test_that("all_output() returns the desired output files", {
+  input_dir <- system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE)
+  all_output <- all_output(input_dir)
+  expect_equal(dim(all_output), c(44,59))
+  expect_equivalent(table(all_output$K, all_output$seed), as.table(matrix(c(11,11,11,11), nrow=2)))
+  
+  expect_equal(dim(all_output(input_dir, df_type = "driver_genotype_properties")), c(223, 31))
+  df_cut <- all_output(input_dir, df_type = "driver_genotype_properties", vaf_cut_off = 0.002)
+  expect_equal(dim(df_cut), c(222,31))
+  expect_equal(nrow(df_cut %>% filter(Population == 0, VAF < 0.002)), 0)
+  
+  expect_equal(dim(all_output(input_dir, df_type = "genotype_properties")), c(457, 31))
+  df_cut <- all_output(input_dir, df_type = "genotype_properties", vaf_cut_off = 0.002)
+  expect_equal(dim(df_cut), c(427,31))
+  expect_equal(nrow(df_cut %>% filter(Population == 0, VAF < 0.002)), 0)
 
-
+  expect_error(all_output(input_dir, df_type = "not a type"))
+})
 

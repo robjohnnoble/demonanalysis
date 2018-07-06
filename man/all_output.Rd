@@ -24,3 +24,10 @@ a combined dataframe
 Create a composite dataframe for a batch of simulations, derived from multiple 
 data files per simulation.
 }
+\examples{
+all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE))
+all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
+df_type = "driver_genotype_properties")
+all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
+df_type = "genotype_properties", vaf_cut_off = 0.002)
+}

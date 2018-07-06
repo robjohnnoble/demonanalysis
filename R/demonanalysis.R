@@ -621,7 +621,7 @@ final_error_message <- function(input_dir, adjust = 0) {
     res <- read_lines(fname)
     return(res[length(res) - abs(adjust)])
   }
-  else return("no file")
+  else return("no error_log.dat file")
 }
 
 #' Return the final line (or an earlier line) of every error log in a batch of simulations.
