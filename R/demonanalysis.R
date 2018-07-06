@@ -487,6 +487,9 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
       # make sure only one NumCells is used:
       numcells <- unique(df1$NumCells)[1]
       df1 <- filter(df1, NumCells == numcells)
+      
+      # set generation for plots:
+      generation = max(df1$Generation)
     }
     else {
       if(is.na(generation)) generation <- max(df1$Generation)
@@ -517,7 +520,7 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
 }
 
-#' Plot numers of cells with n mutations for each value of n
+#' Plot numbers of cells with n mutations for each value of n
 #' 
 #' @param df data frame with columns "Generation", "CellsWith0Drivers" and "CellsWithXDrivers" for some values of X >= 1
 #' 
