@@ -476,17 +476,24 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
     df1 <- read_delim_special(paste0(path, files_list[i]))
     
     if(!is.na(numcells)) {
+      # add NumCells column from output.dat:
+      ref_df <- read_delim_special(paste0(path, "output.dat"))
+      ref_df <- select(ref_df, Generation, NumCells) %>% 
+        filter(Generation %in% df1$Generation)
+      df1 <- merge(df1, ref_df)
+      
+      # find closest NumCells to user input:
       df1 <- filter(df1, abs(NumCells - numcells) == min(abs(NumCells - numcells)))
+      # make sure only one NumCells is used:
       numcells <- unique(df1$NumCells)[1]
-      # make sure only one NumCells is used
       df1 <- filter(df1, NumCells == numcells)
     }
     else {
       if(is.na(generation)) generation <- max(df1$Generation)
-      # find closest generation to user input
+      # find closest Generation to user input:
       df1 <- filter(df1, abs(Generation - generation) == min(abs(Generation - generation)))
+      # make sure only one generation is used:
       generation <- unique(df1$Generation)[1]
-      # make sure only one generation is used
       df1 <- filter(df1, Generation == generation)
     }
     
