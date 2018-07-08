@@ -176,9 +176,9 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
                      log_mean_autocor = log(mean(sweep_seq)), 
                      sqrt_mean_autocor = sqrt(mean(sweep_seq)), 
                      skewness = skewness(sweep_seq))
-  } else if (df_type == "driver_genotype_properties"){
-      df_driver_genotype_properties <- fread(paste0(full_dir, "/output_driver_genotype_properties.dat"))
-      colnames(df_driver_genotype_properties) <- c("Population", "Parent", "Identity", "DriverMutations", "MigrationMutations", "Immortal", "PassengerMutations", "BirthRate", "MigrationRate", "OriginTime", "AlleleCount")
+  } else if (df_type == "driver_genotype_properties" || df_type == "genotype_properties"){
+      df_properties <- fread(paste0(full_dir, "/output_", df_type, ".dat"))
+      if(df_type == "driver_genotype_properties") colnames(df_properties) <- c("Population", "Parent", "Identity", "DriverMutations", "MigrationMutations", "Immortal", "PassengerMutations", "BirthRate", "MigrationRate", "OriginTime", "AlleleCount")
       # data contains columns AlleleCount and pop_size
       calc_VAF <- function(data){
         alpha <- 1
@@ -186,34 +186,15 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
         VAF <- data$AlleleCount / coverage
         return(VAF)
       }
-      df_driver_genotype_properties$pop_size <- (df_out %>% filter(Generation == max(Generation)) %>% select(NumCells))$NumCells
-      df_driver_genotype_properties$VAF <- calc_VAF(df_driver_genotype_properties)
+      df_properties$pop_size <- (df_out %>% filter(Generation == max(Generation)) %>% select(NumCells))$NumCells
+      df_properties$VAF <- calc_VAF(df_properties)
       if(!is.na(vaf_cut_off)) {
-        df_driver_genotype_properties <- df_driver_genotype_properties %>% filter(VAF >= vaf_cut_off | Population > 0)
+        df_properties <- df_properties %>% filter(VAF >= vaf_cut_off | Population > 0)
       }
-      if(nrow(df_driver_genotype_properties) == 0){
+      if(nrow(df_properties) == 0){
         temp <- NULL
       } else {
-        temp <- cbind(df_pars, df_driver_genotype_properties)
-      }
-  } else if(df_type == "genotype_properties"){
-      df_genotype_properties <- fread(paste0(full_dir, "/output_genotype_properties.dat"))
-      calc_VAF <- function(data){
-        alpha <- 1
-        coverage <- data$pop_size * alpha
-        VAF <- data$AlleleCount / coverage
-        return(VAF)
-      }
-      df_genotype_properties$pop_size <- (df_out %>% filter(Generation == max(Generation)) %>% select(NumCells))$NumCells
-      df_genotype_properties$VAF <- calc_VAF(df_genotype_properties)
-      # filter out too low VAF but keep rows with pop > 0
-      if(!is.na(vaf_cut_off)) {
-        df_genotype_properties <- df_genotype_properties %>% filter(VAF >= vaf_cut_off | Population > 0)
-      }
-      if(nrow(df_genotype_properties) == 0){
-        temp <- NULL
-      } else {
-        temp <- cbind(df_pars, df_genotype_properties)
+        temp <- cbind(df_pars, df_properties)
       }
   } else {
     warning
