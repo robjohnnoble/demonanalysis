@@ -197,7 +197,6 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
         temp <- cbind(df_pars, df_properties)
       }
   } else {
-    warning
     stop("no valid df_type argument was passed")
   }
   
