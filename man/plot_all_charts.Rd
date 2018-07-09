@@ -4,11 +4,11 @@
 \alias{plot_all_charts}
 \title{Plot a set of charts representing allele frequencies and genotype sizes}
 \usage{
-plot_all_charts(path, output_filename = NA, file_type = "png",
+plot_all_charts(path_or_dflist, output_filename = NA, file_type = "png",
   output_dir = NA, max_size = NA, generation = NA, numcells = NA)
 }
 \arguments{
-\item{path}{folder containing the input files}
+\item{path_or_dflist}{folder containing the input files, or a list of data frames}
 
 \item{output_filename}{name of output image file}
 

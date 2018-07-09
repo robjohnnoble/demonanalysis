@@ -442,7 +442,7 @@ plot_first_inc_moment <- function(sizes, counts, max_size = 1, ...) {
 
 #' Plot a set of charts representing allele frequencies and genotype sizes
 #' 
-#' @param path folder containing the input files
+#' @param path_or_dflist folder containing the input files, or a list of data frames
 #' @param output_filename name of output image file
 #' @param file_type either "pdf" or "png" (other values default to "pdf")
 #' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
@@ -464,45 +464,55 @@ plot_first_inc_moment <- function(sizes, counts, max_size = 1, ...) {
 #' 
 #' @examples
 #' plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-plot_all_charts <- function(path, output_filename = NA, file_type = "png", output_dir = NA, max_size = NA, generation = NA, numcells = NA) {
-  if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
-  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
-  
-  if(!is.na(output_filename) & !is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1100, height = 1100, res = 100)
-    else pdf(paste0(output_dir,output_filename,".pdf"), width = 11, height = 11)
+plot_all_charts <- function(path_or_dflist, output_filename = NA, file_type = "png", output_dir = NA, max_size = NA, generation = NA, numcells = NA) {
+  if("list" %in% class(path_or_dflist)) {
+    input_list <- path_or_dflist
+    path <- NA
+  }
+  else {
+    path <- path_or_dflist
+    if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
+    if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+    
+    if(!is.na(output_filename) & !is.na(output_dir)) {
+      if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1100, height = 1100, res = 100)
+      else pdf(paste0(output_dir,output_filename,".pdf"), width = 11, height = 11)
+    }
+    input_list <- list("output_allele_counts.dat", "output_driver_allele_counts.dat", "output_genotype_counts.dat", "output_driver_genotype_counts.dat")
+    input_list <- paste0(path, input_list)
   }
   
   par(mfrow = c(4, 4))
   par(mgp = c(2.2, 1, 0))
   par(mar = c(3.8, 3.8, 0.8, 0.8))
   
-  files_list <- c("output_allele_counts.dat", "output_driver_allele_counts.dat", "output_genotype_counts.dat", "output_driver_genotype_counts.dat")
   axis_lab <- c("mutation", "driver mutation", "genotype", "driver genotype")
   axis_lab2 <- c("clone", "driver clone", "genotype", "driver genotype")
   
   for(i in 1:4) {
-    df1 <- read_delim_special(paste0(path, files_list[i]))
+    if("list" %in% class(path_or_dflist)) df1 <- input_list[[i]]
+    else df1 <- read_delim_special(input_list[[i]])
     
     df1 <- filter_by_generation_or_numcells(df1, path, generation, numcells)
+    
     # set generation for plots:
     generation = max(df1$Generation)
     
     # plot 1:
-    plot_counts(paste0(path, files_list[i]), xlab = paste0(axis_lab[i], " frequency"), generation = generation, ylim = c(0, 10))
+    plot_counts(input_list[[i]], xlab = paste0(axis_lab[i], " frequency"), generation = generation, ylim = c(0, 10))
     if(length(df1) > 1) div_alleles <- round(quadratic_diversity(df1$Frequency, df1$Count, 0.025, threshold = 0.1), 2)
     else div_alleles <- ""
     if(length(df1) > 1) text(1, 9, paste0("modes = ", div_alleles), pos = 2)
     
     # plot 2:
-    plot_logit_freq_dist(paste0(path, files_list[i]), generation = generation, xlab = paste0(axis_lab[i], " frequency"))
+    plot_logit_freq_dist(input_list[[i]], generation = generation, xlab = paste0(axis_lab[i], " frequency"))
     
     # plot 3:
     if(is.na(max_size)) plot_first_inc_moment(df1$Frequency, df1$Count, xlab = paste0(axis_lab[i], " frequency"))
     else plot_first_inc_moment(df1$Size, df1$Count, xlab = paste0(axis_lab2[i], " size"), max_size = max_size)
     
     # plot 4:
-    plot_cum_dist(paste0(path, files_list[i]), generation = generation, xlab = paste0("inverse ", axis_lab[i], " frequency"))
+    plot_cum_dist(input_list[[i]], generation = generation, xlab = paste0("inverse ", axis_lab[i], " frequency"))
   }
   
   if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
