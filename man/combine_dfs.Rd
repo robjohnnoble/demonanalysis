@@ -6,7 +6,7 @@
 and (optionally) diversity metrics, and with added columns containing derived variables.}
 \usage{
 combine_dfs(full_dir, include_diversities = TRUE, df_type = "output",
-  vaf_cut_off = NA)
+  vaf_cut_off = NA, generation = NA, numcells = NA)
 }
 \arguments{
 \item{full_dir}{base input directory name}
@@ -16,6 +16,10 @@ combine_dfs(full_dir, include_diversities = TRUE, df_type = "output",
 \item{df_type}{which dataframes to combine}
 
 \item{vaf_cut_off}{exclude genotypes with vaf lower cut off from combined_df}
+
+\item{generation}{Generation at which to filter (default NA corresponds to no filtering)}
+
+\item{numcells}{Number of cells at which to filter (takes precedent over generation; default NA corresponds to no filtering)}
 }
 \value{
 the combined dataframe
@@ -30,4 +34,6 @@ combine_dfs(full_dir = system.file("extdata", "", package = "demonanalysis", mus
 df_type = "driver_genotype_properties")
 combine_dfs(full_dir = system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
 df_type = "genotype_properties", vaf_cut_off = 0.002)
+combine_dfs(full_dir = system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
+df_type = "genotype_counts", numcells = 100)
 }

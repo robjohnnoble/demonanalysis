@@ -268,7 +268,7 @@ plot_counts <- function(file, generation = NA, ...) {
   df <- read_delim_special(file)
   if("Generation" %in% colnames(df)) {
     if(is.na(generation)) generation <- max(df$Generation)
-    df <- filter(df, Generation == generation)
+    df <- filter_by_generation_or_numcells(df, NA, generation, NA)
   }
   hist <- with(df, hist(rep(x = Frequency, times = Count), plot = FALSE, breaks = seq(0, 1, length = 100)))
   plot(hist, xlim = c(0, 1), ylab = "count", main = "", ...)
@@ -302,7 +302,7 @@ plot_logit_freq_dist <- function(file, generation = NA, ...) {
   df <- read_delim_special(file)
   if("Generation" %in% colnames(df)) {
     if(is.na(generation)) generation <- max(df$Generation)
-    df <- filter(df, Generation == generation)
+    df <- filter_by_generation_or_numcells(df, NA, generation, NA)
   }
   
   df <- filter(df, Frequency < 1, Frequency > plogis(-14))
@@ -350,7 +350,7 @@ plot_cum_dist <- function(file, generation = NA, ...) {
   df1 <- read_delim_special(file)
   if("Generation" %in% colnames(df1)) {
     if(is.na(generation)) generation <- max(df1$Generation)
-    df1 <- filter(df1, Generation == generation)
+    df1 <- filter_by_generation_or_numcells(df1, NA, generation, NA)
   }
   
   cum_count <- function(df, d) {
@@ -475,30 +475,9 @@ plot_all_charts <- function(path, output_filename = NA, file_type = "png", outpu
   for(i in 1:4) {
     df1 <- read_delim_special(paste0(path, files_list[i]))
     
-    if(!is.na(numcells)) {
-      # add NumCells column from output.dat:
-      ref_df <- read_delim_special(paste0(path, "output.dat"))
-      ref_df <- select(ref_df, Generation, NumCells) %>% 
-        filter(Generation %in% df1$Generation)
-      df1 <- merge(df1, ref_df)
-      
-      # find closest NumCells to user input:
-      df1 <- filter(df1, abs(NumCells - numcells) == min(abs(NumCells - numcells)))
-      # make sure only one NumCells is used:
-      numcells <- unique(df1$NumCells)[1]
-      df1 <- filter(df1, NumCells == numcells)
-      
-      # set generation for plots:
-      generation = max(df1$Generation)
-    }
-    else {
-      if(is.na(generation)) generation <- max(df1$Generation)
-      # find closest Generation to user input:
-      df1 <- filter(df1, abs(Generation - generation) == min(abs(Generation - generation)))
-      # make sure only one generation is used:
-      generation <- unique(df1$Generation)[1]
-      df1 <- filter(df1, Generation == generation)
-    }
+    df1 <- filter_by_generation_or_numcells(df1, path, generation, numcells)
+    # set generation for plots:
+    generation = max(df1$Generation)
     
     # plot 1:
     plot_counts(paste0(path, files_list[i]), xlab = paste0(axis_lab[i], " frequency"), generation = generation, ylim = c(0, 10))

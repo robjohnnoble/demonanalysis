@@ -115,6 +115,49 @@ add_relative_time <- function(df, start_size, num_parameters) {
   return(df)
 }
 
+#' Filter a data frame by Generation or NumCells
+#' 
+#' @param df data frame
+#' @param path folder containing output.dat (needed for numcells only)
+#' @param generation Generation at which to filter (default NA corresponds to no filtering)
+#' @param numcells Number of cells at which to filter (takes precedent over generation; default NA corresponds to no filtering)
+#' 
+#' @return the combined dataframe
+#' 
+#' @export
+#' 
+#' @examples
+#' df <- read_delim_special(system.file("extdata", "output_allele_counts.dat", 
+#' package = "demonanalysis", mustWork = TRUE))
+#' filter_by_generation_or_numcells(df, NA, 10, NA)
+#' my_path <- system.file("extdata", package = "demonanalysis", mustWork = TRUE)
+#' filter_by_generation_or_numcells(df, my_path, NA, 100)
+filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells = NA) {
+  if(!is.na(numcells)) {
+    if(!("NumCells" %in% colnames(df))) {
+      # add NumCells column from output.dat:
+      if(substr(path, nchar(path), nchar(path)) == "/") path <- substr(path, 1, nchar(path) - 1)
+      ref_df <- read_delim_special(paste0(path, "/output.dat"))
+      ref_df <- select(ref_df, Generation, NumCells) %>% 
+        filter(Generation %in% df$Generation)
+      df <- merge(df, ref_df)
+    }
+    # find closest NumCells to user input:
+    df <- filter(df, abs(NumCells - numcells) == min(abs(NumCells - numcells)))
+    # make sure only one NumCells is used:
+    numcells <- unique(df$NumCells)[1]
+    df <- filter(df, NumCells == numcells)
+  }
+  else if(!is.na(generation)) {
+    # find closest Generation to user input:
+    df <- filter(df, abs(Generation - generation) == min(abs(Generation - generation)))
+    # make sure only one generation is used:
+    generation <- unique(df$Generation)[1]
+    df <- filter(df, Generation == generation)
+  }
+  return(df)
+}
+
 #' Combine data for one simulation, including population metrics, parameter values 
 #' and (optionally) diversity metrics, and with added columns containing derived variables.
 #' 
@@ -122,6 +165,8 @@ add_relative_time <- function(df, start_size, num_parameters) {
 #' @param include_diversities boolean whether to include diversity metrics
 #' @param df_type which dataframes to combine
 #' @param vaf_cut_off exclude genotypes with vaf lower cut off from combined_df
+#' @param generation Generation at which to filter (default NA corresponds to no filtering)
+#' @param numcells Number of cells at which to filter (takes precedent over generation; default NA corresponds to no filtering)
 #' 
 #' @return the combined dataframe
 #' 
@@ -138,7 +183,9 @@ add_relative_time <- function(df, start_size, num_parameters) {
 #' df_type = "driver_genotype_properties")
 #' combine_dfs(full_dir = system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
 #' df_type = "genotype_properties", vaf_cut_off = 0.002)
-combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output", vaf_cut_off = NA) {
+#' combine_dfs(full_dir = system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
+#' df_type = "genotype_counts", numcells = 100)
+combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output", vaf_cut_off = NA, generation = NA, numcells = NA) {
   
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
   
@@ -163,8 +210,12 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
     if(include_diversities) temp <- merge(df_out, df_div, all = TRUE)
     else temp <- df_out
     
-    # creates df of df_out plus the parameters
-    temp <- cbind(df_pars, temp)
+    # add parameter columns:
+    if(nrow(temp) == 0){
+      temp <- NULL
+    } else {
+      temp <- cbind(df_pars, temp)
+    }
     
     # adds maxgen and gen_adj columns
     if(!exists("num_parameters")) num_parameters <- count_parameters(full_dir)
@@ -176,29 +227,41 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
                      log_mean_autocor = log(mean(sweep_seq)), 
                      sqrt_mean_autocor = sqrt(mean(sweep_seq)), 
                      skewness = skewness(sweep_seq))
-  } else if (df_type == "driver_genotype_properties" || df_type == "genotype_properties"){
-      df_properties <- fread(paste0(full_dir, "/output_", df_type, ".dat"))
-      if(df_type == "driver_genotype_properties") colnames(df_properties) <- c("Population", "Parent", "Identity", "DriverMutations", "MigrationMutations", "Immortal", "PassengerMutations", "BirthRate", "MigrationRate", "OriginTime", "AlleleCount")
-      # data contains columns AlleleCount and pop_size
-      calc_VAF <- function(data){
-        alpha <- 1
-        coverage <- data$pop_size * alpha
-        VAF <- data$AlleleCount / coverage
-        return(VAF)
-      }
-      df_properties$pop_size <- (df_out %>% filter(Generation == max(Generation)) %>% select(NumCells))$NumCells
-      df_properties$VAF <- calc_VAF(df_properties)
-      if(!is.na(vaf_cut_off)) {
-        df_properties <- df_properties %>% filter(VAF >= vaf_cut_off | Population > 0)
-      }
-      if(nrow(df_properties) == 0){
-        temp <- NULL
-      } else {
-        temp <- cbind(df_pars, df_properties)
-      }
+  } else if (df_type %in% c("allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts")){
+    temp <- fread(paste0(full_dir, "/output_", df_type, ".dat"))
+    # add parameter columns:
+    if(nrow(temp) == 0){
+      temp <- NULL
+    } else {
+      temp <- cbind(df_pars, temp)
+    }
+  } else if (df_type %in% c("driver_genotype_properties", "genotype_properties")){
+    temp <- fread(paste0(full_dir, "/output_", df_type, ".dat"))
+    if(df_type == "driver_genotype_properties") colnames(temp) <- c("Population", "Parent", "Identity", "DriverMutations", "MigrationMutations", "Immortal", "PassengerMutations", "BirthRate", "MigrationRate", "OriginTime", "AlleleCount")
+    # data contains columns AlleleCount and pop_size
+    calc_VAF <- function(data){
+      alpha <- 1
+      coverage <- data$pop_size * alpha
+      VAF <- data$AlleleCount / coverage
+      return(VAF)
+    }
+    temp$pop_size <- (df_out %>% filter(Generation == max(Generation)) %>% select(NumCells))$NumCells
+    temp$VAF <- calc_VAF(temp)
+    if(!is.na(vaf_cut_off)) {
+      temp <- temp %>% filter(VAF >= vaf_cut_off | Population > 0)
+    }
+    # add parameter columns:
+    if(nrow(temp) == 0){
+      temp <- NULL
+    } else {
+      temp <- cbind(df_pars, temp)
+    }
   } else {
     stop("no valid df_type argument was passed")
   }
+  
+  # filter if requested:
+  temp <- filter_by_generation_or_numcells(temp, full_dir, generation, numcells)
   
   print(paste0("Result of combine_dfs has dimensions ", dim(temp)[1], " x ", dim(temp)[2]), quote = FALSE)
   
@@ -212,6 +275,8 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 #' @param include_diversities boolean whether to include diversity metrics
 #' @param df_type which dataframes to combine
 #' @param vaf_cut_off exclude genotypes with vaf lower cut off from combined_df
+#' @param generation Generation at which to filter (default NA corresponds to no filtering)
+#' @param numcells Number of cells at which to filter (takes precedent over generation; default NA corresponds to no filtering)
 #' 
 #' @return a combined dataframe
 #' 
@@ -225,9 +290,12 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 #' df_type = "driver_genotype_properties")
 #' all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
 #' df_type = "genotype_properties", vaf_cut_off = 0.002)
-all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", vaf_cut_off = NA) {
+#' all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
+#' df_type = "allele_counts", generation = 10)
+all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", vaf_cut_off = NA, generation = NA, numcells = NA) {
   
-  df_type_list <- c("output", "driver_genotype_properties", "genotype_properties")
+  df_type_list <- c("output", "driver_genotype_properties", "genotype_properties", 
+                    "allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts")
   stopifnot(df_type %in% df_type_list)
   
   pars_and_values <- parameter_names_and_values(input_dir)
@@ -250,7 +318,7 @@ all_output <- function(input_dir, include_diversities = TRUE, df_type = "output"
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
     print(paste0(full_dir, " ", msg), quote = FALSE)
-    if(!identical(msg, character(0))) if(msg == "Exit code 0") return(combine_dfs(full_dir, include_diversities, df_type, vaf_cut_off))
+    if(!identical(msg, character(0))) if(msg == "Exit code 0") return(combine_dfs(full_dir, include_diversities, df_type, vaf_cut_off, generation, numcells))
     return(data.frame())
   }
   res <- rbindlist(apply_combinations(final_values, each_df))
