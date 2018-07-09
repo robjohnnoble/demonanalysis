@@ -158,13 +158,12 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
   return(df)
 }
 
-#' Combine data for one simulation, including population metrics, parameter values 
-#' and (optionally) diversity metrics, and with added columns containing derived variables.
+#' Combine (and optionally process) data for one simulation
 #' 
 #' @param full_dir base input directory name
-#' @param include_diversities boolean whether to include diversity metrics
+#' @param include_diversities boolean whether to include diversity metrics (if df_type == "output")
 #' @param df_type which dataframes to combine
-#' @param vaf_cut_off exclude genotypes with vaf lower cut off from combined_df
+#' @param vaf_cut_off exclude genotypes with vaf lower than cut off (if df_type == "genotype_properties" or "driver_genotype_properties")
 #' @param generation Generation at which to filter (default NA corresponds to no filtering)
 #' @param numcells Number of cells at which to filter (takes precedent over generation; default NA corresponds to no filtering)
 #' 

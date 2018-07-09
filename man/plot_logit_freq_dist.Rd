@@ -4,10 +4,10 @@
 \alias{plot_logit_freq_dist}
 \title{Plot a histogram of variant allele frequencies with logit x-axis and log y-axis}
 \usage{
-plot_logit_freq_dist(file, generation = NA, ...)
+plot_logit_freq_dist(file_or_dataframe, generation = NA, ...)
 }
 \arguments{
-\item{file}{file containing columns "Frequency" and "Count"}
+\item{file_or_dataframe}{file or data frame containing columns "Frequency" and "Count"}
 
 \item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 

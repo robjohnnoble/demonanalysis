@@ -2,8 +2,7 @@
 % Please edit documentation in R/datacollation.R
 \name{combine_dfs}
 \alias{combine_dfs}
-\title{Combine data for one simulation, including population metrics, parameter values 
-and (optionally) diversity metrics, and with added columns containing derived variables.}
+\title{Combine (and optionally process) data for one simulation}
 \usage{
 combine_dfs(full_dir, include_diversities = TRUE, df_type = "output",
   vaf_cut_off = NA, generation = NA, numcells = NA)
@@ -11,11 +10,11 @@ combine_dfs(full_dir, include_diversities = TRUE, df_type = "output",
 \arguments{
 \item{full_dir}{base input directory name}
 
-\item{include_diversities}{boolean whether to include diversity metrics}
+\item{include_diversities}{boolean whether to include diversity metrics (if df_type == "output")}
 
 \item{df_type}{which dataframes to combine}
 
-\item{vaf_cut_off}{exclude genotypes with vaf lower cut off from combined_df}
+\item{vaf_cut_off}{exclude genotypes with vaf lower than cut off (if df_type == "genotype_properties" or "driver_genotype_properties")}
 
 \item{generation}{Generation at which to filter (default NA corresponds to no filtering)}
 
@@ -25,8 +24,7 @@ combine_dfs(full_dir, include_diversities = TRUE, df_type = "output",
 the combined dataframe
 }
 \description{
-Combine data for one simulation, including population metrics, parameter values 
-and (optionally) diversity metrics, and with added columns containing derived variables.
+Combine (and optionally process) data for one simulation
 }
 \examples{
 combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))

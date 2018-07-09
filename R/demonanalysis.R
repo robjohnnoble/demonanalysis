@@ -248,7 +248,7 @@ plot_allelecount_vs_origintime <- function(file, log = FALSE) {
 
 #' Plot counts of variant allele frequencies on linear scales
 #' 
-#' @param file file containing columns "Frequency" and "Count"
+#' @param file_or_dataframe file or data frame containing columns "Frequency" and "Count"
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' @param ... other parameters passed to plot
 #' 
@@ -259,13 +259,16 @@ plot_allelecount_vs_origintime <- function(file, log = FALSE) {
 #' @examples
 #' plot_counts(system.file("extdata", "output_allele_counts.dat", 
 #' package = "demonanalysis", mustWork = TRUE), ylim = c(0, 10))
-plot_counts <- function(file, generation = NA, ...) {
-  if(!file.exists(file)) {
-    warning(paste0(file, " not found"))
-    plot(0, type = 'n', axes = FALSE, ann = FALSE)
-    return(NA)
+plot_counts <- function(file_or_dataframe, generation = NA, ...) {
+  if("data.frame" %in% class(file_or_dataframe)) df <- file_or_dataframe
+  else {
+    if(!file.exists(file_or_dataframe)) {
+      warning(paste0(file_or_dataframe, " not found"))
+      plot(0, type = 'n', axes = FALSE, ann = FALSE)
+      return(NA)
+    }
+    df <- read_delim_special(file_or_dataframe)
   }
-  df <- read_delim_special(file)
   if("Generation" %in% colnames(df)) {
     if(is.na(generation)) generation <- max(df$Generation)
     df <- filter_by_generation_or_numcells(df, NA, generation, NA)
@@ -277,7 +280,7 @@ plot_counts <- function(file, generation = NA, ...) {
 
 #' Plot a histogram of variant allele frequencies with logit x-axis and log y-axis
 #' 
-#' @param file file containing columns "Frequency" and "Count"
+#' @param file_or_dataframe file or data frame containing columns "Frequency" and "Count"
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' @param ... other parameters passed to plot
 #' 
@@ -293,13 +296,16 @@ plot_counts <- function(file, generation = NA, ...) {
 #' @examples
 #' plot_logit_freq_dist(system.file("extdata", "output_allele_counts.dat", 
 #' package = "demonanalysis", mustWork = TRUE))
-plot_logit_freq_dist <- function(file, generation = NA, ...) {
-  if(!file.exists(file)) {
-    warning(paste0(file, " not found"))
-    plot(0, type = 'n', axes = FALSE, ann = FALSE)
-    return(NA)
+plot_logit_freq_dist <- function(file_or_dataframe, generation = NA, ...) {
+  if("data.frame" %in% class(file_or_dataframe)) df <- file_or_dataframe
+  else {
+    if(!file.exists(file_or_dataframe)) {
+      warning(paste0(file_or_dataframe, " not found"))
+      plot(0, type = 'n', axes = FALSE, ann = FALSE)
+      return(NA)
+    }
+    df <- read_delim_special(file_or_dataframe)
   }
-  df <- read_delim_special(file)
   if("Generation" %in% colnames(df)) {
     if(is.na(generation)) generation <- max(df$Generation)
     df <- filter_by_generation_or_numcells(df, NA, generation, NA)
@@ -328,7 +334,7 @@ plot_logit_freq_dist <- function(file, generation = NA, ...) {
 
 #' Plot cumulative density of variant allele frequencies versus inverse allele frequency
 #' 
-#' @param file file containing columns "Frequency" and "Count"
+#' @param file_or_dataframe file or data frame containing columns "Frequency" and "Count"
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' @param ... other parameters passed to plot
 #' 
@@ -341,13 +347,16 @@ plot_logit_freq_dist <- function(file, generation = NA, ...) {
 #' @examples
 #' plot_cum_dist(system.file("extdata", "output_allele_counts.dat", 
 #' package = "demonanalysis", mustWork = TRUE))
-plot_cum_dist <- function(file, generation = NA, ...) {
-  if(!file.exists(file)) {
-    warning(paste0(file, " not found"))
-    plot(0, type = 'n', axes = FALSE, ann = FALSE)
-    return(NA)
+plot_cum_dist <- function(file_or_dataframe, generation = NA, ...) {
+  if("data.frame" %in% class(file_or_dataframe)) df1 <- file_or_dataframe
+  else {
+    if(!file.exists(file_or_dataframe)) {
+      warning(paste0(file_or_dataframe, " not found"))
+      plot(0, type = 'n', axes = FALSE, ann = FALSE)
+      return(NA)
+    }
+    df1 <- read_delim_special(file_or_dataframe)
   }
-  df1 <- read_delim_special(file)
   if("Generation" %in% colnames(df1)) {
     if(is.na(generation)) generation <- max(df1$Generation)
     df1 <- filter_by_generation_or_numcells(df1, NA, generation, NA)

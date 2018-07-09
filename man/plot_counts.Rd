@@ -4,10 +4,10 @@
 \alias{plot_counts}
 \title{Plot counts of variant allele frequencies on linear scales}
 \usage{
-plot_counts(file, generation = NA, ...)
+plot_counts(file_or_dataframe, generation = NA, ...)
 }
 \arguments{
-\item{file}{file containing columns "Frequency" and "Count"}
+\item{file_or_dataframe}{file or data frame containing columns "Frequency" and "Count"}
 
 \item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 
