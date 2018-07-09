@@ -464,6 +464,8 @@ plot_first_inc_moment <- function(sizes, counts, max_size = 1, ...) {
 #' 
 #' @examples
 #' plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
+#' plot_all_charts(list(output_allele_counts, output_driver_allele_counts, 
+#' output_genotype_counts, output_driver_genotype_counts))
 plot_all_charts <- function(path_or_dflist, output_filename = NA, file_type = "png", output_dir = NA, max_size = NA, generation = NA, numcells = NA) {
   if("list" %in% class(path_or_dflist)) {
     input_list <- path_or_dflist

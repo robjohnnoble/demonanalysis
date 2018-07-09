@@ -557,4 +557,12 @@ refresh_data_files <- function() {
   save(output, file="data/output.RData")
   parameters <- read_delim("~/Documents/GitHub/demonanalysis/inst/extdata/parameters.dat", "\t")
   save(parameters, file="data/parameters.RData")
+  output_allele_counts <- read_delim(system.file("extdata", "output_allele_counts.dat", package = "demonanalysis", mustWork = TRUE), "\t")
+  save(output_allele_counts, file="data/output_allele_counts.RData")
+  output_driver_allele_counts <- read_delim(system.file("extdata", "output_driver_allele_counts.dat", package = "demonanalysis", mustWork = TRUE), "\t")
+  save(output_driver_allele_counts, file="data/output_driver_allele_counts.RData")
+  output_driver_genotype_counts <- read_delim(system.file("extdata", "output_driver_genotype_counts.dat", package = "demonanalysis", mustWork = TRUE), "\t")
+  save(output_driver_genotype_counts, file="data/output_driver_genotype_counts.RData")
+  output_genotype_counts <- read_delim(system.file("extdata", "output_genotype_counts.dat", package = "demonanalysis", mustWork = TRUE), "\t")
+  save(output_genotype_counts, file="data/output_genotype_counts.RData")
 }

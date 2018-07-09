@@ -30,4 +30,6 @@ Plot a set of charts representing allele frequencies and genotype sizes
 }
 \examples{
 plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
+plot_all_charts(list(output_allele_counts, output_driver_allele_counts, 
+output_genotype_counts, output_driver_genotype_counts))
 }
