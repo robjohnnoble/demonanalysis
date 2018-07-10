@@ -13,13 +13,20 @@ filter_by_generation_or_numcells(df, path, generation = NA, numcells = NA)
 
 \item{generation}{Generation at which to filter (default NA corresponds to no filtering)}
 
-\item{numcells}{Number of cells at which to filter (takes precedent over generation; default NA corresponds to no filtering)}
+\item{numcells}{Number of cells at which to filter (default NA corresponds to no filtering)}
 }
 \value{
 the combined dataframe
 }
 \description{
 Filter a data frame by Generation or NumCells
+}
+\details{
+If both \code{generation} and \code{numcells} are provided then numcells 
+takes precedent. If \code{numcells} is provided and \code{df} lacks a \code{NumCells} 
+column then a \code{NumCells} column will be added (using the \code{output.dat} file 
+in the folder specified by \code{path}), unless \code{df} contains multiple \code{seed} 
+values, in which case an error will result.
 }
 \examples{
 df <- read_delim_special(system.file("extdata", "output_allele_counts.dat", 

@@ -120,11 +120,17 @@ add_relative_time <- function(df, start_size, num_parameters) {
 #' @param df data frame
 #' @param path folder containing output.dat (needed for numcells only)
 #' @param generation Generation at which to filter (default NA corresponds to no filtering)
-#' @param numcells Number of cells at which to filter (takes precedent over generation; default NA corresponds to no filtering)
+#' @param numcells Number of cells at which to filter (default NA corresponds to no filtering)
 #' 
 #' @return the combined dataframe
 #' 
 #' @export
+#' 
+#' @details If both \code{generation} and \code{numcells} are provided then numcells 
+#' takes precedent. If \code{numcells} is provided and \code{df} lacks a \code{NumCells} 
+#' column then a \code{NumCells} column will be added (using the \code{output.dat} file 
+#' in the folder specified by \code{path}), unless \code{df} contains multiple \code{seed} 
+#' values, in which case an error will result.
 #' 
 #' @examples
 #' df <- read_delim_special(system.file("extdata", "output_allele_counts.dat", 
@@ -134,7 +140,11 @@ add_relative_time <- function(df, start_size, num_parameters) {
 #' filter_by_generation_or_numcells(df, my_path, NA, 100)
 filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells = NA) {
   if(!is.na(numcells)) {
+    # add NumCells column if needed (when possible):
     if(!("NumCells" %in% colnames(df))) {
+      if("seed" %in% colnames(df)) if(length(unique(df$seed)) > 1) {
+        stop("Cannot add NumCells column to a dataframe that represents multiple simulations.")
+      }
       # add NumCells column from output.dat:
       if(substr(path, nchar(path), nchar(path)) == "/") path <- substr(path, 1, nchar(path) - 1)
       ref_df <- read_delim_special(paste0(path, "/output.dat"))
@@ -142,18 +152,22 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
         filter(Generation %in% df$Generation)
       df <- merge(df, ref_df)
     }
-    # find closest NumCells to user input:
-    df <- filter(df, abs(NumCells - numcells) == min(abs(NumCells - numcells)))
-    # make sure only one NumCells is used:
-    numcells <- unique(df$NumCells)[1]
-    df <- filter(df, NumCells == numcells)
+    # filter by closest NumCells to user input:
+    if("seed" %in% colnames(df)) df <- group_by(df, seed) %>%
+        filter(abs(NumCells - numcells) == min(abs(NumCells - numcells))) %>% 
+        filter(NumCells == min(NumCells)) %>% 
+        ungroup()
+    else df <- filter(df, abs(NumCells - numcells) == min(abs(NumCells - numcells))) %>% 
+        filter(NumCells == min(NumCells))
   }
   else if(!is.na(generation)) {
-    # find closest Generation to user input:
-    df <- filter(df, abs(Generation - generation) == min(abs(Generation - generation)))
-    # make sure only one generation is used:
-    generation <- unique(df$Generation)[1]
-    df <- filter(df, Generation == generation)
+    # filter by closest Generation to user input:
+    if("seed" %in% colnames(df)) df <- group_by(df, seed) %>%
+      filter(abs(Generation - generation) == min(abs(Generation - generation))) %>% 
+      filter(Generation == min(Generation)) %>% 
+      ungroup()
+    else df <- filter(df, abs(Generation - generation) == min(abs(Generation - generation))) %>% 
+        filter(Generation == min(Generation))
   }
   return(df)
 }

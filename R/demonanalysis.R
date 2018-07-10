@@ -449,6 +449,7 @@ plot_first_inc_moment <- function(sizes, counts, max_size = 1, ...) {
 #' @param max_size maximum size (default NA corresponds to plotting frequencies, not sizes)
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' @param numcells Number of cells at which to make the measurement (takes precedent over generation; default NA corresponds to the final size)
+#' @param counts_max Max value of y-axis in counts plot
 #' 
 #' @return plot displyed on screen
 #' 
@@ -466,7 +467,7 @@ plot_first_inc_moment <- function(sizes, counts, max_size = 1, ...) {
 #' plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
 #' plot_all_charts(list(output_allele_counts, output_driver_allele_counts, 
 #' output_genotype_counts, output_driver_genotype_counts))
-plot_all_charts <- function(path_or_dflist, output_filename = NA, file_type = "png", output_dir = NA, max_size = NA, generation = NA, numcells = NA) {
+plot_all_charts <- function(path_or_dflist, output_filename = NA, file_type = "png", output_dir = NA, max_size = NA, generation = NA, numcells = NA, counts_max = 10) {
   if("list" %in% class(path_or_dflist)) {
     input_list <- path_or_dflist
     path <- NA
@@ -497,14 +498,11 @@ plot_all_charts <- function(path_or_dflist, output_filename = NA, file_type = "p
     
     df1 <- filter_by_generation_or_numcells(df1, path, generation, numcells)
     
-    # set generation for plots:
-    generation = max(df1$Generation)
-    
     # plot 1:
-    plot_counts(input_list[[i]], xlab = paste0(axis_lab[i], " frequency"), generation = generation, ylim = c(0, 10))
+    plot_counts(input_list[[i]], xlab = paste0(axis_lab[i], " frequency"), generation = generation, ylim = c(0, counts_max))
     if(length(df1) > 1) div_alleles <- round(quadratic_diversity(df1$Frequency, df1$Count, 0.025, threshold = 0.1), 2)
     else div_alleles <- ""
-    if(length(df1) > 1) text(1, 9, paste0("modes = ", div_alleles), pos = 2)
+    if(length(df1) > 1) text(1, 0.9 * counts_max, paste0("modes = ", div_alleles), pos = 2)
     
     # plot 2:
     plot_logit_freq_dist(input_list[[i]], generation = generation, xlab = paste0(axis_lab[i], " frequency"))

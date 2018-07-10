@@ -5,7 +5,8 @@
 \title{Plot a set of charts representing allele frequencies and genotype sizes}
 \usage{
 plot_all_charts(path_or_dflist, output_filename = NA, file_type = "png",
-  output_dir = NA, max_size = NA, generation = NA, numcells = NA)
+  output_dir = NA, max_size = NA, generation = NA, numcells = NA,
+  counts_max = 10)
 }
 \arguments{
 \item{path_or_dflist}{folder containing the input files, or a list of data frames}
@@ -21,6 +22,8 @@ plot_all_charts(path_or_dflist, output_filename = NA, file_type = "png",
 \item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 
 \item{numcells}{Number of cells at which to make the measurement (takes precedent over generation; default NA corresponds to the final size)}
+
+\item{counts_max}{Max value of y-axis in counts plot}
 }
 \value{
 plot displyed on screen
