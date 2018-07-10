@@ -21,17 +21,22 @@ plot_all_charts(path_or_dflist, output_filename = NA, file_type = "png",
 
 \item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 
-\item{numcells}{Number of cells at which to make the measurement (takes precedent over generation; default NA corresponds to the final size)}
+\item{numcells}{Number of cells at which to make the measurement (default NA corresponds to the final size)}
 
 \item{max_count}{Max value of y-axis in counts plot}
 
-\item{num_parameters}{Number of parameters, accounting for the first set of columns in the dataframe; required if combining data from multiple simulations}
+\item{num_parameters}{Number of parameters, accounting for the first set of columns in the dataframe}
 }
 \value{
 plot displyed on screen
 }
 \description{
 Plot a set of charts representing allele frequencies and genotype sizes
+}
+\details{
+If both \code{generation} and \code{numcells} are provided then \code{numcells} 
+takes precedent. A value for \code{num_parameters} is required only if the input data represents 
+multiple simulations and either \code{generation} or \code{numcells} is specified.
 }
 \examples{
 plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))

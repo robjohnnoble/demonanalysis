@@ -25,7 +25,7 @@ the combined dataframe
 Filter a data frame by Generation or NumCells
 }
 \details{
-If both \code{generation} and \code{numcells} are provided then numcells 
+If both \code{generation} and \code{numcells} are provided then \code{numcells} 
 takes precedent. If \code{numcells} is provided and \code{df} lacks a \code{NumCells} 
 column then a \code{NumCells} column will be added (using the \code{output.dat} file 
 in the folder specified by \code{path}), unless \code{df} contains multiple \code{seed} 
@@ -34,7 +34,7 @@ values, in which case an error will result.
 \examples{
 df <- read_delim_special(system.file("extdata", "output_allele_counts.dat", 
 package = "demonanalysis", mustWork = TRUE))
-filter_by_generation_or_numcells(df, NA, 10, NA)
+filter_by_generation_or_numcells(df, NA, generation = 10, numcells = NA)
 my_path <- system.file("extdata", package = "demonanalysis", mustWork = TRUE)
-filter_by_generation_or_numcells(df, my_path, NA, 100)
+filter_by_generation_or_numcells(df, my_path, generation = NA, numcells = 100)
 }

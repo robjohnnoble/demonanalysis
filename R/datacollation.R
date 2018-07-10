@@ -127,7 +127,7 @@ add_relative_time <- function(df, start_size, num_parameters) {
 #' 
 #' @export
 #' 
-#' @details If both \code{generation} and \code{numcells} are provided then numcells 
+#' @details If both \code{generation} and \code{numcells} are provided then \code{numcells} 
 #' takes precedent. If \code{numcells} is provided and \code{df} lacks a \code{NumCells} 
 #' column then a \code{NumCells} column will be added (using the \code{output.dat} file 
 #' in the folder specified by \code{path}), unless \code{df} contains multiple \code{seed} 
@@ -198,7 +198,7 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
 #' @param df_type which dataframes to combine
 #' @param vaf_cut_off exclude genotypes with vaf lower than cut off (if df_type == "genotype_properties" or "driver_genotype_properties")
 #' @param generation Generation at which to filter (default NA corresponds to no filtering)
-#' @param numcells Number of cells at which to filter (takes precedent over generation; default NA corresponds to no filtering)
+#' @param numcells Number of cells at which to filter (default NA corresponds to no filtering)
 #' 
 #' @return the combined dataframe
 #' 
@@ -208,6 +208,9 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
 #' @importFrom moments skewness
 #' 
 #' @export
+#' 
+#' @details If both \code{generation} and \code{numcells} are provided then \code{numcells} 
+#' takes precedent.
 #' 
 #' @examples
 #' combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
@@ -308,13 +311,16 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 #' @param df_type which dataframes to combine
 #' @param vaf_cut_off exclude genotypes with vaf lower cut off from combined_df
 #' @param generation Generation at which to filter (default NA corresponds to no filtering)
-#' @param numcells Number of cells at which to filter (takes precedent over generation; default NA corresponds to no filtering)
+#' @param numcells Number of cells at which to filter (default NA corresponds to no filtering)
 #' 
 #' @return a combined dataframe
 #' 
 #' @importFrom data.table rbindlist
 #' 
 #' @export
+#' 
+#' @details If both \code{generation} and \code{numcells} are provided then \code{numcells} 
+#' takes precedent.
 #' 
 #' @examples
 #' all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE))

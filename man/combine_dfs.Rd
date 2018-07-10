@@ -18,13 +18,17 @@ combine_dfs(full_dir, include_diversities = TRUE, df_type = "output",
 
 \item{generation}{Generation at which to filter (default NA corresponds to no filtering)}
 
-\item{numcells}{Number of cells at which to filter (takes precedent over generation; default NA corresponds to no filtering)}
+\item{numcells}{Number of cells at which to filter (default NA corresponds to no filtering)}
 }
 \value{
 the combined dataframe
 }
 \description{
 Combine (and optionally process) data for one simulation
+}
+\details{
+If both \code{generation} and \code{numcells} are provided then \code{numcells} 
+takes precedent.
 }
 \examples{
 combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))

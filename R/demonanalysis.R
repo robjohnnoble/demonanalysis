@@ -448,13 +448,17 @@ plot_first_inc_moment <- function(sizes, counts, max_size = 1, ...) {
 #' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
 #' @param max_size maximum size (default NA corresponds to plotting frequencies, not sizes)
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
-#' @param numcells Number of cells at which to make the measurement (takes precedent over generation; default NA corresponds to the final size)
+#' @param numcells Number of cells at which to make the measurement (default NA corresponds to the final size)
 #' @param max_count Max value of y-axis in counts plot
-#' @param num_parameters Number of parameters, accounting for the first set of columns in the dataframe; required if combining data from multiple simulations
+#' @param num_parameters Number of parameters, accounting for the first set of columns in the dataframe
 #' 
 #' @return plot displyed on screen
 #' 
 #' @export
+#' 
+#' @details If both \code{generation} and \code{numcells} are provided then \code{numcells} 
+#' takes precedent. A value for \code{num_parameters} is required only if the input data represents 
+#' multiple simulations and either \code{generation} or \code{numcells} is specified.
 #' 
 #' @import dplyr
 #' @importFrom readr read_delim

@@ -19,7 +19,7 @@ all_output(input_dir, include_diversities = TRUE, df_type = "output",
 
 \item{generation}{Generation at which to filter (default NA corresponds to no filtering)}
 
-\item{numcells}{Number of cells at which to filter (takes precedent over generation; default NA corresponds to no filtering)}
+\item{numcells}{Number of cells at which to filter (default NA corresponds to no filtering)}
 }
 \value{
 a combined dataframe
@@ -27,6 +27,10 @@ a combined dataframe
 \description{
 Create a composite dataframe for a batch of simulations, derived from multiple 
 data files per simulation.
+}
+\details{
+If both \code{generation} and \code{numcells} are provided then \code{numcells} 
+takes precedent.
 }
 \examples{
 all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE))
