@@ -35,4 +35,15 @@ Plot a set of charts representing allele frequencies and genotype sizes
 plot_all_charts(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
 plot_all_charts(list(output_allele_counts, output_driver_allele_counts, 
 output_genotype_counts, output_driver_genotype_counts))
+
+# combining results from multiple simulations:
+df1 <- all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
+df_type = "allele_counts", generation = 10)
+df2 <- all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
+df_type = "driver_allele_counts", generation = 10)
+df3 <- all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
+df_type = "genotype_counts", generation = 10)
+df4 <- all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
+df_type = "driver_genotype_counts", generation = 10)
+plot_all_charts(list(df1, df2, df3, df4))
 }
