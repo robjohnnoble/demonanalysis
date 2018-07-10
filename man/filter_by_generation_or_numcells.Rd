@@ -4,7 +4,8 @@
 \alias{filter_by_generation_or_numcells}
 \title{Filter a data frame by Generation or NumCells}
 \usage{
-filter_by_generation_or_numcells(df, path, generation = NA, numcells = NA)
+filter_by_generation_or_numcells(df, path, generation = NA, numcells = NA,
+  num_parameters = NA)
 }
 \arguments{
 \item{df}{data frame}
@@ -14,6 +15,8 @@ filter_by_generation_or_numcells(df, path, generation = NA, numcells = NA)
 \item{generation}{Generation at which to filter (default NA corresponds to no filtering)}
 
 \item{numcells}{Number of cells at which to filter (default NA corresponds to no filtering)}
+
+\item{num_parameters}{Number of parameters, accounting for the first set of columns in the dataframe; required if df represents multiple simulations}
 }
 \value{
 the combined dataframe

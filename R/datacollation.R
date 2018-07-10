@@ -121,6 +121,7 @@ add_relative_time <- function(df, start_size, num_parameters) {
 #' @param path folder containing output.dat (needed for numcells only)
 #' @param generation Generation at which to filter (default NA corresponds to no filtering)
 #' @param numcells Number of cells at which to filter (default NA corresponds to no filtering)
+#' @param num_parameters Number of parameters, accounting for the first set of columns in the dataframe; required if df represents multiple simulations
 #' 
 #' @return the combined dataframe
 #' 
@@ -135,16 +136,24 @@ add_relative_time <- function(df, start_size, num_parameters) {
 #' @examples
 #' df <- read_delim_special(system.file("extdata", "output_allele_counts.dat", 
 #' package = "demonanalysis", mustWork = TRUE))
-#' filter_by_generation_or_numcells(df, NA, 10, NA)
+#' filter_by_generation_or_numcells(df, NA, generation = 10, numcells = NA)
 #' my_path <- system.file("extdata", package = "demonanalysis", mustWork = TRUE)
-#' filter_by_generation_or_numcells(df, my_path, NA, 100)
-filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells = NA) {
+#' filter_by_generation_or_numcells(df, my_path, generation = NA, numcells = 100)
+filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells = NA, num_parameters = NA) {
+  # count simulations:
+  if(!is.na(num_parameters)) {
+    df <- group_by_at(df, 1:num_parameters)
+    num_sims <- n_groups(df)
+    df <- ungroup(df)
+  }
+  else num_sims <- 1
+  if(num_sims > 1 || ("seed" %in% colnames(df) && length(unique(df$seed)) > 1)) multiple_sims <- 1
+  else multiple_sims <- 0
+  
   if(!is.na(numcells)) {
     # add NumCells column if needed (when possible):
     if(!("NumCells" %in% colnames(df))) {
-      if("seed" %in% colnames(df)) if(length(unique(df$seed)) > 1) {
-        stop("Cannot add NumCells column to a dataframe that represents multiple simulations.")
-      }
+      if(multiple_sims) stop("Cannot add NumCells column to a dataframe that represents multiple simulations.")
       # add NumCells column from output.dat:
       if(substr(path, nchar(path), nchar(path)) == "/") path <- substr(path, 1, nchar(path) - 1)
       ref_df <- read_delim_special(paste0(path, "/output.dat"))
@@ -153,21 +162,31 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
       df <- merge(df, ref_df)
     }
     # filter by closest NumCells to user input:
-    if("seed" %in% colnames(df)) df <- group_by(df, seed) %>%
+    if(multiple_sims) {
+      if(is.na(num_parameters)) stop("Need to specify num_parameters for data frame representing multiple simulations.")
+      df <- group_by_at(df, 1:num_parameters) %>% 
         filter(abs(NumCells - numcells) == min(abs(NumCells - numcells))) %>% 
         filter(NumCells == min(NumCells)) %>% 
         ungroup()
-    else df <- filter(df, abs(NumCells - numcells) == min(abs(NumCells - numcells))) %>% 
+    }
+    else {
+      df <- filter(df, abs(NumCells - numcells) == min(abs(NumCells - numcells))) %>% 
         filter(NumCells == min(NumCells))
+    }
   }
   else if(!is.na(generation)) {
     # filter by closest Generation to user input:
-    if("seed" %in% colnames(df)) df <- group_by(df, seed) %>%
-      filter(abs(Generation - generation) == min(abs(Generation - generation))) %>% 
-      filter(Generation == min(Generation)) %>% 
-      ungroup()
-    else df <- filter(df, abs(Generation - generation) == min(abs(Generation - generation))) %>% 
+    if(multiple_sims) {
+      if(is.na(num_parameters)) stop("Need to specify num_parameters for data frame representing multiple simulations.")
+      df <- group_by_at(df, 1:num_parameters) %>% 
+        filter(abs(Generation - generation) == min(abs(Generation - generation))) %>% 
+        filter(Generation == min(Generation)) %>% 
+        ungroup()
+    }
+    else {
+      df <- filter(df, abs(Generation - generation) == min(abs(Generation - generation))) %>% 
         filter(Generation == min(Generation))
+    }
   }
   return(df)
 }

@@ -271,7 +271,7 @@ plot_counts <- function(file_or_dataframe, generation = NA, ...) {
   }
   if("Generation" %in% colnames(df)) {
     if(is.na(generation)) generation <- max(df$Generation)
-    df <- filter_by_generation_or_numcells(df, NA, generation, NA)
+    if(generation != "nofilter") df <- filter_by_generation_or_numcells(df, NA, generation, NA)
   }
   hist <- with(df, hist(rep(x = Frequency, times = Count), plot = FALSE, breaks = seq(0, 1, length = 100)))
   plot(hist, xlim = c(0, 1), ylab = "count", main = "", ...)
@@ -308,7 +308,7 @@ plot_logit_freq_dist <- function(file_or_dataframe, generation = NA, ...) {
   }
   if("Generation" %in% colnames(df)) {
     if(is.na(generation)) generation <- max(df$Generation)
-    df <- filter_by_generation_or_numcells(df, NA, generation, NA)
+    if(generation != "nofilter") df <- filter_by_generation_or_numcells(df, NA, generation, NA)
   }
   
   df <- filter(df, Frequency < 1, Frequency > plogis(-14))
@@ -359,7 +359,7 @@ plot_cum_dist <- function(file_or_dataframe, generation = NA, ...) {
   }
   if("Generation" %in% colnames(df1)) {
     if(is.na(generation)) generation <- max(df1$Generation)
-    df1 <- filter_by_generation_or_numcells(df1, NA, generation, NA)
+    if(generation != "nofilter") df1 <- filter_by_generation_or_numcells(df1, NA, generation, NA)
   }
   
   cum_count <- function(df, d) {
@@ -450,6 +450,7 @@ plot_first_inc_moment <- function(sizes, counts, max_size = 1, ...) {
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
 #' @param numcells Number of cells at which to make the measurement (takes precedent over generation; default NA corresponds to the final size)
 #' @param max_count Max value of y-axis in counts plot
+#' @param num_parameters Number of parameters, accounting for the first set of columns in the dataframe; required if combining data from multiple simulations
 #' 
 #' @return plot displyed on screen
 #' 
@@ -477,8 +478,11 @@ plot_first_inc_moment <- function(sizes, counts, max_size = 1, ...) {
 #' df_type = "genotype_counts", generation = 10)
 #' df4 <- all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
 #' df_type = "driver_genotype_counts", generation = 10)
-#' plot_all_charts(list(df1, df2, df3, df4))
-plot_all_charts <- function(path_or_dflist, output_filename = NA, file_type = "png", output_dir = NA, max_size = NA, generation = NA, numcells = NA, max_count = 10) {
+#' num_parameters <- count_parameters(system.file("example_batch", "", 
+#' package = "demonanalysis", mustWork = TRUE))
+#' plot_all_charts(list(df1, df2, df3, df4), num_parameters = num_parameters)
+plot_all_charts <- function(path_or_dflist, output_filename = NA, file_type = "png", output_dir = NA, max_size = NA, 
+                            generation = NA, numcells = NA, max_count = 10, num_parameters = NA) {
   if("list" %in% class(path_or_dflist)) {
     input_list <- path_or_dflist
     path <- NA
@@ -507,23 +511,23 @@ plot_all_charts <- function(path_or_dflist, output_filename = NA, file_type = "p
     if("list" %in% class(path_or_dflist)) df1 <- input_list[[i]]
     else df1 <- read_delim_special(input_list[[i]])
     
-    df1 <- filter_by_generation_or_numcells(df1, path, generation, numcells)
+    df1 <- filter_by_generation_or_numcells(df1, path = path, generation = generation, numcells = numcells, num_parameters = num_parameters)
     
     # plot 1:
-    plot_counts(input_list[[i]], xlab = paste0(axis_lab[i], " frequency"), generation = generation, ylim = c(0, max_count))
+    plot_counts(df1, xlab = paste0(axis_lab[i], " frequency"), generation = "nofilter", ylim = c(0, max_count))
     if(length(df1) > 1) div_alleles <- round(quadratic_diversity(df1$Frequency, df1$Count, 0.025, threshold = 0.1), 2)
     else div_alleles <- ""
     if(length(df1) > 1) text(1, 0.9 * max_count, paste0("modes = ", div_alleles), pos = 2)
     
     # plot 2:
-    plot_logit_freq_dist(input_list[[i]], generation = generation, xlab = paste0(axis_lab[i], " frequency"))
+    plot_logit_freq_dist(df1, generation = "nofilter", xlab = paste0(axis_lab[i], " frequency"))
     
     # plot 3:
     if(is.na(max_size)) plot_first_inc_moment(df1$Frequency, df1$Count, xlab = paste0(axis_lab[i], " frequency"))
     else plot_first_inc_moment(df1$Size, df1$Count, xlab = paste0(axis_lab2[i], " size"), max_size = max_size)
     
     # plot 4:
-    plot_cum_dist(input_list[[i]], generation = generation, xlab = paste0("inverse ", axis_lab[i], " frequency"))
+    plot_cum_dist(df1, generation = "nofilter", xlab = paste0("inverse ", axis_lab[i], " frequency"))
   }
   
   if(!is.na(output_filename) & !is.na(output_dir)) dev.off()

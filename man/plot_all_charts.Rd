@@ -6,7 +6,7 @@
 \usage{
 plot_all_charts(path_or_dflist, output_filename = NA, file_type = "png",
   output_dir = NA, max_size = NA, generation = NA, numcells = NA,
-  max_count = 10)
+  max_count = 10, num_parameters = NA)
 }
 \arguments{
 \item{path_or_dflist}{folder containing the input files, or a list of data frames}
@@ -24,6 +24,8 @@ plot_all_charts(path_or_dflist, output_filename = NA, file_type = "png",
 \item{numcells}{Number of cells at which to make the measurement (takes precedent over generation; default NA corresponds to the final size)}
 
 \item{max_count}{Max value of y-axis in counts plot}
+
+\item{num_parameters}{Number of parameters, accounting for the first set of columns in the dataframe; required if combining data from multiple simulations}
 }
 \value{
 plot displyed on screen
@@ -45,5 +47,7 @@ df3 <- all_output(system.file("example_batch", "", package = "demonanalysis", mu
 df_type = "genotype_counts", generation = 10)
 df4 <- all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
 df_type = "driver_genotype_counts", generation = 10)
-plot_all_charts(list(df1, df2, df3, df4))
+num_parameters <- count_parameters(system.file("example_batch", "", 
+package = "demonanalysis", mustWork = TRUE))
+plot_all_charts(list(df1, df2, df3, df4), num_parameters = num_parameters)
 }
