@@ -313,8 +313,14 @@ plot_logit_freq_dist <- function(file_or_dataframe, generation = NA, ...) {
   
   df <- filter(df, Frequency < 1, Frequency > plogis(-14))
   
+  bin_nums <- 1:100
   logit_breaks <- plogis(-14 + 0:100 * 26 / 100)
-  hist <- with(df, hist(rep(x = Frequency, times = Count), plot = FALSE, breaks = logit_breaks))
+  logit_mids <- plogis(-14 + ((2*0:99+1) * 26 / 200))
+  logit_widths <- logit_breaks - lag(logit_breaks, 1)
+  logit_widths <- logit_widths[!is.na(logit_widths)]
+  hist <- df %>% mutate(bin = cut(Frequency, breaks = logit_breaks, labels = bin_nums)) %>%
+    group_by(bin) %>% summarise(Count = sum(Count)) %>% 
+    mutate(mids = logit_mids[bin], density = Count / (sum(Count) * logit_widths[bin]))
   
   plot(log10(hist$density) ~ qlogis(hist$mids), 
        xaxt = "n", yaxt = "n", 
