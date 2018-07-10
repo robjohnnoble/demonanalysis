@@ -6,7 +6,7 @@
 \usage{
 plot_all_charts(path_or_dflist, output_filename = NA, file_type = "png",
   output_dir = NA, max_size = NA, generation = NA, numcells = NA,
-  counts_max = 10)
+  max_count = 10)
 }
 \arguments{
 \item{path_or_dflist}{folder containing the input files, or a list of data frames}
@@ -23,7 +23,7 @@ plot_all_charts(path_or_dflist, output_filename = NA, file_type = "png",
 
 \item{numcells}{Number of cells at which to make the measurement (takes precedent over generation; default NA corresponds to the final size)}
 
-\item{counts_max}{Max value of y-axis in counts plot}
+\item{max_count}{Max value of y-axis in counts plot}
 }
 \value{
 plot displyed on screen
