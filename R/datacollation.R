@@ -166,15 +166,15 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
       if(is.na(num_parameters)) stop("Need to specify num_parameters for data frame representing multiple simulations.")
       df <- group_by_at(df, 1:num_parameters) %>% 
         filter(abs(NumCells - numcells) == min(abs(NumCells - numcells))) %>% 
-        filter(NumCells == unique(df$NumCells)[1]) %>% 
+        filter(NumCells == min(NumCells)) %>% 
         ungroup()
     }
     else {
       print(paste0("About to filter; numcells = ", numcells))
       print("NumCells:")
       print(unique(df$NumCells))
-      df <- filter(df, abs(NumCells - numcells) == min(abs(NumCells - numcells))) %>% 
-        filter(NumCells == unique(df$NumCells)[1])
+      df <- filter(df, abs(NumCells - numcells) == min(abs(NumCells - numcells))) #%>% 
+        filter(NumCells == min(NumCells))
       print("Filtered")
     }
   }
@@ -184,12 +184,12 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
       if(is.na(num_parameters)) stop("Need to specify num_parameters for data frame representing multiple simulations.")
       df <- group_by_at(df, 1:num_parameters) %>% 
         filter(abs(Generation - generation) == min(abs(Generation - generation))) %>% 
-        filter(Generation == unique(df$Generation)[1]) %>% 
+        filter(Generation == min(Generation)) %>% 
         ungroup()
     }
     else {
       df <- filter(df, abs(Generation - generation) == min(abs(Generation - generation))) %>% 
-        filter(Generation == unique(df$Generation)[1])
+        filter(Generation == min(Generation))
     }
   }
   return(df)
