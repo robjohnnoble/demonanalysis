@@ -254,6 +254,10 @@ plot_allelecount_vs_origintime <- function(file, log = FALSE) {
 #' @return data frame with densities
 #' 
 #' @export
+#' 
+#' @examples
+#' df_test <- data.frame(Frequency = seq(0, 1, length = 20), Count = rbinom(20, 10, 0.5))
+#' hist2(df_test, seq(0, 1, length.out = 5))
 hist2 <- function(df, breaks) {
   n_bins <- length(breaks)
   bin_nums <- 1:(n_bins - 1)
@@ -261,7 +265,7 @@ hist2 <- function(df, breaks) {
   widths <- widths[!is.na(widths)]
   mids <- breaks[bin_nums] + widths / 2
   
-  hist <- df %>% mutate(bin = cut(Frequency, breaks = breaks, labels = bin_nums)) %>%
+  hist <- df %>% mutate(bin = cut(Frequency, breaks = breaks, labels = bin_nums, include.lowest = TRUE)) %>%
     group_by(bin) %>% summarise(Count = sum(Count)) %>% 
     mutate(mids = mids[bin], density = Count / (sum(Count) * widths[bin]))
   return(hist)
@@ -541,14 +545,15 @@ plot_all_charts <- function(path_or_dflist, output_filename = NA, file_type = "p
   else {
     path <- path_or_dflist
     if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
-    if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
-    
-    if(!is.na(output_filename) & !is.na(output_dir)) {
-      if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1100, height = 1100, res = 100)
-      else pdf(paste0(output_dir,output_filename,".pdf"), width = 11, height = 11)
-    }
     input_list <- list("output_allele_counts.dat", "output_driver_allele_counts.dat", "output_genotype_counts.dat", "output_driver_genotype_counts.dat")
     input_list <- paste0(path, input_list)
+  }
+  
+  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+  
+  if(!is.na(output_filename) & !is.na(output_dir)) {
+    if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1100, height = 1100, res = 100)
+    else pdf(paste0(output_dir,output_filename,".pdf"), width = 11, height = 11)
   }
   
   par(mfrow = c(4, 4))
