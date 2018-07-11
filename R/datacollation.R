@@ -150,6 +150,8 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
   if(num_sims > 1 || ("seed" %in% colnames(df) && length(unique(df$seed)) > 1)) multiple_sims <- 1
   else multiple_sims <- 0
   
+  print(paste0("multiple_sims = ", multiple_sims))
+  
   if(!is.na(numcells)) {
     # add NumCells column if needed (when possible):
     if(!("NumCells" %in% colnames(df))) {
@@ -295,9 +297,11 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
     stop("no valid df_type argument was passed")
   }
   
-  print(paste0("About to filter; dimensions ", dim(temp)))
-  print(paste0("colnames ", colnames(temp)))
-  print(paste0("numcells ", unique(temp$numcells)))
+  print("About to filter")
+  print("Dimensions:")
+  print(dim(temp))
+  print("Column names:")
+  print(colnames(temp))
   # filter if requested:
   temp <- filter_by_generation_or_numcells(temp, full_dir, generation, numcells)
   
