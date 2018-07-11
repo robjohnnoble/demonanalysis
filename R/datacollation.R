@@ -167,6 +167,7 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
         filter(Generation %in% df$Generation)
       print("About to merge")
       df <- merge(df, ref_df)
+      print("Merged")
     }
     # filter by closest NumCells to user input:
     if(multiple_sims) {
@@ -177,8 +178,10 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
         ungroup()
     }
     else {
+      print(paste0("About to filter; numcells = ", numcells))
       df <- filter(df, abs(NumCells - numcells) == min(abs(NumCells - numcells))) %>% 
         filter(NumCells == min(NumCells))
+      print("Filtered")
     }
   }
   else if(!is.na(generation)) {
