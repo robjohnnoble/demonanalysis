@@ -262,9 +262,12 @@ plot_allelecount_vs_origintime <- function(file, log = FALSE) {
 #' breaks <- seq(0, 1, length.out = 5)
 #' hist2(freq, breaks, num)
 #' hist2(freq, breaks)
+#' 
+#' # equivalent using standard function:
+#' hist(rep(x = freq, times = num), plot = FALSE, breaks = breaks)
+#' hist(freq, plot = FALSE, breaks = breaks)
 hist2 <- function(x, breaks, counts = 1) {
-  n_bins <- length(breaks)
-  bin_nums <- 1:(n_bins - 1)
+  bin_nums <- 1:(length(breaks) - 1)
   widths <- breaks - lag(breaks, 1)
   widths <- widths[!is.na(widths)]
   mids <- breaks[bin_nums] + widths / 2

@@ -20,8 +20,13 @@ data frame with counts and densities
 Alternative to base hist function (using dplyr)
 }
 \examples{
-df_test <- data.frame(Frequency = seq(0, 1, length = 20), Count = rbinom(20, 10, 0.5))
+freq <- seq(0, 1, length = 20)
+num <- rbinom(20, 10, 0.5)
 breaks <- seq(0, 1, length.out = 5)
-hist2(df_test$Frequency, breaks, df_test$Count)
-hist2(df_test$Frequency, breaks)
+hist2(freq, breaks, num)
+hist2(freq, breaks)
+
+# equivalent using standard function:
+hist(rep(x = freq, times = num), plot = FALSE, breaks = breaks)
+hist(freq, plot = FALSE, breaks = breaks)
 }
