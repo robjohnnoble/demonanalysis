@@ -27,6 +27,6 @@ hist2(freq, breaks, num)
 hist2(freq, breaks)
 
 # equivalent using standard function:
-hist(rep(x = freq, times = num), plot = FALSE, breaks = breaks)
-hist(freq, plot = FALSE, breaks = breaks)
+hist(rep(x = freq, times = num), breaks, plot = FALSE)
+hist(freq, breaks, plot = FALSE)
 }

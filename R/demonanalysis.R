@@ -308,8 +308,7 @@ plot_counts <- function(file_or_dataframe, generation = NA, ...) {
     if(generation != "nofilter") df <- filter_by_generation_or_numcells(df, NA, generation, NA)
   }
   
-  n_bins <- 100
-  breaks <- seq(0, 1, length = n_bins + 1)
+  breaks <- seq(0, 1, length = 101)
   hist <- hist2(df$Frequency, breaks, df$Count)
   plot(hist$counts ~ hist$mids, type = "h", xlim = c(0, 1), ylab = "count", main = "", ...)
 }
@@ -478,8 +477,7 @@ plot_first_inc_moment <- function(sizes, counts, max_size = 1, condense = NA, ..
       counts <- df$counts
     }
     else if(condense == "continuous") {
-      n_bins <- 1e4
-      breaks <- seq(0, max(sizes), length = n_bins + 1)
+      breaks <- seq(0, max(sizes), length = 1e4 + 1)
       hist <- hist2(sizes, breaks, counts)
       sizes <- hist$mids
       counts <- hist$counts
