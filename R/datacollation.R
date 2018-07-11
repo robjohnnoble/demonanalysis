@@ -295,6 +295,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
     stop("no valid df_type argument was passed")
   }
   
+  print("About to filter")
   # filter if requested:
   temp <- filter_by_generation_or_numcells(temp, full_dir, generation, numcells)
   
