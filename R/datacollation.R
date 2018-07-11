@@ -173,7 +173,7 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
       print(paste0("About to filter; numcells = ", numcells))
       print("NumCells:")
       print(unique(df$NumCells))
-      df <- filter(df, abs(NumCells - numcells) == min(abs(NumCells - numcells))) #%>% 
+      df <- filter(df, abs(NumCells - numcells) == min(abs(NumCells - numcells))) %>% 
         filter(NumCells == min(NumCells))
       print("Filtered")
     }
