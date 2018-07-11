@@ -159,8 +159,13 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
       # add NumCells column from output.dat:
       if(substr(path, nchar(path), nchar(path)) == "/") path <- substr(path, 1, nchar(path) - 1)
       ref_df <- read_delim_special(paste0(path, "/output.dat"))
+      print("ref_df has dimensions")
+      print(dim(ref_df))
+      print("ref_df has colnames")
+      print(colnames(ref_df))
       ref_df <- select(ref_df, Generation, NumCells) %>% 
         filter(Generation %in% df$Generation)
+      print("About to merge")
       df <- merge(df, ref_df)
     }
     # filter by closest NumCells to user input:
