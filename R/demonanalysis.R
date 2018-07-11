@@ -264,8 +264,8 @@ plot_allelecount_vs_origintime <- function(file, log = FALSE) {
 #' hist2(freq, breaks)
 #' 
 #' # equivalent using standard function:
-#' hist(rep(x = freq, times = num), plot = FALSE, breaks = breaks)
-#' hist(freq, plot = FALSE, breaks = breaks)
+#' hist(rep(x = freq, times = num), breaks, plot = FALSE)
+#' hist(freq, breaks, plot = FALSE)
 hist2 <- function(x, breaks, counts = 1) {
   bin_nums <- 1:(length(breaks) - 1)
   widths <- breaks - lag(breaks, 1)
@@ -312,7 +312,6 @@ plot_counts <- function(file_or_dataframe, generation = NA, ...) {
   breaks <- seq(0, 1, length = n_bins + 1)
   hist <- hist2(df$Frequency, breaks, df$Count)
   plot(hist$counts ~ hist$mids, type = "h", xlim = c(0, 1), ylab = "count", main = "", ...)
-  abline(v = 0.1, lty = 2, col = "red")
 }
 
 #' Plot a histogram of variant allele frequencies with logit x-axis and log y-axis
