@@ -4,16 +4,24 @@
 \alias{hist2}
 \title{Alternative to base hist function (using dplyr)}
 \usage{
-hist2(df, breaks)
+hist2(x, breaks, counts = 1)
 }
 \arguments{
-\item{df}{data frame with Frequency and Count columns}
+\item{x}{a vector of values for which the histogram is desired}
 
 \item{breaks}{a vector giving the breakpoints between histogram bins}
+
+\item{counts}{optional vector of counts for each x value}
 }
 \value{
-data frame with densities
+data frame with counts and densities
 }
 \description{
 Alternative to base hist function (using dplyr)
+}
+\examples{
+df_test <- data.frame(Frequency = seq(0, 1, length = 20), Count = rbinom(20, 10, 0.5))
+breaks <- seq(0, 1, length.out = 5)
+hist2(df_test$Frequency, breaks, df_test$Count)
+hist2(df_test$Frequency, breaks)
 }

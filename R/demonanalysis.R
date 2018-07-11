@@ -248,26 +248,32 @@ plot_allelecount_vs_origintime <- function(file, log = FALSE) {
 
 #' Alternative to base hist function (using dplyr)
 #' 
-#' @param df data frame with Frequency and Count columns
+#' @param x a vector of values for which the histogram is desired
 #' @param breaks a vector giving the breakpoints between histogram bins
+#' @param counts optional vector of counts for each x value
 #' 
-#' @return data frame with densities
+#' @return data frame with counts and densities
 #' 
 #' @export
 #' 
 #' @examples
-#' df_test <- data.frame(Frequency = seq(0, 1, length = 20), Count = rbinom(20, 10, 0.5))
-#' hist2(df_test, seq(0, 1, length.out = 5))
-hist2 <- function(df, breaks) {
+#' freq <- seq(0, 1, length = 20)
+#' num <- rbinom(20, 10, 0.5)
+#' breaks <- seq(0, 1, length.out = 5)
+#' hist2(freq, breaks, num)
+#' hist2(freq, breaks)
+hist2 <- function(x, breaks, counts = 1) {
   n_bins <- length(breaks)
   bin_nums <- 1:(n_bins - 1)
   widths <- breaks - lag(breaks, 1)
   widths <- widths[!is.na(widths)]
   mids <- breaks[bin_nums] + widths / 2
   
-  hist <- df %>% mutate(bin = cut(Frequency, breaks = breaks, labels = bin_nums, include.lowest = TRUE)) %>%
-    group_by(bin) %>% summarise(Count = sum(Count)) %>% 
-    mutate(mids = mids[bin], density = Count / (sum(Count) * widths[bin]))
+  df <- data.frame(x = x, counts = counts)
+  
+  hist <- df %>% mutate(bin = cut(x, breaks = breaks, labels = bin_nums, include.lowest = TRUE)) %>%
+    group_by(bin) %>% summarise(counts = sum(counts)) %>% 
+    mutate(mids = mids[bin], density = counts / (sum(counts) * widths[bin]))
   return(hist)
 }
 
@@ -301,9 +307,8 @@ plot_counts <- function(file_or_dataframe, generation = NA, ...) {
   
   n_bins <- 100
   breaks <- seq(0, 1, length = n_bins + 1)
-  hist <- hist2(df, breaks)
-  #hist <- with(df, hist(rep(x = Frequency, times = Count), plot = FALSE, breaks = seq(0, 1, length = 100)))
-  plot(hist$Count ~ hist$mids, type = "h", xlim = c(0, 1), ylab = "count", main = "", ...)
+  hist <- hist2(df$Frequency, breaks, df$Count)
+  plot(hist$counts ~ hist$mids, type = "h", xlim = c(0, 1), ylab = "count", main = "", ...)
   abline(v = 0.1, lty = 2, col = "red")
 }
 
@@ -344,7 +349,7 @@ plot_logit_freq_dist <- function(file_or_dataframe, generation = NA, ...) {
   
   logit_breaks <- plogis(-14 + 0:100 * 26 / 100)
   
-  hist <- hist2(df, logit_breaks)
+  hist <- hist2(df$Frequency, logit_breaks, df$Count)
   
   plot(log10(hist$density) ~ qlogis(hist$mids), 
        xaxt = "n", yaxt = "n", 
@@ -471,12 +476,11 @@ plot_first_inc_moment <- function(sizes, counts, max_size = 1, condense = NA, ..
       counts <- df$counts
     }
     else if(condense == "continuous") {
-      df <- data.frame(Frequency = sizes, Count = counts)
       n_bins <- 1e4
-      breaks <- seq(0, max(df$Frequency), length = n_bins + 1)
-      hist <- hist2(df, breaks)
+      breaks <- seq(0, max(sizes), length = n_bins + 1)
+      hist <- hist2(sizes, breaks, counts)
       sizes <- hist$mids
-      counts <- hist$Count
+      counts <- hist$counts
     }
   }
   
