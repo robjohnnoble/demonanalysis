@@ -246,6 +246,27 @@ plot_allelecount_vs_origintime <- function(file, log = FALSE) {
   print(q)
 }
 
+#' Alternative to base hist function (using dplyr)
+#' 
+#' @param df data frame with Frequency and Count columns
+#' @param breaks a vector giving the breakpoints between histogram bins
+#' 
+#' @return data frame with densities
+#' 
+#' @export
+hist2 <- function(df, breaks) {
+  n_bins <- length(breaks)
+  bin_nums <- 1:(n_bins - 1)
+  widths <- breaks - lag(breaks, 1)
+  widths <- widths[!is.na(widths)]
+  mids <- breaks[bin_nums] + widths / 2
+  
+  hist <- df %>% mutate(bin = cut(Frequency, breaks = breaks, labels = bin_nums)) %>%
+    group_by(bin) %>% summarise(Count = sum(Count)) %>% 
+    mutate(mids = mids[bin], density = Count / (sum(Count) * widths[bin]))
+  return(hist)
+}
+
 #' Plot counts of variant allele frequencies on linear scales
 #' 
 #' @param file_or_dataframe file or data frame containing columns "Frequency" and "Count"
@@ -273,8 +294,12 @@ plot_counts <- function(file_or_dataframe, generation = NA, ...) {
     if(is.na(generation)) generation <- max(df$Generation)
     if(generation != "nofilter") df <- filter_by_generation_or_numcells(df, NA, generation, NA)
   }
-  hist <- with(df, hist(rep(x = Frequency, times = Count), plot = FALSE, breaks = seq(0, 1, length = 100)))
-  plot(hist, xlim = c(0, 1), ylab = "count", main = "", ...)
+  
+  n_bins <- 100
+  breaks <- seq(0, 1, length = n_bins + 1)
+  hist <- hist2(df, breaks)
+  #hist <- with(df, hist(rep(x = Frequency, times = Count), plot = FALSE, breaks = seq(0, 1, length = 100)))
+  plot(hist$Count ~ hist$mids, type = "h", xlim = c(0, 1), ylab = "count", main = "", ...)
   abline(v = 0.1, lty = 2, col = "red")
 }
 
@@ -313,14 +338,9 @@ plot_logit_freq_dist <- function(file_or_dataframe, generation = NA, ...) {
   
   df <- filter(df, Frequency < 1, Frequency > plogis(-14))
   
-  bin_nums <- 1:100
   logit_breaks <- plogis(-14 + 0:100 * 26 / 100)
-  logit_mids <- plogis(-14 + ((2*0:99+1) * 26 / 200))
-  logit_widths <- logit_breaks - lag(logit_breaks, 1)
-  logit_widths <- logit_widths[!is.na(logit_widths)]
-  hist <- df %>% mutate(bin = cut(Frequency, breaks = logit_breaks, labels = bin_nums)) %>%
-    group_by(bin) %>% summarise(Count = sum(Count)) %>% 
-    mutate(mids = logit_mids[bin], density = Count / (sum(Count) * logit_widths[bin]))
+  
+  hist <- hist2(df, logit_breaks)
   
   plot(log10(hist$density) ~ qlogis(hist$mids), 
        xaxt = "n", yaxt = "n", 
@@ -421,6 +441,7 @@ first_inc_moment <- function(sizes, counts, threshold) {
 #' @param sizes for example, midpoints of a histogram
 #' @param counts counts corresponding to the sizes
 #' @param max_size maximum size (default 1)
+#' @param condense either "discrete" or "continuous"
 #' @param ... other parameters passed to plot
 #' 
 #' @return plot displyed on screen
@@ -429,12 +450,32 @@ first_inc_moment <- function(sizes, counts, threshold) {
 #' 
 #' @examples
 #' df_test <- data.frame(size = 1:20, count = exp(-(1:20)))
-#' plot_first_inc_moment(df_test$size, df_test$count)
-plot_first_inc_moment <- function(sizes, counts, max_size = 1, ...) { 
+#' plot_first_inc_moment(df_test$size, df_test$count, max_size = 20)
+plot_first_inc_moment <- function(sizes, counts, max_size = 1, condense = NA, ...) { 
   if(length(sizes) <= 1) {
     plot(0, type = 'n', axes = FALSE, ann = FALSE)
     return(NA)
   }
+  
+  if(!is.na(condense)) {
+    if(condense == "discrete") {
+      df <- data.frame(sizes = sizes, counts = counts)
+      df <- group_by(df, sizes) %>%
+        summarise(counts = sum(counts)) %>%
+        ungroup()
+      sizes <- df$sizes
+      counts <- df$counts
+    }
+    else if(condense == "continuous") {
+      df <- data.frame(Frequency = sizes, Count = counts)
+      n_bins <- 1e4
+      breaks <- seq(0, max(df$Frequency), length = n_bins + 1)
+      hist <- hist2(df, breaks)
+      sizes <- hist$mids
+      counts <- hist$Count
+    }
+  }
+  
   mom <- sapply(sizes, first_inc_moment, sizes = sizes, counts = counts)
   sizes <- sizes[which(mom > 0)]
   mom <- mom[which(mom > 0)]
@@ -525,17 +566,17 @@ plot_all_charts <- function(path_or_dflist, output_filename = NA, file_type = "p
     
     # plot 1:
     plot_counts(df1, xlab = paste0(axis_lab[i], " frequency"), generation = "nofilter", ylim = c(0, max_count))
-    if(length(df1) > 1) div_alleles <- round(quadratic_diversity(df1$Frequency, df1$Count, 0.025, threshold = 0.1), 2)
-    else div_alleles <- ""
-    if(length(df1) > 1) text(1, 0.9 * max_count, paste0("modes = ", div_alleles), pos = 2)
+    # if(length(df1) > 1) div_alleles <- round(quadratic_diversity(df1$Frequency, df1$Count, 0.025, threshold = 0.1), 2)
+    # else div_alleles <- ""
+    # if(length(df1) > 1) text(1, 0.9 * max_count, paste0("modes = ", div_alleles), pos = 2)
     
     # plot 2:
     plot_logit_freq_dist(df1, generation = "nofilter", xlab = paste0(axis_lab[i], " frequency"))
     
     # plot 3:
-    if(is.na(max_size)) plot_first_inc_moment(df1$Frequency, df1$Count, xlab = paste0(axis_lab[i], " frequency"))
-    else plot_first_inc_moment(df1$Size, df1$Count, xlab = paste0(axis_lab2[i], " size"), max_size = max_size)
-    
+    if(is.na(max_size)) plot_first_inc_moment(df1$Frequency, df1$Count, xlab = paste0(axis_lab[i], " frequency"), condense = "continuous")
+    else plot_first_inc_moment(df1$Size, df1$Count, xlab = paste0(axis_lab2[i], " size"), max_size = max_size, condense = "discrete")
+
     # plot 4:
     plot_cum_dist(df1, generation = "nofilter", xlab = paste0("inverse ", axis_lab[i], " frequency"))
   }

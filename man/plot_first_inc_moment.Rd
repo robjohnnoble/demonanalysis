@@ -4,7 +4,7 @@
 \alias{plot_first_inc_moment}
 \title{Plot first incomplete moment from frequency data}
 \usage{
-plot_first_inc_moment(sizes, counts, max_size = 1, ...)
+plot_first_inc_moment(sizes, counts, max_size = 1, condense = NA, ...)
 }
 \arguments{
 \item{sizes}{for example, midpoints of a histogram}
@@ -12,6 +12,8 @@ plot_first_inc_moment(sizes, counts, max_size = 1, ...)
 \item{counts}{counts corresponding to the sizes}
 
 \item{max_size}{maximum size (default 1)}
+
+\item{condense}{either "discrete" or "continuous"}
 
 \item{...}{other parameters passed to plot}
 }
@@ -23,5 +25,5 @@ Plot first incomplete moment from frequency data
 }
 \examples{
 df_test <- data.frame(size = 1:20, count = exp(-(1:20)))
-plot_first_inc_moment(df_test$size, df_test$count)
+plot_first_inc_moment(df_test$size, df_test$count, max_size = 20)
 }
