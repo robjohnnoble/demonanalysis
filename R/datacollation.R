@@ -10,17 +10,29 @@
 #' 
 #' @examples
 #' count_parameters(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
+#' count_parameters(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE))
 count_parameters <- function(full_dir) {
   
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
   
-  files_list = list.files(full_dir, recursive = TRUE, pattern = "parameters.dat")
-
-  if(identical(files_list, character(0))) stop("Cannot find a parameters file")
+  while(1) {
+    contents_list = list.files(full_dir)
+    
+    exists_list <- dir.exists(paste0(full_dir, "/", contents_list))
+    dirs_list <- contents_list[exists_list]
+    
+    if("parameters.dat" %in% contents_list) {
+      break
+    } else if(length(dirs_list) > 0) {
+      sub_dir <- dirs_list[1]
+    } else {
+      stop(paste0("Cannot find a parameters file in ", full_dir))
+    }
+    
+    full_dir <- paste0(full_dir, "/", sub_dir)
+  }
   
-  file_pars <- files_list[1]
-  
-  df_pars <- read_delim(paste0(full_dir, "/", file_pars), "\t")
+  df_pars <- read_delim(paste0(full_dir, "/parameters.dat"), "\t")
   
   return(dim(df_pars)[2])
 }

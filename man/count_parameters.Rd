@@ -17,4 +17,5 @@ Count the number of parameters in a parameter file in a specified folder or its 
 }
 \examples{
 count_parameters(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
+count_parameters(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE))
 }
