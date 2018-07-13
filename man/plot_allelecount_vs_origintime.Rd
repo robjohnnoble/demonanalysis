@@ -7,7 +7,7 @@
 plot_allelecount_vs_origintime(file, log = FALSE)
 }
 \arguments{
-\item{file}{file containing columns "AlleleCount", "OriginTime and "BirthRate"}
+\item{file}{file containing columns "Descendants" (or "AlleleCount" in older versions), "OriginTime and "BirthRate"}
 
 \item{log}{if TRUE then y-axis will be log-transformed (default FALSE)}
 }

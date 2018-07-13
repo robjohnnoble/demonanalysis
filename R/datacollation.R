@@ -276,12 +276,12 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
     }
   } else if (df_type %in% c("driver_genotype_properties", "genotype_properties")){
     temp <- fread(paste0(full_dir, "/output_", df_type, ".dat"))
-    if(df_type == "driver_genotype_properties") colnames(temp) <- c("Population", "Parent", "Identity", "DriverMutations", "MigrationMutations", "Immortal", "PassengerMutations", "BirthRate", "MigrationRate", "OriginTime", "AlleleCount")
-    # data contains columns AlleleCount and pop_size
+    # data contains columns Descendants (or AlleleCount in older versions) and pop_size
+    colnames(temp)[colnames(temp) == "AlleleCount"] <- "Descendants"
     calc_VAF <- function(data){
       alpha <- 1
       coverage <- data$pop_size * alpha
-      VAF <- data$AlleleCount / coverage
+      VAF <- data$Descendants / coverage
       return(VAF)
     }
     temp$pop_size <- (df_out %>% filter(Generation == max(Generation)) %>% select(NumCells))$NumCells

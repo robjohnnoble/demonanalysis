@@ -218,7 +218,7 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
 
 #' Plot allele count versus origin time, coloured by birth rate
 #' 
-#' @param file file containing columns "AlleleCount", "OriginTime and "BirthRate"
+#' @param file file containing columns "Descendants" (or "AlleleCount" in older versions), "OriginTime and "BirthRate"
 #' @param log if TRUE then y-axis will be log-transformed (default FALSE)
 #' 
 #' @return plot displyed on screen
@@ -235,8 +235,9 @@ plot_allelecount_vs_origintime <- function(file, log = FALSE) {
     return(NA)
   }
   df <- read_delim_special(file)
+  colnames(df)[colnames(df) == "AlleleCount"] <- "Descendants"
   
-  q <- ggplot(filter(df, AlleleCount > 0), aes(OriginTime, AlleleCount, size = BirthRate, colour = log10(BirthRate))) + 
+  q <- ggplot(filter(df, Descendants > 0), aes(OriginTime, Descendants, size = BirthRate, colour = log10(BirthRate))) + 
     geom_point(alpha = 0.5) + 
     scale_color_continuous(low = "blue", high = "red") + 
     theme_classic()
