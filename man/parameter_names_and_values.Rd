@@ -15,3 +15,7 @@ dataframe of parameter names and values, or NA if input_dir contains results of 
 \description{
 Find the names and final values of parameters that were varied in a batch of simulations
 }
+\examples{
+parameter_names_and_values(system.file("example_batch", "", 
+package = "demonanalysis", mustWork = TRUE))
+}

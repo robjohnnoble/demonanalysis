@@ -44,6 +44,10 @@ count_parameters <- function(full_dir) {
 #' @return dataframe of parameter names and values, or NA if input_dir contains results of a single simulation
 #' 
 #' @export
+#' 
+#' @examples
+#' parameter_names_and_values(system.file("example_batch", "", 
+#' package = "demonanalysis", mustWork = TRUE))
 parameter_names_and_values <- function(input_dir) {
   
   if(substr(input_dir, nchar(input_dir), nchar(input_dir)) == "/") input_dir <- substr(input_dir, 1, nchar(input_dir) - 1)

@@ -11,9 +11,9 @@
 #' @examples
 #' apply_combinations(c(2, 3), mean)
 apply_combinations <- function(vec, fn, ...){
-  vecs <- mapply(seq, 0, vec, SIMPLIFY = FALSE)
-  tmp <- do.call(expand.grid, vecs)
-  apply(tmp, 1, fn, ...)
+  vecs <- mapply(seq, 0, vec, SIMPLIFY = FALSE) # a list of n sequences, where n = length(vec)
+  tmp <- do.call(expand.grid, vecs) # a data frame where each row is a permuation of values from the n sequences
+  apply(tmp, 1, fn, ...) # the result of applying fn to each row of tmp
 }
 
 #' Attempt to read a tab-delimited file and return the contents, or NA if the file doesn't exist
