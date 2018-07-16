@@ -372,7 +372,7 @@ plot_curves_faceted <- function(df, num_parameters, x_var = "gen_adj", y_var= "N
   
   if(line_col %in% colnames(df)) q <- q + geom_line(aes_string(col = line_col), alpha = alpha) + 
     scale_colour_distiller(palette = "RdYlBu")
-  else q <- q + geom_line(aes_string(col = line_col), alpha = alpha)
+  else q <- q + geom_line(col = line_col, alpha = alpha)
   
   pars_without_K_seed <- pars_without_K[pars_without_K != "seed"]
   
