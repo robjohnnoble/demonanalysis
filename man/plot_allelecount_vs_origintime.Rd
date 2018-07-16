@@ -4,12 +4,19 @@
 \alias{plot_allelecount_vs_origintime}
 \title{Plot allele count versus origin time, coloured by birth rate}
 \usage{
-plot_allelecount_vs_origintime(file, log = FALSE)
+plot_allelecount_vs_origintime(file, log = FALSE, colour_by = "BirthRate",
+  palette = NA, discrete = FALSE)
 }
 \arguments{
 \item{file}{file containing columns "Descendants" (or "AlleleCount" in older versions), "OriginTime and "BirthRate"}
 
 \item{log}{if TRUE then y-axis will be log-transformed (default FALSE)}
+
+\item{colour_by}{character containing name of column by which to colour the plot}
+
+\item{palette}{either a brewer palette or a vector of colours (if colour_by is categorical)}
+
+\item{discrete}{whether to use a discrete or continuous colour scale (default FALSE)}
 }
 \value{
 plot displyed on screen
@@ -20,4 +27,7 @@ Plot allele count versus origin time, coloured by birth rate
 \examples{
 plot_allelecount_vs_origintime(system.file("extdata", "output_genotype_properties.dat", 
 package = "demonanalysis", mustWork = TRUE))
+plot_allelecount_vs_origintime(system.file("extdata", "output_genotype_properties.dat", 
+package = "demonanalysis", mustWork = TRUE), colour_by = "DriverMutations", 
+palette = c("black", "blue", "grey", "red"), discrete = TRUE)
 }

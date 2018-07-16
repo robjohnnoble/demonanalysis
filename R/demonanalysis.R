@@ -220,27 +220,72 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
 #' 
 #' @param file file containing columns "Descendants" (or "AlleleCount" in older versions), "OriginTime and "BirthRate"
 #' @param log if TRUE then y-axis will be log-transformed (default FALSE)
+#' @param colour_by character containing name of column by which to colour the plot
+#' @param palette either a brewer palette or a vector of colours (if colour_by is categorical)
+#' @param discrete whether to use a discrete or continuous colour scale (default FALSE)
 #' 
 #' @return plot displyed on screen
+#' 
+#' @importFrom grDevices col2rgb
 #' 
 #' @export
 #' 
 #' @examples
 #' plot_allelecount_vs_origintime(system.file("extdata", "output_genotype_properties.dat", 
 #' package = "demonanalysis", mustWork = TRUE))
-plot_allelecount_vs_origintime <- function(file, log = FALSE) {
+#' plot_allelecount_vs_origintime(system.file("extdata", "output_genotype_properties.dat", 
+#' package = "demonanalysis", mustWork = TRUE), colour_by = "DriverMutations", 
+#' palette = c("black", "blue", "grey", "red"), discrete = TRUE)
+plot_allelecount_vs_origintime <- function(file, log = FALSE, colour_by = "BirthRate", palette = NA, discrete = FALSE) {
   if(!file.exists(file)) {
     warning(paste0(file, " not found"))
     plot(0, type = 'n', axes = FALSE, ann = FALSE)
     return(NA)
   }
+  
   df <- read_delim_special(file)
+  df <- as.data.frame(df)
   colnames(df)[colnames(df) == "AlleleCount"] <- "Descendants"
   
-  q <- ggplot(filter(df, Descendants > 0), aes(OriginTime, Descendants, size = BirthRate, colour = log10(BirthRate))) + 
+  if(discrete) df[ , colour_by] <- as.factor(df[ , colour_by])
+  
+  direction <- 1
+  if(is.na(palette[1])) {
+    if(!discrete) {
+      palette <- "RdBu"
+      direction <- -1
+    }
+    else {
+      long_palette <- c("#8A7C64", "#599861", "#89C5DA", "#DA5724", "#74D944", "#CE50CA", 
+                        "#3F4921", "#C0717C", "#CBD588", "#5F7FC7", "#673770", "#D3D93E", 
+                        "#38333E", "#508578", "#D7C1B1", "#689030", "#AD6F3B", "#CD9BCD", 
+                        "#D14285", "#6DDE88", "#652926", "#7FDCC0", "#C84248", "#8569D5", 
+                        "#5E738F", "#D1A33D")
+      palette <- rep(long_palette, ceiling(length(unique(df[ , colour_by])) / length(long_palette)))
+    }
+  }
+  # test whether palette is a vector of colours; if not then we'll assume it's the name of a predefined palette:
+  palette_named <- !min(sapply(palette, function(X) tryCatch(is.matrix(col2rgb(X)), error = function(e) FALSE)))
+  
+  q <- ggplot(filter(df, Descendants > 0), aes_string("OriginTime", "Descendants", size = "BirthRate", colour = colour_by)) + 
     geom_point(alpha = 0.5) + 
-    scale_color_continuous(low = "blue", high = "red") + 
     theme_classic()
+  
+  if(!discrete) {
+    q <- q + 
+      scale_color_distiller(palette = palette, direction = direction)
+  }
+  else {
+    if(palette_named) {
+      q <- q + 
+        scale_color_brewer(palette = palette)
+    }
+    else {
+      id_list <- sort(unique(select(df, colour_by))[[1]]) # list of legend entries, omitting NA
+      q <- q + 
+        scale_color_manual(values = palette)
+    }
+  }
   
   if(log) q <- q + scale_y_continuous(trans = 'log10')
   
