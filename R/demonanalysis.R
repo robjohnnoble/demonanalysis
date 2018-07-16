@@ -131,8 +131,8 @@ grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FAL
           panel.background=element_blank(),panel.border=element_blank(),panel.grid.major=element_blank(),
           panel.grid.minor=element_blank(),plot.background=element_blank())
   if(discrete) {
-    if(!is.na(palette[1])) h2 <- h2 + scale_fill_manual(name = legend_title, values = palette) +
-      scale_color_manual(values = palette)
+    if(!is.na(palette[1])) h2 <- h2 + scale_fill_manual(name = legend_title, values = palette, na.value="white") +
+      scale_color_manual(values = palette, na.value="white")
   }
   else {
     if(is.na(palette[1])) {
@@ -140,8 +140,8 @@ grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FAL
         scale_color_distiller(palette ="RdBu", na.value="white")
     }
     else {
-      h2 <- h2 + scale_fill_distiller(name = legend_title, palette = palette, direction = -1) + 
-        scale_color_distiller(palette = palette)
+      h2 <- h2 + scale_fill_distiller(name = legend_title, palette = palette, direction = -1, na.value="white") + 
+        scale_color_distiller(palette = palette, na.value="white")
     }
   }
   return(h2)
@@ -178,9 +178,9 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
                     "#38333E", "#508578", "#D7C1B1", "#689030", "#AD6F3B", "#CD9BCD", 
                     "#D14285", "#6DDE88", "#652926", "#7FDCC0", "#C84248", "#8569D5", 
                     "#5E738F", "#D1A33D")
-  dd <- (-1):25
-  dd.col <- c("white", long_palette)
-  names(dd.col)  <- dd
+  dd <- 0:25
+  dd.col <- long_palette
+  names(dd.col) <- dd
   
   h1 <- Muller_plot(Muller_df, colour_by = "col_index", palette = dd.col)
   h2 <- Muller_pop_plot(Muller_df, colour_by = "col_index", palette = dd.col)
