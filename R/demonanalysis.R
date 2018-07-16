@@ -780,14 +780,12 @@ all_statuses <- function(input_dir, adjust = 0, summary = FALSE, with_names = FA
 #' @param type what type of images to create: "plot", "chart" or "origintimes" (or a vector containing two or more of these strings)
 #' @param file_type either "pdf" or "png" (other values default to "pdf")
 #' @param output_dir folder in which to save the image files
-#' @param max_size maximum size (default NA corresponds to plotting frequencies, not sizes)
-#' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
-#' @param numcells Number of cells at which to make the measurement (takes precedent over generation; default NA corresponds to the final size)
+#' @param ... additional arguments passed to the plotting function
 #' 
 #' @return a set of image files
 #' 
 #' @export
-create_plots_batch <- function(input_dir, type = "plot", file_type = "png", output_dir = NA, max_size = NA, generation = NA, numcells = NA) {
+create_plots_batch <- function(input_dir, type = "plot", file_type = "png", output_dir = NA, ...) {
   pars_and_values <- parameter_names_and_values(input_dir)
   if(is.na(pars_and_values)[1]) stop("input_dir should contain results of a batch of simulations")
   pars <- pars_and_values$name
@@ -798,14 +796,14 @@ create_plots_batch <- function(input_dir, type = "plot", file_type = "png", outp
     msg <- final_error_message(full_dir)
     if(!identical(msg, character(0))) if(msg == "Exit code 0") {
       if("plot" %in% type) plot_all_images(full_dir, make_image_file_name("plot", pars, x), file_type, output_dir)
-      if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, x), file_type, output_dir, max_size, generation, numcells)
+      if("chart" %in% type) plot_all_charts(full_dir, make_image_file_name("chart", pars, x), file_type, output_dir, ...)
       if("origintimes" %in% type) {
         if(!is.na(output_dir)) {
           fname <- make_image_file_name("origintimes", pars, x)
           if(file_type == "png") png(paste0(output_dir, "/", fname, ".png"), width = 700, height = 500, res = 100)
           else pdf(paste0(fname, ".pdf"), width = 7, height = 5)
         }
-        plot_allelecount_vs_origintime(paste0(full_dir, "output_genotype_properties.dat"))
+        plot_allelecount_vs_origintime(paste0(full_dir, "output_genotype_properties.dat"), ...)
         if(!is.na(output_dir)) dev.off()
       }
     }
