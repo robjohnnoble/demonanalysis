@@ -219,6 +219,7 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
 #' @param vaf_cut_off exclude genotypes with vaf lower than cut off (if df_type == "genotype_properties" or "driver_genotype_properties")
 #' @param generation Generation at which to filter (default NA corresponds to no filtering)
 #' @param numcells Number of cells at which to filter (default NA corresponds to no filtering)
+#' @param num_parameters Number of parameters, accounting for the first set of columns in the dataframe (optional, but may improve speed)
 #' 
 #' @return the combined dataframe
 #' 
@@ -240,7 +241,7 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
 #' df_type = "genotype_properties", vaf_cut_off = 0.002)
 #' combine_dfs(full_dir = system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
 #' df_type = "genotype_counts", numcells = 100)
-combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output", vaf_cut_off = NA, generation = NA, numcells = NA) {
+combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output", vaf_cut_off = NA, generation = NA, numcells = NA, num_parameters = NA) {
   
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
   
@@ -273,7 +274,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
     }
     
     # adds maxgen and gen_adj columns
-    if(!exists("num_parameters")) num_parameters <- count_parameters(full_dir)
+    if(is.na(num_parameters)) num_parameters <- count_parameters(full_dir)
     temp <- add_columns(temp, num_parameters) 
     
     # add sweep_seq columns (specific for output.dat?)
@@ -376,7 +377,8 @@ all_output <- function(input_dir, include_diversities = TRUE, df_type = "output"
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
     print(paste0(full_dir, " ", msg), quote = FALSE)
-    if(!identical(msg, character(0))) if(msg == "Exit code 0") return(combine_dfs(full_dir, include_diversities, df_type, vaf_cut_off, generation, numcells))
+    if(!identical(msg, character(0))) if(msg == "Exit code 0") return(combine_dfs(full_dir, include_diversities, 
+                                                                                  df_type, vaf_cut_off, generation, numcells, num_parameters))
     return(data.frame())
   }
   res <- rbindlist(apply_combinations(final_values, each_df))

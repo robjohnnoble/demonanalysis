@@ -5,7 +5,7 @@
 \title{Combine (and optionally process) data for one simulation}
 \usage{
 combine_dfs(full_dir, include_diversities = TRUE, df_type = "output",
-  vaf_cut_off = NA, generation = NA, numcells = NA)
+  vaf_cut_off = NA, generation = NA, numcells = NA, num_parameters = NA)
 }
 \arguments{
 \item{full_dir}{base input directory name}
@@ -19,6 +19,8 @@ combine_dfs(full_dir, include_diversities = TRUE, df_type = "output",
 \item{generation}{Generation at which to filter (default NA corresponds to no filtering)}
 
 \item{numcells}{Number of cells at which to filter (default NA corresponds to no filtering)}
+
+\item{num_parameters}{Number of parameters, accounting for the first set of columns in the dataframe (optional, but may improve speed)}
 }
 \value{
 the combined dataframe
