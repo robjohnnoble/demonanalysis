@@ -15,7 +15,8 @@ add_relative_time(df, start_size, num_parameters)
 }
 \value{
 the same dataframe with additional columns: "new_time" is the time elapsed since
-NumCells = start_size; "div0" is DriverEdgeDiversity when NumCells = start_size
+NumCells = start_size; "div0" is DriverEdgeDiversity when NumCells = start_size; 
+"rank_div0" is div0 rescaled to a rank between 0 and 1
 }
 \description{
 Add relative time column to a dataframe, and diversity at the new time zero

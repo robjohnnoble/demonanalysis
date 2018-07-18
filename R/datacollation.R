@@ -83,23 +83,34 @@ parameter_names_and_values <- function(input_dir) {
 
 #' Add derived variables to a dataframe
 #' 
-#' @param df dataframe with columns including "Generation"
+#' @param df dataframe with columns including "Generation" and "NumCells"
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' 
 #' @return the same dataframe with additional columns: for each simulation, 
 #' "maxgen" is the maximum value of Generation; "gen_adj" is the time elapsed
-#' since Generation zero, relative to maxgen.
+#' since Generation zero, relative to maxgen; GrowthRate is the rate of change of
+#' NumCells, relative to Generation; SmoothGrowthRate is GrowthRate with loess smoothing.
+#' 
+#' @importFrom stats loess
 #' 
 #' @export
 #' 
 #' @examples
-#' df <- data.frame(p = 1, seed = rep(1:2, each = 4), 
-#' Generation = c(1:4, 3:6), Y = rep(1:4, times = 2))
-#' add_columns(df, 1)
+#' df <- data.frame(p = 1, seed = rep(1:2, each = 10), 
+#' Generation = c(1:10, 3:12), NumCells = rep(1:10, times = 2) + rnorm(20, 0, 0.1))
+#' add_columns(df, 2)
 add_columns <- function(df, num_parameters) {
   df <- df %>% group_by_at(1:num_parameters) %>% 
     mutate(maxgen = max(Generation, na.rm = TRUE)) %>% 
     mutate(gen_adj = Generation / maxgen) %>% 
+    mutate(GrowthRate = pmax((lead(NumCells, 2) - NumCells) / (lead(Generation, 2) - Generation), 0.1)) %>% 
+    ungroup()
+  
+  # replace NA values in GrowthRate:
+  df[is.na(df$GrowthRate), "GrowthRate"] <- df[!is.na(df$GrowthRate) & is.na(lead(df$GrowthRate, 2)), "GrowthRate"]
+  
+  df <- df %>% group_by_at(1:num_parameters) %>% 
+    mutate(SmoothGrowthRate = loess(GrowthRate ~ NumCells)$fitted) %>% 
     ungroup()
   
   return(df)
@@ -112,7 +123,10 @@ add_columns <- function(df, num_parameters) {
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' 
 #' @return the same dataframe with additional columns: "new_time" is the time elapsed since
-#' NumCells = start_size; "div0" is DriverEdgeDiversity when NumCells = start_size
+#' NumCells = start_size; "div0" is DriverEdgeDiversity when NumCells = start_size; 
+#' "rank_div0" is div0 rescaled to a rank between 0 and 1
+#' 
+#' @importFrom scales rescale
 #' 
 #' @export
 #' 
@@ -126,8 +140,9 @@ add_relative_time <- function(df, start_size, num_parameters) {
     mutate(new_time = gen_adj - min(gen_adj[NumCells >= start_size], na.rm = TRUE)) %>% 
     mutate(div0 = min(DriverEdgeDiversity[gen_adj == min(gen_adj[NumCells >= start_size & 
            (!is.na(DriverEdgeDiversity) | Generation == max(Generation))], na.rm = TRUE)])) %>% 
+    mutate(rank_div0 = rescale(rank(div0))) %>% 
     ungroup()
-  
+
   return(df)
 }
 

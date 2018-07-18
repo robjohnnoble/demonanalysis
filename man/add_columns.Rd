@@ -7,20 +7,21 @@
 add_columns(df, num_parameters)
 }
 \arguments{
-\item{df}{dataframe with columns including "Generation"}
+\item{df}{dataframe with columns including "Generation" and "NumCells"}
 
 \item{num_parameters}{number of parameters, accounting for the first set of columns in the dataframe}
 }
 \value{
 the same dataframe with additional columns: for each simulation, 
 "maxgen" is the maximum value of Generation; "gen_adj" is the time elapsed
-since Generation zero, relative to maxgen.
+since Generation zero, relative to maxgen; GrowthRate is the rate of change of
+NumCells, relative to Generation; SmoothGrowthRate is GrowthRate with loess smoothing.
 }
 \description{
 Add derived variables to a dataframe
 }
 \examples{
-df <- data.frame(p = 1, seed = rep(1:2, each = 4), 
-Generation = c(1:4, 3:6), Y = rep(1:4, times = 2))
-add_columns(df, 1)
+df <- data.frame(p = 1, seed = rep(1:2, each = 10), 
+Generation = c(1:10, 3:12), NumCells = rep(1:10, times = 2) + rnorm(20, 0, 0.1))
+add_columns(df, 2)
 }
