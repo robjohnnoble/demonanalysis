@@ -88,8 +88,8 @@ parameter_names_and_values <- function(input_dir) {
 #' 
 #' @return the same dataframe with additional columns: for each simulation, 
 #' "maxgen" is the maximum value of Generation; "gen_adj" is the time elapsed
-#' since Generation zero, relative to maxgen; GrowthRate is the rate of change of
-#' NumCells, relative to Generation; SmoothGrowthRate is GrowthRate with loess smoothing.
+#' since Generation zero, relative to maxgen; SmoothNumCells is NumCells with loess smoothing; 
+#' GrowthRate is the rate of change of SmoothNumCells, relative to Generation.
 #' 
 #' @importFrom stats loess
 #' 
@@ -103,16 +103,19 @@ add_columns <- function(df, num_parameters) {
   df <- df %>% group_by_at(1:num_parameters) %>% 
     mutate(maxgen = max(Generation, na.rm = TRUE)) %>% 
     mutate(gen_adj = Generation / maxgen) %>% 
-    mutate(GrowthRate = pmax((lead(NumCells, 2) - NumCells) / (lead(Generation, 2) - Generation), 0.1)) %>% 
+    ungroup()
+  
+  df <- df %>% group_by_at(1:num_parameters) %>% 
+    mutate(SmoothNumCells = 10^loess(log10(NumCells) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
+    ungroup()
+  
+  df <- df %>% group_by_at(1:num_parameters) %>% 
+    mutate(GrowthRate = (SmoothNumCells - lag(SmoothNumCells, 1)) / (Generation - lag(Generation, 1))) %>% 
     ungroup()
   
   # replace NA values in GrowthRate:
-  df[is.na(df$GrowthRate), "GrowthRate"] <- df[!is.na(df$GrowthRate) & is.na(lead(df$GrowthRate, 2)), "GrowthRate"]
-  
-  df <- df %>% group_by_at(1:num_parameters) %>% 
-    mutate(SmoothGrowthRate = loess(GrowthRate ~ NumCells)$fitted) %>% 
-    ungroup()
-  
+  df[is.na(df$GrowthRate), "GrowthRate"] <- df[!is.na(df$GrowthRate) & is.na(lag(df$GrowthRate, 1)), "GrowthRate"]
+
   return(df)
 }
 
@@ -136,11 +139,21 @@ add_columns <- function(df, num_parameters) {
 #' comb_df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
 #' add_relative_time(comb_df, start_size = 100, num_parameters = num_parameters)
 add_relative_time <- function(df, start_size, num_parameters) {
-  df <- df %>% group_by_at(1:num_parameters) %>% 
+  col_nums <- c(1:num_parameters)
+  
+  df <- df %>% group_by_at(col_nums) %>% 
     mutate(new_time = gen_adj - min(gen_adj[NumCells >= start_size], na.rm = TRUE)) %>% 
     mutate(div0 = min(DriverEdgeDiversity[gen_adj == min(gen_adj[NumCells >= start_size & 
            (!is.na(DriverEdgeDiversity) | Generation == max(Generation))], na.rm = TRUE)])) %>% 
+    mutate(GrowthRate0 = min(GrowthRate[gen_adj == min(gen_adj[NumCells >= start_size & 
+           (!is.na(GrowthRate) | Generation == max(Generation))], na.rm = TRUE)])) %>% 
+    ungroup()
+  
+  col_nums <- col_nums[col_nums != which(colnames(df) == "seed")]
+    
+  df <- df %>% group_by_at(col_nums) %>% 
     mutate(rank_div0 = rescale(rank(div0))) %>% 
+    mutate(rank_GrowthRate0 = rescale(rank(GrowthRate0))) %>% 
     ungroup()
 
   return(df)

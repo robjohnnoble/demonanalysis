@@ -14,8 +14,8 @@ add_columns(df, num_parameters)
 \value{
 the same dataframe with additional columns: for each simulation, 
 "maxgen" is the maximum value of Generation; "gen_adj" is the time elapsed
-since Generation zero, relative to maxgen; GrowthRate is the rate of change of
-NumCells, relative to Generation; SmoothGrowthRate is GrowthRate with loess smoothing.
+since Generation zero, relative to maxgen; SmoothNumCells is NumCells with loess smoothing; 
+GrowthRate is the rate of change of SmoothNumCells, relative to Generation.
 }
 \description{
 Add derived variables to a dataframe
