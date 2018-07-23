@@ -4,7 +4,8 @@
 \alias{disp_rate_min}
 \title{Minimum limit on dispersal speed}
 \usage{
-disp_rate_min(r1, r2, K, d, m, selection = "birth", symmetric = FALSE)
+disp_rate_min(r1, r2, K, d, m, selection = "birth", symmetric = FALSE,
+  two_dim = FALSE)
 }
 \arguments{
 \item{r1}{birth rate of cells in the destination deme, relative to reference birth rate}
@@ -20,6 +21,8 @@ disp_rate_min(r1, r2, K, d, m, selection = "birth", symmetric = FALSE)
 \item{selection}{one of "birth", "death", "birth & migration"}
 
 \item{symmetric}{whether migration occurs in both directions}
+
+\item{two_dim}{whether to adjust for two-dimensional growth}
 }
 \value{
 A number, corresponding to the speed.
@@ -28,7 +31,9 @@ A number, corresponding to the speed.
 Minimum limit on dispersal speed
 }
 \details{
-Assumes that a cell type cannot attempt to migrate until it reaches fixation.
+Assumes that a cell type cannot attempt to migrate until it reaches fixation. 
+Adjustment for two-dimensional growth entails multiplying the migration rate by 0.4, which is
+a factor estimated from simulation results.
 }
 \examples{
 disp_rate_min(1, 1.1, 2, 1, 0.1, "birth")

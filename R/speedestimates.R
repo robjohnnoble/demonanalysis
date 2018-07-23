@@ -233,17 +233,21 @@ time_expected <- function(r1, r2, K, d, m, selection = "birth"){
 #' @param r2 birth rate of migrating cells, relative to r1
 #' @param selection one of "birth", "death", "birth & migration"
 #' @param symmetric whether migration occurs in both directions
+#' @param two_dim whether to adjust for two-dimensional growth
 #' 
 #' @return A number, corresponding to the speed.
 #' 
 #' @export
 #' 
-#' @details Assumes that the time until fixation is negligible relative to the time until migration.
+#' @details Assumes that the time until fixation is negligible relative to the time until migration. 
+#' Adjustment for two-dimensional growth entails multiplying the migration rate by 0.4, which is
+#' a factor estimated from simulation results.
 #' 
 #' @examples 
 #' disp_rate_max(2, 1, 0.1, 1, 1.1, "birth")
 #' disp_rate_max(2, 1, 0.1, 1, 1.1, "death")
-disp_rate_max <- function(K, d, m, r1, r2, selection = "birth", symmetric = FALSE) {
+disp_rate_max <- function(K, d, m, r1, r2, selection = "birth", symmetric = FALSE, two_dim = FALSE) {
+  if(two_dim) m <- 0.4 * m
   if(!symmetric) return(sqrt(K) / time_migration(K, d, m, r1, r2, selection))
   else return((sqrt(K) / time_migration(K, d, m, r1, r2, selection) - sqrt(K) / time_migration(K, d, m, r1, 1 / r2, selection))/2)
 }
@@ -257,17 +261,21 @@ disp_rate_max <- function(K, d, m, r1, r2, selection = "birth", symmetric = FALS
 #' @param m migration rate per cell, relative to birth rate
 #' @param selection one of "birth", "death", "birth & migration"
 #' @param symmetric whether migration occurs in both directions
+#' @param two_dim whether to adjust for two-dimensional growth
 #' 
 #' @return A number, corresponding to the speed.
 #' 
 #' @export
 #' 
-#' @details Assumes that a cell type cannot attempt to migrate until it reaches fixation.
+#' @details Assumes that a cell type cannot attempt to migrate until it reaches fixation. 
+#' Adjustment for two-dimensional growth entails multiplying the migration rate by 0.4, which is
+#' a factor estimated from simulation results.
 #' 
 #' @examples 
 #' disp_rate_min(1, 1.1, 2, 1, 0.1, "birth")
 #' disp_rate_min(1, 1.1, 2, 1, 0.1, "death")
-disp_rate_min <- function(r1, r2, K, d, m, selection = "birth", symmetric = FALSE) {
+disp_rate_min <- function(r1, r2, K, d, m, selection = "birth", symmetric = FALSE, two_dim = FALSE) {
+  if(two_dim) m <- 0.4 * m
   if(!symmetric) return(sqrt(K) / (time_fixation(r1, r2, K) + time_migration(K, d, m, r1, r2, selection)))
   else return((sqrt(K) / (time_fixation(r1, r2, K) + time_migration(K, d, m, r1, r2, selection)) - sqrt(K) / (time_fixation(r1, 1 / r2, K) + time_migration(K, d, m, r1, 1 / r2, selection)))/2)
 }
@@ -281,15 +289,29 @@ disp_rate_min <- function(r1, r2, K, d, m, selection = "birth", symmetric = FALS
 #' @param m migration rate per cell, relative to birth rate
 #' @param selection one of "birth", "death", "birth & migration"
 #' @param symmetric whether migration occurs in both directions
+#' @param two_dim whether to adjust for two-dimensional growth
 #' 
 #' @return A number, corresponding to the speed.
 #' 
 #' @export
 #' 
+#' @details Adjustment for two-dimensional growth entails multiplying the migration rate by 0.4, which is
+#' a factor estimated from simulation results.
+#' 
 #' @examples 
 #' disp_rate(1, 1.1, 2, 1, 0.1, "birth")
 #' disp_rate(1, 1.1, 2, 1, 0.1, "death")
-disp_rate <- function(r1, r2, K, d, m, selection = "birth", symmetric = FALSE) {
+#' 
+#' \dontrun{
+#' df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
+#' num_parameters <- count_parameters(system.file("extdata", "", 
+#' package = "demonanalysis", mustWork = TRUE))
+#' df <- add_columns(df, num_parameters)
+#' median(df$RadiusGrowthRate[which(df$NumCells > 400)]) # dispersal rate from simulation with unoccupied destination demes
+#' disp_rate(1, 1, 1, 1, 1, two_dim = TRUE) # predicted dispersal rate, assuming occupied destination demes
+#' }
+disp_rate <- function(r1, r2, K, d, m, selection = "birth", symmetric = FALSE, two_dim = FALSE) {
+  if(two_dim) m <- 0.4 * m
   if(!symmetric) return(sqrt(K) / time_expected(r1, r2, K, d, m, selection))
   else return((sqrt(K) / time_expected(r1, r2, K, d, m, selection) - sqrt(K) / time_expected(r1, 1 / r2, K, d, m, selection))/2)
 }
@@ -298,19 +320,16 @@ disp_rate <- function(r1, r2, K, d, m, selection = "birth", symmetric = FALSE) {
 #' 
 #' @param K deme carrying capacity
 #' @param edge_only whether migration occurs at the edge only
-#' @param two_dim whether to adjust for two-dimensional growth
 #' 
 #' @return A number, corresponding to the speed.
 #' 
 #' @export
 #' 
-#' @details Assumes migration_type = 0, migration_edge_only = 0, migration_rate_scales_with_K = 1. 
-#' Adjustment for two-dimensional growth entails multiplying the migration rate by 0.4, which is
-#' a factor estimated from simulation results.
+#' @details Assumes migration_type = 0, migration_edge_only = 0, migration_rate_scales_with_K = 1.
 #' 
 #' @examples 
 #' mig_rate(8)
-mig_rate <- function(K, edge_only = 0, two_dim = FALSE) {
+mig_rate <- function(K, edge_only = 0) {
   if(edge_only == 0) {
     A <- -0.1593
     B <- -0.2868
@@ -320,12 +339,7 @@ mig_rate <- function(K, edge_only = 0, two_dim = FALSE) {
     B <- -0.14
     C <- 0.5761
   }
-  if(two_dim) {
-    mult = 0.4 # approximately the right adjustment factor, based on simulation results
-  } else {
-    mult = 1
-  }
-  return(mult * 10^(A * (log10(K))^2 + B * log10(K) + C) / sqrt(K))
+  return(10^(A * (log10(K))^2 + B * log10(K) + C) / sqrt(K))
 }
 
 #' A convenient wrapper for calculating dispersal rate for parameter values used in demon.cpp
@@ -344,5 +358,5 @@ mig_rate <- function(K, edge_only = 0, two_dim = FALSE) {
 #' @examples 
 #' disp_rate_demon(8, 1/0.9)
 disp_rate_demon <- function(K, r2, edge_only = 0, two_dim = FALSE) {
-  disp_rate(1, r2, K, sqrt(K), mig_rate(K, edge_only, two_dim), "birth")
+  disp_rate(1, r2, K, sqrt(K), mig_rate(K, edge_only), "birth", two_dim)
 }

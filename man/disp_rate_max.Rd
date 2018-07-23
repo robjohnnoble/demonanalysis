@@ -4,7 +4,8 @@
 \alias{disp_rate_max}
 \title{Maximum limit on dispersal speed}
 \usage{
-disp_rate_max(K, d, m, r1, r2, selection = "birth", symmetric = FALSE)
+disp_rate_max(K, d, m, r1, r2, selection = "birth", symmetric = FALSE,
+  two_dim = FALSE)
 }
 \arguments{
 \item{K}{deme carrying capacity}
@@ -20,6 +21,8 @@ disp_rate_max(K, d, m, r1, r2, selection = "birth", symmetric = FALSE)
 \item{selection}{one of "birth", "death", "birth & migration"}
 
 \item{symmetric}{whether migration occurs in both directions}
+
+\item{two_dim}{whether to adjust for two-dimensional growth}
 }
 \value{
 A number, corresponding to the speed.
@@ -28,7 +31,9 @@ A number, corresponding to the speed.
 Maximum limit on dispersal speed
 }
 \details{
-Assumes that the time until fixation is negligible relative to the time until migration.
+Assumes that the time until fixation is negligible relative to the time until migration. 
+Adjustment for two-dimensional growth entails multiplying the migration rate by 0.4, which is
+a factor estimated from simulation results.
 }
 \examples{
 disp_rate_max(2, 1, 0.1, 1, 1.1, "birth")

@@ -4,14 +4,12 @@
 \alias{mig_rate}
 \title{Quadratic formula used to set migration rate in demon.cpp}
 \usage{
-mig_rate(K, edge_only = 0, two_dim = FALSE)
+mig_rate(K, edge_only = 0)
 }
 \arguments{
 \item{K}{deme carrying capacity}
 
 \item{edge_only}{whether migration occurs at the edge only}
-
-\item{two_dim}{whether to adjust for two-dimensional growth}
 }
 \value{
 A number, corresponding to the speed.
@@ -20,9 +18,7 @@ A number, corresponding to the speed.
 Quadratic formula used to set migration rate in demon.cpp
 }
 \details{
-Assumes migration_type = 0, migration_edge_only = 0, migration_rate_scales_with_K = 1. 
-Adjustment for two-dimensional growth entails multiplying the migration rate by 0.4, which is
-a factor estimated from simulation results.
+Assumes migration_type = 0, migration_edge_only = 0, migration_rate_scales_with_K = 1.
 }
 \examples{
 mig_rate(8)
