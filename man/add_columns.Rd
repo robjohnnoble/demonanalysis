@@ -12,10 +12,12 @@ add_columns(df, num_parameters)
 \item{num_parameters}{number of parameters, accounting for the first set of columns in the dataframe}
 }
 \value{
-the same dataframe with additional columns: for each simulation, 
+The same dataframe with additional columns. For each simulation, 
 "maxgen" is the maximum value of Generation; "gen_adj" is the time elapsed
 since Generation zero, relative to maxgen; SmoothNumCells is NumCells with loess smoothing; 
-GrowthRate is the rate of change of SmoothNumCells, relative to Generation.
+SmoothRadius is the radius of a disc of area NumCells, after loess smoothing; 
+GrowthRate and RadiusGrowthRate are the rates of change of SmoothNumCells and SmoothRadius, 
+relative to Generation.
 }
 \description{
 Add derived variables to a dataframe

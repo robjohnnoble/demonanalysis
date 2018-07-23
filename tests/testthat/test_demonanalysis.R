@@ -46,8 +46,8 @@ test_that("find_correlations perfect fit", {
 test_that("combine_dfs() returns the desired output files", {
   full_dir <- system.file("extdata", "", package = "demonanalysis", mustWork = TRUE)
   # test dimensions output.dat
-  expect_equal(dim(combine_dfs(full_dir = full_dir, include_diversities = TRUE)), c(32, 130))
-  expect_equal(dim(combine_dfs(full_dir = full_dir, include_diversities = FALSE)), c(32, 55))
+  expect_equal(dim(combine_dfs(full_dir = full_dir, include_diversities = TRUE)), c(32, 132))
+  expect_equal(dim(combine_dfs(full_dir = full_dir, include_diversities = FALSE)), c(32, 57))
   
   # test driver_genotype_properties
   expect_equal(dim(combine_dfs(full_dir = full_dir, df_type = "driver_genotype_properties")), c(122,29))
@@ -69,7 +69,7 @@ test_that("combine_dfs() returns the desired output files", {
 test_that("all_output() returns the desired output files", {
   input_dir <- system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE)
   all_output <- all_output(input_dir)
-  expect_equal(dim(all_output), c(44,61))
+  expect_equal(dim(all_output), c(44,63))
   expect_equivalent(table(all_output$K, all_output$seed), as.table(matrix(c(11,11,11,11), nrow=2)))
   
   expect_equal(dim(all_output(input_dir, df_type = "driver_genotype_properties")), c(223, 31))

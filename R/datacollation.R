@@ -86,10 +86,12 @@ parameter_names_and_values <- function(input_dir) {
 #' @param df dataframe with columns including "Generation" and "NumCells"
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' 
-#' @return the same dataframe with additional columns: for each simulation, 
+#' @return The same dataframe with additional columns. For each simulation, 
 #' "maxgen" is the maximum value of Generation; "gen_adj" is the time elapsed
 #' since Generation zero, relative to maxgen; SmoothNumCells is NumCells with loess smoothing; 
-#' GrowthRate is the rate of change of SmoothNumCells, relative to Generation.
+#' SmoothRadius is the radius of a disc of area NumCells, after loess smoothing; 
+#' GrowthRate and RadiusGrowthRate are the rates of change of SmoothNumCells and SmoothRadius, 
+#' relative to Generation.
 #' 
 #' @importFrom stats loess
 #' 
@@ -107,14 +109,17 @@ add_columns <- function(df, num_parameters) {
   
   df <- df %>% group_by_at(1:num_parameters) %>% 
     mutate(SmoothNumCells = 10^loess(log10(NumCells) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
+    mutate(SmoothRadius = 10^loess(log10(sqrt(NumCells/pi)) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
     ungroup()
   
   df <- df %>% group_by_at(1:num_parameters) %>% 
     mutate(GrowthRate = (SmoothNumCells - lag(SmoothNumCells, 1)) / (Generation - lag(Generation, 1))) %>% 
+    mutate(RadiusGrowthRate = (SmoothRadius - lag(SmoothRadius, 1)) / (Generation - lag(Generation, 1))) %>% 
     ungroup()
   
-  # replace NA values in GrowthRate:
+  # replace NA values:
   df[is.na(df$GrowthRate), "GrowthRate"] <- df[!is.na(df$GrowthRate) & is.na(lag(df$GrowthRate, 1)), "GrowthRate"]
+  df[is.na(df$RadiusGrowthRate), "RadiusGrowthRate"] <- df[!is.na(df$RadiusGrowthRate) & is.na(lag(df$RadiusGrowthRate, 1)), "RadiusGrowthRate"]
 
   return(df)
 }
