@@ -4,15 +4,17 @@
 \alias{image_df_from_grid_file}
 \title{Read a file containing grid states and process it into a dataframe for plotting.}
 \usage{
-image_df_from_grid_file(file, trim = -1)
+image_df_from_grid_file(file, trim = -1, as_matrix = FALSE)
 }
 \arguments{
 \item{file}{file name including path}
 
 \item{trim}{how many rows and columns to remove; if trim < 0 (default) then all rows and columns containing NA are removed}
+
+\item{as_matrix}{whether to return a matrix or a dataframe}
 }
 \value{
-a dataframe formatted for plotting
+Either a dataframe formatted for plotting (as_matrix = FALSE) or a matrix (as_matrix = TRUE)
 }
 \description{
 Read a file containing grid states and process it into a dataframe for plotting.

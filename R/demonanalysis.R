@@ -37,8 +37,9 @@ read_delim_special <- function(file) {
 #' 
 #' @param file file name including path
 #' @param trim how many rows and columns to remove; if trim < 0 (default) then all rows and columns containing NA are removed
+#' @param as_matrix whether to return a matrix or a dataframe
 #' 
-#' @return a dataframe formatted for plotting
+#' @return Either a dataframe formatted for plotting (as_matrix = FALSE) or a matrix (as_matrix = TRUE)
 #' 
 #' @export
 #' @importFrom readr read_delim
@@ -46,7 +47,7 @@ read_delim_special <- function(file) {
 #' @examples
 #' image_df <- image_df_from_grid_file(system.file("extdata", 
 #' "output_passengersgrid.dat", package = "demonanalysis", mustWork = TRUE))
-image_df_from_grid_file <- function(file, trim = -1) {
+image_df_from_grid_file <- function(file, trim = -1, as_matrix = FALSE) {
   if(!file.exists(file)) {
     warning(paste0(file, " not found"))
     return(NA)
@@ -68,6 +69,9 @@ image_df_from_grid_file <- function(file, trim = -1) {
     }
     else res <- res[(trim + 1):(nrow(res) - trim), (trim + 1):(ncol(res) - trim)]
   }
+  
+  if(as_matrix) return(res)
+  
   df <- expand.grid(x = 1:ncol(as.data.frame(res)), y = 1:nrow(as.data.frame(res)))
   df$z <- as.vector(t(res))
   return(df)
@@ -101,6 +105,46 @@ muller_df_from_file <- function(file) {
   pop_df$col_index[pop_df$col_index > 0] <- pop_df$col_index[pop_df$col_index > 0] %% 25 + 1
   pop_df$col_index <- as.character(pop_df$col_index)
   return(get_Muller_df(edges, pop_df))
+}
+
+#' For cells at the boundary of a population, find mean proportion of nearest neighbour sites that are empty
+#' 
+#' @param mat matrix in which empty sites are denoted NA
+#' 
+#' @return a vector containing total number of empty neighbours, total number of edge cells, 
+#' and average proportion of empty neighbours per edge cell
+#' 
+#' @export
+#' 
+#' @examples
+#' mat <- image_df_from_grid_file(system.file("extdata", 
+#' "output_popgrid.dat", package = "demonanalysis", mustWork = TRUE), as_matrix = TRUE)
+#' prob_successful_migration(mat)
+#' 
+#' # Note that the edge of the grid counts as empty space:
+#' mat <- matrix(c(NA,NA,NA,NA,
+#' 1,1,1,1,
+#' NA,NA,NA,NA), nrow = 3, byrow = TRUE)
+#' prob_successful_migration(mat)
+prob_successful_migration <- function(mat) {
+  nrows <- dim(mat)[1]
+  ncols <- dim(mat)[2]
+  n_edge_cells <- 0
+  n_empty_neighbours <- 0
+  for(i in 1:nrows) for(j in 1:ncols) {
+    temp <- 0
+    if(!is.na(mat[i, j])) {
+      if(i == 1 || is.na(mat[i - 1, j])) temp = temp + 1
+      if(i == nrows || is.na(mat[i + 1, j] == 0)) temp = temp + 1
+      if(j == 1 || is.na(mat[i, j - 1] == 0)) temp = temp + 1
+      if(j == ncols || is.na(mat[i, j + 1] == 0)) temp = temp + 1
+    }
+    n_empty_neighbours <- n_empty_neighbours + temp
+    if(temp > 0) n_edge_cells <- n_edge_cells + 1
+  }
+  return(c(n_empty_neighbours = n_empty_neighbours, 
+           n_edge_cells = n_edge_cells, 
+           prob = (n_empty_neighbours / n_edge_cells) / 4))
 }
 
 #' Plot a grid from a properly formatted data frame.
