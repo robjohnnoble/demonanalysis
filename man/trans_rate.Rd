@@ -16,7 +16,7 @@ trans_rate(i, j, r, K)
 \item{K}{total population size}
 }
 \value{
-A number, corresponding to the rate.
+The transition rate.
 }
 \description{
 Moran process transition rates

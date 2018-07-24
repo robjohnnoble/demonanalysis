@@ -4,26 +4,32 @@
 \alias{disp_rate_demon}
 \title{A convenient wrapper for calculating dispersal rate for parameter values used in demon.cpp}
 \usage{
-disp_rate_demon(K, r2, edge_only = 0, two_dim = FALSE)
+disp_rate_demon(K, r2, migration_type = 0, migration_edge_only = 0)
 }
 \arguments{
 \item{K}{deme carrying capacity}
 
 \item{r2}{birth rate of migrating cells}
 
-\item{edge_only}{whether migration occurs at the edge only}
+\item{migration_type}{0, 1, 2, 3 or 4 (see details)}
 
-\item{two_dim}{whether to adjust for two-dimensional growth}
+\item{migration_edge_only}{whether migration occurs at the edge only}
 }
 \value{
-A number, corresponding to the speed.
+The dispersal speed.
 }
 \description{
 A convenient wrapper for calculating dispersal rate for parameter values used in demon.cpp
 }
 \details{
-Assumes migration_type = 0, migration_edge_only = 0, migration_rate_scales_with_K = 1.
+Assumes migration_type = 0, migration_rate_scales_with_K = 1.
 }
 \examples{
-disp_rate_demon(8, 1/0.9)
+# no difference between migration_type = 0 and migration_type = 1 when r2 = 1/0.9:
+sapply(0:3, disp_rate_demon, K = 32, r2 = 1/0.9, migration_edge_only = 0)
+sapply(0:3, disp_rate_demon, K = 32, r2 = 1/0.9, migration_edge_only = 1)
+
+# otherwise expect difference:
+sapply(0:3, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 0)
+sapply(0:3, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 1)
 }

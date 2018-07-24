@@ -4,7 +4,7 @@
 \alias{lambda}
 \title{Expected migration rate per deme}
 \usage{
-lambda(i, K, d, m, r1, r2, selection = "birth")
+lambda(i, K, d, m, r1, r2, migration_type = 0)
 }
 \arguments{
 \item{i}{number of cells in the deme}
@@ -19,10 +19,10 @@ lambda(i, K, d, m, r1, r2, selection = "birth")
 
 \item{r2}{birth rate of migrating cells, relative to r1}
 
-\item{selection}{if selection = "birth & migration" then the rate will be multiplied by a factor of r2 * r1}
+\item{migration_type}{0 or 1 (see details)}
 }
 \value{
-A number, corresponding to the rate.
+The migration rate.
 }
 \description{
 Expected migration rate per deme
@@ -30,7 +30,11 @@ Expected migration rate per deme
 \details{
 Assumes that min(d / sqrt(K), 1) is the probability that a migration attempt will land outside the deme. 
 Importantly, does not account for the chance that the migrating cell will land in an already-occupied deme.
+
+If migration_type = 0 (meaning that migration rate is correlated with birth rate) 
+then the migration rate will be multiplied by a factor of r2 * r1. Otherwise no adjustment will be made.
 }
 \examples{
-lambda(1, 2, 1, 0.1, 1, 1.1)
+lambda(1, 2, 1, 0.1, 0.9, 1/0.9, 0)
+lambda(1, 2, 1, 0.1, 0.9, 1/0.9, 1)
 }

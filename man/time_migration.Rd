@@ -4,7 +4,7 @@
 \alias{time_migration}
 \title{Mean time until successful migration from a deme that is fully occupied by the focus cell type}
 \usage{
-time_migration(K, d, m, r1, r2, selection = "birth")
+time_migration(K, d, m, r1, r2, migration_type)
 }
 \arguments{
 \item{K}{deme carrying capacity}
@@ -17,15 +17,20 @@ time_migration(K, d, m, r1, r2, selection = "birth")
 
 \item{r2}{birth rate of migrating cells, relative to r1}
 
-\item{selection}{one of "birth", "death", "birth & migration"}
+\item{migration_type}{0, 1 or 4 (see details)}
 }
 \value{
-A number, corresponding to the time.
+The waiting time.
 }
 \description{
 Mean time until successful migration from a deme that is fully occupied by the focus cell type
 }
+\details{
+Meaning of migration_type:
+0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
+1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+}
 \examples{
-time_migration(2, 1, 0.1, 1, 1.1, "birth")
-time_migration(2, 1, 0.1, 1, 1.1, "death")
+time_migration(2, 1, 0.1, 1, 1.1, 0)
+time_migration(2, 1, 0.1, 1, 1.1, 4)
 }

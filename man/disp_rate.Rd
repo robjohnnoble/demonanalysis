@@ -2,10 +2,10 @@
 % Please edit documentation in R/speedestimates.R
 \name{disp_rate}
 \alias{disp_rate}
-\title{Expected disperal speed, allowing dispersal to occur before fixation}
+\title{Expected disperal speed for migration model, allowing dispersal to occur before fixation}
 \usage{
-disp_rate(r1, r2, K, d, m, selection = "birth", symmetric = FALSE,
-  two_dim = FALSE)
+disp_rate(r1, r2, K, d, m, migration_type = 0, symmetric = FALSE,
+  two_dim = TRUE)
 }
 \arguments{
 \item{r1}{birth rate of cells in the destination deme, relative to reference birth rate}
@@ -18,32 +18,19 @@ disp_rate(r1, r2, K, d, m, selection = "birth", symmetric = FALSE,
 
 \item{m}{migration rate per cell, relative to birth rate}
 
-\item{selection}{one of "birth", "death", "birth & migration"}
+\item{migration_type}{0, 1 or 4 (see details)}
 
 \item{symmetric}{whether migration occurs in both directions}
 
 \item{two_dim}{whether to adjust for two-dimensional growth}
 }
 \value{
-A number, corresponding to the speed.
+The dispersal speed.
 }
 \description{
-Expected disperal speed, allowing dispersal to occur before fixation
-}
-\details{
-Adjustment for two-dimensional growth entails multiplying the migration rate by 0.4, which is
-a factor estimated from simulation results.
+Expected disperal speed for migration model, allowing dispersal to occur before fixation
 }
 \examples{
-disp_rate(1, 1.1, 2, 1, 0.1, "birth")
-disp_rate(1, 1.1, 2, 1, 0.1, "death")
-
-\dontrun{
-df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-num_parameters <- count_parameters(system.file("extdata", "", 
-package = "demonanalysis", mustWork = TRUE))
-df <- add_columns(df, num_parameters)
-median(df$RadiusGrowthRate[which(df$NumCells > 400)]) # dispersal rate from simulation
-disp_rate(0, 1, 1, 1, 1, two_dim = TRUE) # predicted dispersal rate
-}
+disp_rate(1, 1.1, 2, 1, 0.1, 0)
+disp_rate(1, 1.1, 2, 1, 0.1, 4)
 }

@@ -16,7 +16,7 @@ T_grow_j(j, r1, r2, K)
 \item{K}{deme carrying capacity}
 }
 \value{
-A number, corresponding to the time.
+The waiting time.
 }
 \description{
 Mean time from population size 1 until size j <= K in a Moran process

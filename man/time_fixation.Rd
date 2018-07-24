@@ -16,7 +16,7 @@ time_fixation(r1, r2, K, r_powers_shifted = NA)
 \item{r_powers_shifted}{optional look-up vector}
 }
 \value{
-A number, corresponding to the time.
+The waiting time.
 }
 \description{
 Mean time until one cell achieves fixation, given that it reaches fixation

@@ -14,7 +14,7 @@ rho(i, K, r)
 \item{r}{relative fitness of the focus type}
 }
 \value{
-A number, corresponding to the probability.
+The fixation probability.
 }
 \description{
 Probability of fixation in a Moran process

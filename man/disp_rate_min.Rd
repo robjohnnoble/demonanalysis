@@ -2,10 +2,10 @@
 % Please edit documentation in R/speedestimates.R
 \name{disp_rate_min}
 \alias{disp_rate_min}
-\title{Minimum limit on dispersal speed}
+\title{Minimum limit on dispersal speed for migration model}
 \usage{
-disp_rate_min(r1, r2, K, d, m, selection = "birth", symmetric = FALSE,
-  two_dim = FALSE)
+disp_rate_min(r1, r2, K, d, m, migration_type = 0, symmetric = FALSE,
+  two_dim = TRUE)
 }
 \arguments{
 \item{r1}{birth rate of cells in the destination deme, relative to reference birth rate}
@@ -18,24 +18,26 @@ disp_rate_min(r1, r2, K, d, m, selection = "birth", symmetric = FALSE,
 
 \item{m}{migration rate per cell, relative to birth rate}
 
-\item{selection}{one of "birth", "death", "birth & migration"}
+\item{migration_type}{0, 1 or 4 (see details)}
 
 \item{symmetric}{whether migration occurs in both directions}
 
 \item{two_dim}{whether to adjust for two-dimensional growth}
 }
 \value{
-A number, corresponding to the speed.
+The dispersal speed.
 }
 \description{
-Minimum limit on dispersal speed
+Minimum limit on dispersal speed for migration model
 }
 \details{
-Assumes that a cell type cannot attempt to migrate until it reaches fixation. 
-Adjustment for two-dimensional growth entails multiplying the migration rate by 0.4, which is
-a factor estimated from simulation results.
+Assumes that a cell type cannot attempt to migrate until it reaches fixation.
+
+Meaning of migration_type:
+0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
+1: migration, such that migration rate is independent of birth rate, and death rate is uniform
 }
 \examples{
-disp_rate_min(1, 1.1, 2, 1, 0.1, "birth")
-disp_rate_min(1, 1.1, 2, 1, 0.1, "death")
+disp_rate_min(1, 1.1, 2, 1, 0.1, 0)
+disp_rate_min(1, 1.1, 2, 1, 0.1, 4)
 }

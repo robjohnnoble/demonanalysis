@@ -2,10 +2,10 @@
 % Please edit documentation in R/speedestimates.R
 \name{disp_rate_max}
 \alias{disp_rate_max}
-\title{Maximum limit on dispersal speed}
+\title{Maximum limit on dispersal speed for migration model}
 \usage{
-disp_rate_max(K, d, m, r1, r2, selection = "birth", symmetric = FALSE,
-  two_dim = FALSE)
+disp_rate_max(K, d, m, r1, r2, migration_type = 0, symmetric = FALSE,
+  two_dim = TRUE)
 }
 \arguments{
 \item{K}{deme carrying capacity}
@@ -18,24 +18,26 @@ disp_rate_max(K, d, m, r1, r2, selection = "birth", symmetric = FALSE,
 
 \item{r2}{birth rate of migrating cells, relative to r1}
 
-\item{selection}{one of "birth", "death", "birth & migration"}
+\item{migration_type}{0, 1 or 4 (see details)}
 
 \item{symmetric}{whether migration occurs in both directions}
 
 \item{two_dim}{whether to adjust for two-dimensional growth}
 }
 \value{
-A number, corresponding to the speed.
+The dispersal speed.
 }
 \description{
-Maximum limit on dispersal speed
+Maximum limit on dispersal speed for migration model
 }
 \details{
-Assumes that the time until fixation is negligible relative to the time until migration. 
-Adjustment for two-dimensional growth entails multiplying the migration rate by 0.4, which is
-a factor estimated from simulation results.
+Assumes that the time until fixation is negligible relative to the time until migration.
+
+Meaning of migration_type:
+0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
+1: migration, such that migration rate is independent of birth rate, and death rate is uniform
 }
 \examples{
-disp_rate_max(2, 1, 0.1, 1, 1.1, "birth")
-disp_rate_max(2, 1, 0.1, 1, 1.1, "death")
+disp_rate_max(2, 1, 0.1, 1, 1.1, 0)
+disp_rate_max(2, 1, 0.1, 1, 1.1, 4)
 }

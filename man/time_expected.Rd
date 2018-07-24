@@ -4,7 +4,7 @@
 \alias{time_expected}
 \title{Expected time of first successful migration, which may occur before fixation}
 \usage{
-time_expected(r1, r2, K, d, m, selection = "birth")
+time_expected(r1, r2, K, d, m, migration_type = 0)
 }
 \arguments{
 \item{r1}{birth rate of cells in the destination deme, relative to reference birth rate}
@@ -17,15 +17,20 @@ time_expected(r1, r2, K, d, m, selection = "birth")
 
 \item{m}{migration rate per cell, relative to birth rate}
 
-\item{selection}{one of "birth", "death", "birth & migration"}
+\item{migration_type}{0, 1 or 4 (see details)}
 }
 \value{
-A number, corresponding to the time.
+The waiting time.
 }
 \description{
 Expected time of first successful migration, which may occur before fixation
 }
+\details{
+Meaning of migration_type:
+0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
+1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+}
 \examples{
-time_expected(1, 1.1, 2, 1, 0.1, "birth")
-time_expected(1, 1.1, 2, 1, 0.1, "death")
+time_expected(1, 1.1, 2, 1, 0.1, 0)
+time_expected(1, 1.1, 2, 1, 0.1, 4)
 }

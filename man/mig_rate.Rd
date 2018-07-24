@@ -4,22 +4,32 @@
 \alias{mig_rate}
 \title{Quadratic formula used to set migration rate in demon.cpp}
 \usage{
-mig_rate(K, edge_only = 0)
+mig_rate(K, migration_type = 0, migration_edge_only = 0,
+  migration_rate_scales_with_K = 1)
 }
 \arguments{
 \item{K}{deme carrying capacity}
 
-\item{edge_only}{whether migration occurs at the edge only}
+\item{migration_type}{0, 1, 2, 3 or 4 (see details)}
+
+\item{migration_edge_only}{whether migration occurs at the edge only}
+
+\item{migration_rate_scales_with_K}{whether to divide by sqrt(K)}
 }
 \value{
-A number, corresponding to the speed.
+The dispersal speed.
 }
 \description{
 Quadratic formula used to set migration rate in demon.cpp
 }
 \details{
-Assumes migration_type = 0, migration_edge_only = 0, migration_rate_scales_with_K = 1.
+Meaning of migration_type:
+0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
+1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
+3: fission, such that fission rate is independent of birth rate, and death rate is uniform
 }
 \examples{
-mig_rate(8)
+mig_rate(32)
+mig_rate(32, migration_type = 2)
 }

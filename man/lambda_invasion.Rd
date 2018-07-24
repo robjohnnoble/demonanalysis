@@ -4,7 +4,7 @@
 \alias{lambda_invasion}
 \title{Rate of migration followed by survival}
 \usage{
-lambda_invasion(i, K, d, m, r1, r2, selection = "birth")
+lambda_invasion(i, K, d, m, r1, r2, migration_type = 0, death_rate = 1)
 }
 \arguments{
 \item{i}{number of cells of the focus type}
@@ -19,15 +19,21 @@ lambda_invasion(i, K, d, m, r1, r2, selection = "birth")
 
 \item{r2}{birth rate of migrating cells, relative to r1}
 
-\item{selection}{one of "birth", "death", "birth & migration"}
+\item{migration_type}{0 or 1 (see details)}
+
+\item{death_rate}{death rate of migrating cells, relative to death rate of cells in destination deme}
 }
 \value{
-A number, corresponding to the rate.
+The rate of migration followed by survival.
 }
 \description{
 Rate of migration followed by survival
 }
+\details{
+If migration_type = 0 (meaning that migration rate is correlated with birth rate) 
+then the migration rate will be multiplied by a factor of r2 * r1. Otherwise no adjustment will be made.
+}
 \examples{
-lambda_invasion(1, 2, 1, 0.1, 1, 1.1, "birth")
-lambda_invasion(1, 2, 1, 0.1, 1, 1.1, "death")
+lambda_invasion(1, 2, 1, 0.1, 1, 1.1, 0)
+lambda_invasion(1, 2, 1, 0.1, 1, 1.1, 1)
 }
