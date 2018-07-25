@@ -112,7 +112,7 @@ trans_rate <- function(i, j, r, K) {
 #' @param m migration rate per cell, relative to birth rate
 #' @param r1 birth rate of cells in the destination deme, relative to reference birth rate
 #' @param r2 birth rate of migrating cells, relative to r1
-#' @param migration_type 0, 1 or 4 (see details)
+#' @param migration_type 0 or 1 (see details)
 #' @param d migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)
 #' 
 #' @return The waiting time.
@@ -216,7 +216,7 @@ T_grow_j <- function(j, r1, r2, K) {
 #' @param r2 birth rate of migrating cells, relative to r1
 #' @param K deme carrying capacity
 #' @param m migration rate per cell, relative to birth rate
-#' @param migration_type 0, 1 or 4 (see details)
+#' @param migration_type 0 or 1 (see details)
 #' @param d migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)
 #' 
 #' @return The waiting time.
@@ -264,7 +264,7 @@ time_expected <- function(r1, r2, K, m, migration_type = 0, d = NA){
 #' @param m migration rate per cell, relative to birth rate
 #' @param r1 birth rate of cells in the destination deme, relative to reference birth rate
 #' @param r2 birth rate of migrating cells, relative to r1
-#' @param migration_type 0, 1 or 4 (see details)
+#' @param migration_type 0 or 1 (see details)
 #' @param symmetric whether migration occurs in both directions
 #' @param two_dim whether to adjust for two-dimensional growth
 #' @param d migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)
@@ -294,7 +294,7 @@ disp_rate_max <- function(K, m, r1, r2, migration_type = 0, symmetric = FALSE, t
 #' @param r2 birth rate of migrating cells, relative to r1
 #' @param K deme carrying capacity
 #' @param m migration rate per cell, relative to birth rate
-#' @param migration_type 0, 1 or 4 (see details)
+#' @param migration_type 0 or 1 (see details)
 #' @param symmetric whether migration occurs in both directions
 #' @param two_dim whether to adjust for two-dimensional growth
 #' @param d migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)
@@ -327,7 +327,7 @@ disp_rate_min <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, t
 #' @param r2 birth rate of migrating cells, relative to r1
 #' @param K deme carrying capacity
 #' @param m migration rate per cell, relative to birth rate
-#' @param migration_type 0, 1 or 4 (see details)
+#' @param migration_type 0 or 1 (see details)
 #' @param symmetric whether migration occurs in both directions
 #' @param two_dim whether to adjust for two-dimensional growth
 #' @param d migration distance relative to 1/sqrt(K)
@@ -378,7 +378,7 @@ disp_rate <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, two_d
 #' median(df$RadiusGrowthRate[which(df$NumCells > 400)])
 #' 
 #' # predicted dispersal rate is a bit too low in this case:
-#' disp_rate_fission(1, 1, 1)
+#' disp_rate_fission(1, 1, 1, migration_edge_only = 1)
 #' }
 disp_rate_fission <- function(r2, K, m, migration_type = 2, migration_edge_only = 0, two_dim = TRUE, NumCells = NA) {
   # time_to_grow = time until deme population size reaches K
@@ -414,7 +414,7 @@ disp_rate_fission <- function(r2, K, m, migration_type = 2, migration_edge_only 
 #' Quadratic formula used to set migration rate in demon.cpp
 #' 
 #' @param K deme carrying capacity
-#' @param migration_type 0, 1, 2, 3 or 4 (see details)
+#' @param migration_type 0, 1, 2 or 3 (see details)
 #' @param migration_edge_only whether migration occurs at the edge only
 #' @param migration_rate_scales_with_K whether to divide by sqrt(K)
 #' 
@@ -489,7 +489,7 @@ adjust_mig_rate <- function(m, two_dim) {
 #' @param K deme carrying capacity
 #' @param r2 birth rate of migrating cells
 #' @param filled_grid whether the model is of a filled grid or an expanding tumour
-#' @param migration_type 0, 1, 2, 3 or 4 (see details)
+#' @param migration_type 0, 1, 2, 3 (see details)
 #' @param migration_edge_only whether migration occurs at the edge only
 #' @param migration_rate_scales_with_K whether to divide migration rate by sqrt(K)
 #' @param NumCells total population size (all demes); required only if migration_type = 2 or 3 and migration_edge_only = 0
@@ -498,7 +498,13 @@ adjust_mig_rate <- function(m, two_dim) {
 #' 
 #' @export
 #' 
-#' @details If filled_grid = 1 then migration_type is set to 0.
+#' @details Meaning of migration_type:
+#' 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
+#' 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+#' 2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
+#' 3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+#' 
+#' If filled_grid = 1 then migration_type is set to 0.
 #' 
 #' @examples 
 #' # compare migration_edge_only = 0 versus migration_edge_only = 1:

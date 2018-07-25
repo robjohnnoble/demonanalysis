@@ -15,7 +15,7 @@ time_expected(r1, r2, K, m, migration_type = 0, d = NA)
 
 \item{m}{migration rate per cell, relative to birth rate}
 
-\item{migration_type}{0, 1 or 4 (see details)}
+\item{migration_type}{0 or 1 (see details)}
 
 \item{d}{migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)}
 }

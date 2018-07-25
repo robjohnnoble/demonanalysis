@@ -16,7 +16,7 @@ disp_rate_max(K, m, r1, r2, migration_type = 0, symmetric = FALSE,
 
 \item{r2}{birth rate of migrating cells, relative to r1}
 
-\item{migration_type}{0, 1 or 4 (see details)}
+\item{migration_type}{0 or 1 (see details)}
 
 \item{symmetric}{whether migration occurs in both directions}
 

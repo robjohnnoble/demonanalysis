@@ -15,7 +15,7 @@ disp_rate_demon(K, r2, filled_grid = 0, migration_type = 0,
 
 \item{filled_grid}{whether the model is of a filled grid or an expanding tumour}
 
-\item{migration_type}{0, 1, 2, 3 or 4 (see details)}
+\item{migration_type}{0, 1, 2, 3 (see details)}
 
 \item{migration_edge_only}{whether migration occurs at the edge only}
 
@@ -30,6 +30,12 @@ The growth rate of the radius, measured in cells (not demes).
 A convenient wrapper for calculating dispersal rate using demon.cpp default parameter values
 }
 \details{
+Meaning of migration_type:
+0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
+1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
+3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+
 If filled_grid = 1 then migration_type is set to 0.
 }
 \examples{

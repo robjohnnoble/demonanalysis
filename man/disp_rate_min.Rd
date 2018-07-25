@@ -16,7 +16,7 @@ disp_rate_min(r1, r2, K, m, migration_type = 0, symmetric = FALSE,
 
 \item{m}{migration rate per cell, relative to birth rate}
 
-\item{migration_type}{0, 1 or 4 (see details)}
+\item{migration_type}{0 or 1 (see details)}
 
 \item{symmetric}{whether migration occurs in both directions}
 

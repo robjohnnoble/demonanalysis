@@ -10,7 +10,7 @@ mig_rate(K, migration_type = 0, migration_edge_only = 0,
 \arguments{
 \item{K}{deme carrying capacity}
 
-\item{migration_type}{0, 1, 2, 3 or 4 (see details)}
+\item{migration_type}{0, 1, 2 or 3 (see details)}
 
 \item{migration_edge_only}{whether migration occurs at the edge only}
 

@@ -48,6 +48,6 @@ df <- add_columns(df, num_parameters)
 median(df$RadiusGrowthRate[which(df$NumCells > 400)])
 
 # predicted dispersal rate is a bit too low in this case:
-disp_rate_fission(1, 1, 1)
+disp_rate_fission(1, 1, 1, migration_edge_only = 1)
 }
 }
