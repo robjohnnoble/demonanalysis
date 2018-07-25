@@ -35,11 +35,11 @@ Assumes that a cell type cannot attempt to migrate until it reaches fixation.
 
 Meaning of migration_type:
 \itemize{
-  \item 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
-  \item 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+  \item 0: migration, such that a migration attempt occurs only following a birth event
+  \item 1: migration, such that migration is independent of birth
   }
 }
 \examples{
 disp_rate_min(1, 1.1, 2, 0.1, 0)
-disp_rate_min(1, 1.1, 2, 0.1, 4)
+disp_rate_min(1, 1.1, 2, 0.1, 1)
 }

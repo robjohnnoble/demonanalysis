@@ -33,8 +33,8 @@ Assumes that a deme cannot attempt fission until its population size reaches K.
 
 Meaning of migration_type:
 \itemize{
-  \item 2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
-  \item 3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+  \item 2: fission, such that a fission attempt occurs only following a birth event
+  \item 3: fission, such that fission is independent of birth
   }
 }
 \examples{

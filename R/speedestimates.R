@@ -10,14 +10,14 @@
 #' 
 #' @return The migration rate.
 #' 
-#' @details If migration_type = 0 (meaning that migration rate is correlated with birth rate) 
+#' @details If migration_type = 0 (meaning that migration is attempted only after a birth event) 
 #' then the migration rate will be multiplied by a factor of r2 * r1. Otherwise no adjustment will be made.
 #' 
 #' If d and K are set then the calculation assumes that min(d / sqrt(K), 1) is the probability 
 #' that a migration attempt will land outside the deme. 
 #' 
 #' Importantly, this function does not account for the chance that the migrating cell will 
-#' land in an already-occupied deme.
+#' land in a deme that already occupied.
 #' 
 #' @export
 #' 
@@ -26,13 +26,15 @@
 #' lambda(1, 0.1, 0.9, 1/0.9, 0)
 #' lambda(1, 0.1, 0.9, 1/0.9, 1)
 lambda <- function(i, m, r1, r2, migration_type = 0, d = NA, K = NA) {
+  m <- min(m, 1) # m is a probability, so it cannot exceed 1
   res <- m * i
   if(!is.na(d)) {
     if(is.na(K)) stop("If d is set then K must also be set.")
     res <- res * min(d / sqrt(K), 1)
   }
   if(migration_type == 0) return(r1 * r2 * res)
-  else return(res)
+  else if(migration_type == 1) return(res)
+  else stop("Invalid migration_type")
 }
 
 #' Probability of fixation in a Moran process
@@ -127,7 +129,7 @@ trans_rate <- function(i, j, r, K) {
 #' 
 #' @examples 
 #' time_migration(2, 0.1, 1, 1.1, 0)
-#' time_migration(2, 0.1, 1, 1.1, 4)
+#' time_migration(2, 0.1, 1, 1.1, 1)
 time_migration <- function(K, m, r1, r2, migration_type, d = NA) {
   return(1 / lambda_invasion(K, K, m, r1, r2, migration_type, d = d))
 }
@@ -233,11 +235,11 @@ T_grow_j <- function(j, r1, r2, K) {
 #' 
 #' @examples 
 #' time_expected(1, 1.1, 2, 0.1, 0)
-#' time_expected(1, 1.1, 2, 0.1, 4)
+#' time_expected(1, 1.1, 2, 0.1, 1)
 #' 
 #' # for comparison:
 #' time_migration(2, 0.1, 1, 1.1, 0)
-#' time_migration(2, 0.1, 1, 1.1, 4)
+#' time_migration(2, 0.1, 1, 1.1, 1)
 time_expected <- function(r1, r2, K, m, migration_type = 0, d = NA){
   
   if(K == 1) return(time_migration(K, m, r1, r2, migration_type, d))
@@ -287,7 +289,7 @@ time_expected <- function(r1, r2, K, m, migration_type = 0, d = NA){
 #' 
 #' @examples 
 #' disp_rate_max(2, 0.1, 1, 1.1, 0)
-#' disp_rate_max(2, 0.1, 1, 1.1, 4)
+#' disp_rate_max(2, 0.1, 1, 1.1, 1)
 disp_rate_max <- function(K, m, r1, r2, migration_type = 0, symmetric = FALSE, two_dim = TRUE, d = NA) {
   m <- adjust_mig_rate(m, two_dim)
   if(!symmetric) return(sqrt(K) / time_migration(K, m, r1, r2, migration_type, d))
@@ -319,7 +321,7 @@ disp_rate_max <- function(K, m, r1, r2, migration_type = 0, symmetric = FALSE, t
 #' 
 #' @examples 
 #' disp_rate_min(1, 1.1, 2, 0.1, 0)
-#' disp_rate_min(1, 1.1, 2, 0.1, 4)
+#' disp_rate_min(1, 1.1, 2, 0.1, 1)
 disp_rate_min <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, two_dim = TRUE, d = NA) {
   m <- adjust_mig_rate(m, two_dim)
   if(!symmetric) return(sqrt(K) / (time_fixation(r1, r2, K) + time_migration(K, m, r1, r2, migration_type, d)))
@@ -346,7 +348,7 @@ disp_rate_min <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, t
 #' 
 #' @examples 
 #' disp_rate(1, 1.1, 2, 0.1, 0)
-#' disp_rate(1, 1.1, 2, 0.1, 4)
+#' disp_rate(1, 1.1, 2, 0.1, 1)
 disp_rate <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, two_dim = TRUE, d = NA) {
   m <- adjust_mig_rate(m, two_dim)
   if(!symmetric) return(sqrt(K) / time_expected(r1, r2, K, m, migration_type, d))
@@ -395,7 +397,7 @@ disp_rate_fission <- function(r2, K, m, migration_type = 2, migration_edge_only 
   # fission_events_rate = number of attempted fission events per unit time:
   if(migration_type == 2) {
     birth_rate_per_deme <- r2 * K # in this case, fission events are proportional to birth events; deme population will usually be K
-    m_per_deme <- min(m * (K + 1), 1) # fission rate is per cell, so need to multiply by population size, which will be K+1 following a birth event
+    m_per_deme <- min(m * (K + 1), 1) # fission probability is per cell, so need to multiply by population size, which will be K+1 following a birth event
     if(migration_edge_only) m_per_deme <- adjust_mig_rate(m_per_deme, two_dim)
     fission_events_rate <- birth_rate_per_deme * m_per_deme
   } else if(migration_type == 3) {

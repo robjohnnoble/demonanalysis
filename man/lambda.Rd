@@ -28,14 +28,14 @@ The migration rate.
 Expected migration rate per deme
 }
 \details{
-If migration_type = 0 (meaning that migration rate is correlated with birth rate) 
+If migration_type = 0 (meaning that migration is attempted only after a birth event) 
 then the migration rate will be multiplied by a factor of r2 * r1. Otherwise no adjustment will be made.
 
 If d and K are set then the calculation assumes that min(d / sqrt(K), 1) is the probability 
 that a migration attempt will land outside the deme. 
 
 Importantly, this function does not account for the chance that the migrating cell will 
-land in an already-occupied deme.
+land in a deme that already occupied.
 }
 \examples{
 # if r1 * r2 = 1 then results are identical for migration_type = 0 and migration_type = 1: 
