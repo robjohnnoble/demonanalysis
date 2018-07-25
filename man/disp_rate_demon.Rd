@@ -2,7 +2,7 @@
 % Please edit documentation in R/speedestimates.R
 \name{disp_rate_demon}
 \alias{disp_rate_demon}
-\title{A convenient wrapper for calculating dispersal rate using demon.cpp default parameter values}
+\title{Demon dispersal rate}
 \usage{
 disp_rate_demon(K, r2, filled_grid = 0, migration_type = 0,
   migration_edge_only = 0, migration_rate_scales_with_K = 1,

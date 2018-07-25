@@ -2,7 +2,7 @@
 % Please edit documentation in R/speedestimates.R
 \name{disp_rate}
 \alias{disp_rate}
-\title{Expected disperal speed for migration model, allowing dispersal to occur before fixation}
+\title{Expected disperal speed for migration model}
 \usage{
 disp_rate(r1, r2, K, m, migration_type = 0, symmetric = FALSE,
   two_dim = TRUE, d = NA)

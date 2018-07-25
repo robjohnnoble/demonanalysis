@@ -2,7 +2,7 @@
 % Please edit documentation in R/speedestimates.R
 \name{time_migration}
 \alias{time_migration}
-\title{Mean time until successful migration from a deme that is fully occupied by the focus cell type}
+\title{Migration waiting time from fully occupied deme}
 \usage{
 time_migration(K, m, r1, r2, migration_type, d = NA)
 }

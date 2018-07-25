@@ -2,7 +2,7 @@
 % Please edit documentation in R/speedestimates.R
 \name{time_fixation}
 \alias{time_fixation}
-\title{Mean time until one cell achieves fixation, given that it reaches fixation}
+\title{Conditional fixation time}
 \usage{
 time_fixation(r1, r2, K, r_powers_shifted = NA)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/speedestimates.R
 \name{mig_rate}
 \alias{mig_rate}
-\title{Quadratic formula used to set migration rate in demon.cpp}
+\title{Demon migration rate}
 \usage{
 mig_rate(K, migration_type = 0, migration_edge_only = 0,
   migration_rate_scales_with_K = 1)

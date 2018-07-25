@@ -2,7 +2,7 @@
 % Please edit documentation in R/speedestimates.R
 \name{T_grow_j}
 \alias{T_grow_j}
-\title{Mean time from population size 1 until size j <= K in a Moran process}
+\title{Moran growth waiting time}
 \usage{
 T_grow_j(j, r1, r2, K)
 }

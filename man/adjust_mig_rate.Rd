@@ -2,7 +2,7 @@
 % Please edit documentation in R/speedestimates.R
 \name{adjust_mig_rate}
 \alias{adjust_mig_rate}
-\title{Adjust migration rate for probability that migrating cell lands in an already-occupied deme}
+\title{Two-dimensional adjusted migration rate}
 \usage{
 adjust_mig_rate(m, two_dim)
 }

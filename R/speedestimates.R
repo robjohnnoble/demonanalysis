@@ -104,6 +104,8 @@ trans_rate <- function(i, j, r, K) {
   return(res)
 }
 
+#' Migration waiting time from fully occupied deme
+#' 
 #' Mean time until successful migration from a deme that is fully occupied by the focus cell type
 #' 
 #' @param K deme carrying capacity
@@ -125,9 +127,11 @@ trans_rate <- function(i, j, r, K) {
 #' time_migration(2, 0.1, 1, 1.1, 0)
 #' time_migration(2, 0.1, 1, 1.1, 4)
 time_migration <- function(K, m, r1, r2, migration_type, d = NA) {
-  return(1 / lambda_invasion(K, K, m, r1, r2, migration_type, d))
+  return(1 / lambda_invasion(K, K, m, r1, r2, migration_type, d = d))
 }
 
+#' Conditional fixation time
+#' 
 #' Mean time until one cell achieves fixation, given that it reaches fixation
 #' 
 #' @param r1 birth rate of non-focus cells, relative to reference birth rate
@@ -159,6 +163,8 @@ time_fixation <- function(r1, r2, K, r_powers_shifted = NA) {
   return(sum/r1) # relative to the doubling time of a cell with birth rate 1
 }
 
+#' Moran growth waiting time
+#' 
 #' Mean time from population size 1 until size j <= K in a Moran process
 #' 
 #' @param j final population size of the focus type
@@ -202,6 +208,8 @@ T_grow_j <- function(j, r1, r2, K) {
   return((t1 * (1 + sum1) - sum2 / r1)) # relative to the doubling time of a cell with birth rate 1
 }
 
+#' Migration waiting time (any population size)
+#' 
 #' Expected time of first successful migration, which may occur before fixation
 #' 
 #' @param r1 birth rate of cells in the destination deme, relative to reference birth rate
@@ -222,6 +230,10 @@ T_grow_j <- function(j, r1, r2, K) {
 #' @examples 
 #' time_expected(1, 1.1, 2, 0.1, 0)
 #' time_expected(1, 1.1, 2, 0.1, 4)
+#' 
+#' # for comparison:
+#' time_migration(2, 0.1, 1, 1.1, 0)
+#' time_migration(2, 0.1, 1, 1.1, 4)
 time_expected <- function(r1, r2, K, m, migration_type = 0, d = NA){
   
   if(K == 1) return(time_migration(K, m, r1, r2, migration_type, d))
@@ -307,6 +319,8 @@ disp_rate_min <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, t
                  (time_fixation(r1, 1 / r2, K) + time_migration(K, m, r1, 1 / r2, migration_type, d)))/2)
 }
 
+#' Expected disperal speed for migration model
+#' 
 #' Expected disperal speed for migration model, allowing dispersal to occur before fixation
 #' 
 #' @param r1 birth rate of cells in the destination deme, relative to reference birth rate
@@ -395,6 +409,8 @@ disp_rate_fission <- function(r2, K, m, migration_type = 2, migration_edge_only 
   }
 }
 
+#' Demon migration rate
+#' 
 #' Quadratic formula used to set migration rate in demon.cpp
 #' 
 #' @param K deme carrying capacity
@@ -445,6 +461,8 @@ mig_rate <- function(K, migration_type = 0, migration_edge_only = 0, migration_r
   return(m)
 }
 
+#' Two-dimensional adjusted migration rate
+#' 
 #' Adjust migration rate for probability that migrating cell lands in an already-occupied deme
 #' 
 #' @param m migration rate per cell, relative to birth rate
@@ -464,6 +482,8 @@ adjust_mig_rate <- function(m, two_dim) {
   else return(m)
 }
 
+#' Demon dispersal rate
+#' 
 #' A convenient wrapper for calculating dispersal rate using demon.cpp default parameter values
 #' 
 #' @param K deme carrying capacity

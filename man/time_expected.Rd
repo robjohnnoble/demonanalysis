@@ -2,7 +2,7 @@
 % Please edit documentation in R/speedestimates.R
 \name{time_expected}
 \alias{time_expected}
-\title{Expected time of first successful migration, which may occur before fixation}
+\title{Migration waiting time (any population size)}
 \usage{
 time_expected(r1, r2, K, m, migration_type = 0, d = NA)
 }
@@ -33,4 +33,8 @@ Meaning of migration_type:
 \examples{
 time_expected(1, 1.1, 2, 0.1, 0)
 time_expected(1, 1.1, 2, 0.1, 4)
+
+# for comparison:
+time_migration(2, 0.1, 1, 1.1, 0)
+time_migration(2, 0.1, 1, 1.1, 4)
 }
