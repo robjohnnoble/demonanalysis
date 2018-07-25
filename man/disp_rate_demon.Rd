@@ -4,7 +4,8 @@
 \alias{disp_rate_demon}
 \title{A convenient wrapper for calculating dispersal rate for parameter values used in demon.cpp}
 \usage{
-disp_rate_demon(K, r2, migration_type = 0, migration_edge_only = 0)
+disp_rate_demon(K, r2, migration_type = 0, migration_edge_only = 0,
+  NumCells = NA)
 }
 \arguments{
 \item{K}{deme carrying capacity}
@@ -14,6 +15,8 @@ disp_rate_demon(K, r2, migration_type = 0, migration_edge_only = 0)
 \item{migration_type}{0, 1, 2, 3 or 4 (see details)}
 
 \item{migration_edge_only}{whether migration occurs at the edge only}
+
+\item{NumCells}{total population size (all demes); required only if migration_type = 2 or 3 and migration_edge_only = 0}
 }
 \value{
 The dispersal speed.
@@ -25,11 +28,15 @@ A convenient wrapper for calculating dispersal rate for parameter values used in
 Assumes migration_type = 0, migration_rate_scales_with_K = 1.
 }
 \examples{
+# compare migration_edge_only = 0 versus migration_edge_only = 1:
+sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_type = 0)
+sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_type = 2, NumCells = 1e6)
+
 # no difference between migration_type = 0 and migration_type = 1 when r2 = 1/0.9:
-sapply(0:3, disp_rate_demon, K = 32, r2 = 1/0.9, migration_edge_only = 0)
+sapply(0:3, disp_rate_demon, K = 32, r2 = 1/0.9, migration_edge_only = 0, NumCells = 1e6)
 sapply(0:3, disp_rate_demon, K = 32, r2 = 1/0.9, migration_edge_only = 1)
 
-# otherwise expect difference:
-sapply(0:3, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 0)
+# otherwise expect a difference:
+sapply(0:3, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 0, NumCells = 1e6)
 sapply(0:3, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 1)
 }

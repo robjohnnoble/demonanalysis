@@ -329,21 +329,23 @@ disp_rate <- function(r1, r2, K, d, m, migration_type = 0, symmetric = FALSE, tw
 #' @param K deme carrying capacity
 #' @param m migration rate per cell, relative to birth rate
 #' @param migration_type 2 or 3 (see details)
+#' @param migration_edge_only whether migration occurs at the edge only
 #' @param two_dim whether to adjust for two-dimensional growth
+#' @param NumCells total population size (all demes); required only if migration_type = 2 or 3 and migration_edge_only = 0
 #' 
 #' @return The dispersal speed.
 #' 
 #' @export
 #' 
-#' @details Assumes that a deme cannot attempt fission unless its population size reaches K.
+#' @details Assumes that a deme cannot attempt fission until its population size reaches K.
 #' 
 #' Meaning of migration_type:
 #' 2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
 #' 3: fission, such that fission rate is independent of birth rate, and death rate is uniform
 #' 
 #' @examples 
-#' disp_rate_fission(1, 2, 0.1)
-#' disp_rate_fission(1, 2, 0.1, migration_type = 3)
+#' disp_rate_fission(1, 2, 0.1, NumCells = 1e6)
+#' disp_rate_fission(1, 2, 0.1, migration_type = 3, NumCells = 1e6)
 #' 
 #' \dontrun{
 #' # find dispersal rate from simulation:
@@ -353,10 +355,10 @@ disp_rate <- function(r1, r2, K, d, m, migration_type = 0, symmetric = FALSE, tw
 #' df <- add_columns(df, num_parameters)
 #' median(df$RadiusGrowthRate[which(df$NumCells > 400)])
 #' 
-#' # predicted dispersal rate:
+#' # predicted dispersal rate is a bit too low in this case:
 #' disp_rate_fission(1, 1, 1)
 #' }
-disp_rate_fission <- function(r2, K, m, migration_type = 2, two_dim = TRUE) {
+disp_rate_fission <- function(r2, K, m, migration_type = 2, migration_edge_only = 0, two_dim = TRUE, NumCells = NA) {
   # time_to_grow = time until deme population size reaches K
   if(K == 1) {
     time_to_grow <- 0 # time taken for population to grow from 1 to 1
@@ -365,19 +367,24 @@ disp_rate_fission <- function(r2, K, m, migration_type = 2, two_dim = TRUE) {
   }
   # fission_events_rate = number of attempted fission events per unit time:
   if(migration_type == 2) {
-    birth_rate_per_deme <- r2 * K # deme population will usually be K
+    birth_rate_per_deme <- r2 * K # in this case, fission events are proportional to birth events; deme population will usually be K
     m_per_deme <- min(m * (K + 1), 1) # fission rate is per cell, so need to multiply by population size, which will be K+1 following a birth event
-    m_per_deme <- adjust_mig_rate(m_per_deme, two_dim)
+    if(migration_edge_only) m_per_deme <- adjust_mig_rate(m_per_deme, two_dim)
     fission_events_rate <- birth_rate_per_deme * m_per_deme
   } else if(migration_type == 3) {
-    m <- adjust_mig_rate(m, two_dim)
+    if(migration_edge_only) m <- adjust_mig_rate(m, two_dim)
     if(K == 1) fission_events_rate <- 0 # fission can happen only when deme population > 1, which is rare in this case
-    else fission_events_rate <- m * K # deme population will usually be K
+    else fission_events_rate <- m * K # fission rate is per cell, so need to multiply by population size, which will usually be K
   } else {
     stop("Invalid migration_type")
   }
   time_to_migrate <- 1 / fission_events_rate
-  return(sqrt(K) / (time_to_grow + time_to_migrate))
+  if((migration_type == 2 || migration_type == 3) && migration_edge_only == 0) {
+    if(is.na(NumCells)) stop("NumCells is missing, and is required in this case")
+    return(1 / (time_to_grow + time_to_migrate) * 1/2 * sqrt(NumCells / pi))
+  } else {
+    return(sqrt(K) / (time_to_grow + time_to_migrate))
+  }
 }
 
 #' Quadratic formula used to set migration rate in demon.cpp
@@ -449,12 +456,13 @@ adjust_mig_rate <- function(m, two_dim) {
   else return(m)
 }
 
-#' A convenient wrapper for calculating dispersal rate for parameter values used in demon.cpp
+#' A convenient wrapper for calculating dispersal rate for exanding tumours, using demon.cpp default parameter values
 #' 
 #' @param K deme carrying capacity
 #' @param r2 birth rate of migrating cells
 #' @param migration_type 0, 1, 2, 3 or 4 (see details)
 #' @param migration_edge_only whether migration occurs at the edge only
+#' @param NumCells total population size (all demes); required only if migration_type = 2 or 3 and migration_edge_only = 0
 #' 
 #' @return The dispersal speed.
 #' 
@@ -463,18 +471,23 @@ adjust_mig_rate <- function(m, two_dim) {
 #' @details Assumes migration_type = 0, migration_rate_scales_with_K = 1.
 #' 
 #' @examples 
-#' # no difference between migration_type = 0 and migration_type = 1 when r2 = 1/0.9:
-#' sapply(0:3, disp_rate_demon, K = 32, r2 = 1/0.9, migration_edge_only = 0)
-#' sapply(0:3, disp_rate_demon, K = 32, r2 = 1/0.9, migration_edge_only = 1)
+#' # compare migration_edge_only = 0 versus migration_edge_only = 1:
+#' sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_type = 0)
+#' sapply(0:1, disp_rate_demon, K = 32, r2 = 1, migration_type = 2, NumCells = 1e6)
 #' 
-#' # otherwise expect difference:
-#' sapply(0:3, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 0)
-#' sapply(0:3, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 1)
-disp_rate_demon <- function(K, r2, migration_type = 0, migration_edge_only = 0) {
+#' # no difference between migration_type = 0 and migration_type = 1 when r2 = 1/0.9 
+#' # (because 0.9 is the birth rate of normal cells):
+#' sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_edge_only = 0)
+#' sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_edge_only = 1)
+#' 
+#' # otherwise expect a difference:
+#' sapply(0:1, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 0)
+#' sapply(0:1, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 1)
+disp_rate_demon <- function(K, r2, migration_type = 0, migration_edge_only = 0, NumCells = NA) {
   if(migration_type == 0 || migration_type == 1) {
     return(disp_rate(0.9, r2, K, sqrt(K), mig_rate(K, migration_type, migration_edge_only), migration_type, symmetric = FALSE, two_dim = TRUE))
   } else if(migration_type == 2 || migration_type == 3) {
-    return(disp_rate_fission(r2, K, mig_rate(K, migration_type, migration_edge_only), migration_type, two_dim = TRUE))
+    return(disp_rate_fission(r2, K, mig_rate(K, migration_type, migration_edge_only), migration_type, migration_edge_only, two_dim = TRUE, NumCells))
   } else {
     stop("Invalid type.")
   }

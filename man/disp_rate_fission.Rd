@@ -4,7 +4,8 @@
 \alias{disp_rate_fission}
 \title{Dispersal speed for deme fission model}
 \usage{
-disp_rate_fission(r2, K, m, migration_type = 2, two_dim = TRUE)
+disp_rate_fission(r2, K, m, migration_type = 2, migration_edge_only = 0,
+  two_dim = TRUE, NumCells = NA)
 }
 \arguments{
 \item{r2}{birth rate relative to reference birth rate}
@@ -15,7 +16,11 @@ disp_rate_fission(r2, K, m, migration_type = 2, two_dim = TRUE)
 
 \item{migration_type}{2 or 3 (see details)}
 
+\item{migration_edge_only}{whether migration occurs at the edge only}
+
 \item{two_dim}{whether to adjust for two-dimensional growth}
+
+\item{NumCells}{total population size (all demes); required only if migration_type = 2 or 3 and migration_edge_only = 0}
 }
 \value{
 The dispersal speed.
@@ -24,15 +29,15 @@ The dispersal speed.
 Dispersal speed for deme fission model
 }
 \details{
-Assumes that a deme cannot attempt fission unless its population size reaches K.
+Assumes that a deme cannot attempt fission until its population size reaches K.
 
 Meaning of migration_type:
 2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
 3: fission, such that fission rate is independent of birth rate, and death rate is uniform
 }
 \examples{
-disp_rate_fission(1, 2, 0.1)
-disp_rate_fission(1, 2, 0.1, migration_type = 3)
+disp_rate_fission(1, 2, 0.1, NumCells = 1e6)
+disp_rate_fission(1, 2, 0.1, migration_type = 3, NumCells = 1e6)
 
 \dontrun{
 # find dispersal rate from simulation:
@@ -42,7 +47,7 @@ package = "demonanalysis", mustWork = TRUE))
 df <- add_columns(df, num_parameters)
 median(df$RadiusGrowthRate[which(df$NumCells > 400)])
 
-# predicted dispersal rate:
+# predicted dispersal rate is a bit too low in this case:
 disp_rate_fission(1, 1, 1)
 }
 }
