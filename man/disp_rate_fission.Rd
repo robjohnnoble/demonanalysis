@@ -41,10 +41,8 @@ disp_rate_fission(1, 2, 0.1, migration_type = 3, NumCells = 1e6)
 
 \dontrun{
 # find dispersal rate from simulation:
-df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-num_parameters <- count_parameters(system.file("extdata", "", 
-package = "demonanalysis", mustWork = TRUE))
-df <- add_columns(df, num_parameters)
+df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
+include_diversities = FALSE)
 median(df$RadiusGrowthRate[which(df$NumCells > 400)])
 
 # predicted dispersal rate is a bit too low in this case:

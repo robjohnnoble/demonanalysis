@@ -369,17 +369,11 @@ disp_rate <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, two_d
 #' disp_rate_fission(1, 2, 0.1, NumCells = 1e6)
 #' disp_rate_fission(1, 2, 0.1, migration_type = 3, NumCells = 1e6)
 #' 
-#' \dontrun{
-#' # find dispersal rate from simulation:
-#' df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-#' num_parameters <- count_parameters(system.file("extdata", "", 
-#' package = "demonanalysis", mustWork = TRUE))
-#' df <- add_columns(df, num_parameters)
-#' median(df$RadiusGrowthRate[which(df$NumCells > 400)])
-#' 
-#' # predicted dispersal rate is a bit too low in this case:
-#' disp_rate_fission(1, 1, 1, migration_edge_only = 1)
-#' }
+#' # comparison with dispersal rate from simulation:
+#' df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
+#' include_diversities = FALSE)
+#' median(df$RadiusGrowthRate[which(df$NumCells > 400)]) # dispersal rate observed in simulation
+#' disp_rate_fission(1, 1, 1, migration_edge_only = 1) # predicted dispersal rate (a bit too low in this case)
 disp_rate_fission <- function(r2, K, m, migration_type = 2, migration_edge_only = 0, two_dim = TRUE, NumCells = NA) {
   # time_to_grow = time until deme population size reaches K
   if(K == 1) {
