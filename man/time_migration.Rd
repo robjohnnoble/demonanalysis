@@ -4,12 +4,10 @@
 \alias{time_migration}
 \title{Mean time until successful migration from a deme that is fully occupied by the focus cell type}
 \usage{
-time_migration(K, d, m, r1, r2, migration_type)
+time_migration(K, m, r1, r2, migration_type, d = NA)
 }
 \arguments{
 \item{K}{deme carrying capacity}
-
-\item{d}{migration distance relative to 1/sqrt(K)}
 
 \item{m}{migration rate per cell, relative to birth rate}
 
@@ -18,6 +16,8 @@ time_migration(K, d, m, r1, r2, migration_type)
 \item{r2}{birth rate of migrating cells, relative to r1}
 
 \item{migration_type}{0, 1 or 4 (see details)}
+
+\item{d}{migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)}
 }
 \value{
 The waiting time.
@@ -31,6 +31,6 @@ Meaning of migration_type:
 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
 }
 \examples{
-time_migration(2, 1, 0.1, 1, 1.1, 0)
-time_migration(2, 1, 0.1, 1, 1.1, 4)
+time_migration(2, 0.1, 1, 1.1, 0)
+time_migration(2, 0.1, 1, 1.1, 4)
 }

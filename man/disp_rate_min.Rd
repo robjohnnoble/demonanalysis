@@ -4,8 +4,8 @@
 \alias{disp_rate_min}
 \title{Minimum limit on dispersal speed for migration model}
 \usage{
-disp_rate_min(r1, r2, K, d, m, migration_type = 0, symmetric = FALSE,
-  two_dim = TRUE)
+disp_rate_min(r1, r2, K, m, migration_type = 0, symmetric = FALSE,
+  two_dim = TRUE, d = NA)
 }
 \arguments{
 \item{r1}{birth rate of cells in the destination deme, relative to reference birth rate}
@@ -14,8 +14,6 @@ disp_rate_min(r1, r2, K, d, m, migration_type = 0, symmetric = FALSE,
 
 \item{K}{deme carrying capacity}
 
-\item{d}{migration distance relative to 1/sqrt(K)}
-
 \item{m}{migration rate per cell, relative to birth rate}
 
 \item{migration_type}{0, 1 or 4 (see details)}
@@ -23,6 +21,8 @@ disp_rate_min(r1, r2, K, d, m, migration_type = 0, symmetric = FALSE,
 \item{symmetric}{whether migration occurs in both directions}
 
 \item{two_dim}{whether to adjust for two-dimensional growth}
+
+\item{d}{migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)}
 }
 \value{
 The lower limit on the growth rate of the radius, measured in cells (not demes).
@@ -38,6 +38,6 @@ Meaning of migration_type:
 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
 }
 \examples{
-disp_rate_min(1, 1.1, 2, 1, 0.1, 0)
-disp_rate_min(1, 1.1, 2, 1, 0.1, 4)
+disp_rate_min(1, 1.1, 2, 0.1, 0)
+disp_rate_min(1, 1.1, 2, 0.1, 4)
 }

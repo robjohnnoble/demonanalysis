@@ -4,7 +4,7 @@
 \alias{time_expected}
 \title{Expected time of first successful migration, which may occur before fixation}
 \usage{
-time_expected(r1, r2, K, d, m, migration_type = 0)
+time_expected(r1, r2, K, m, migration_type = 0, d = NA)
 }
 \arguments{
 \item{r1}{birth rate of cells in the destination deme, relative to reference birth rate}
@@ -13,11 +13,11 @@ time_expected(r1, r2, K, d, m, migration_type = 0)
 
 \item{K}{deme carrying capacity}
 
-\item{d}{migration distance relative to 1/sqrt(K)}
-
 \item{m}{migration rate per cell, relative to birth rate}
 
 \item{migration_type}{0, 1 or 4 (see details)}
+
+\item{d}{migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)}
 }
 \value{
 The waiting time.
@@ -31,6 +31,6 @@ Meaning of migration_type:
 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
 }
 \examples{
-time_expected(1, 1.1, 2, 1, 0.1, 0)
-time_expected(1, 1.1, 2, 1, 0.1, 4)
+time_expected(1, 1.1, 2, 0.1, 0)
+time_expected(1, 1.1, 2, 0.1, 4)
 }

@@ -4,13 +4,11 @@
 \alias{disp_rate_max}
 \title{Maximum limit on dispersal speed for migration model}
 \usage{
-disp_rate_max(K, d, m, r1, r2, migration_type = 0, symmetric = FALSE,
-  two_dim = TRUE)
+disp_rate_max(K, m, r1, r2, migration_type = 0, symmetric = FALSE,
+  two_dim = TRUE, d = NA)
 }
 \arguments{
 \item{K}{deme carrying capacity}
-
-\item{d}{migration distance relative to 1/sqrt(K)}
 
 \item{m}{migration rate per cell, relative to birth rate}
 
@@ -23,6 +21,8 @@ disp_rate_max(K, d, m, r1, r2, migration_type = 0, symmetric = FALSE,
 \item{symmetric}{whether migration occurs in both directions}
 
 \item{two_dim}{whether to adjust for two-dimensional growth}
+
+\item{d}{migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)}
 }
 \value{
 The upper limit on the growth rate of the radius, measured in cells (not demes).
@@ -38,6 +38,6 @@ Meaning of migration_type:
 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
 }
 \examples{
-disp_rate_max(2, 1, 0.1, 1, 1.1, 0)
-disp_rate_max(2, 1, 0.1, 1, 1.1, 4)
+disp_rate_max(2, 0.1, 1, 1.1, 0)
+disp_rate_max(2, 0.1, 1, 1.1, 4)
 }

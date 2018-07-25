@@ -4,14 +4,13 @@
 \alias{lambda_invasion}
 \title{Rate of migration followed by survival}
 \usage{
-lambda_invasion(i, K, d, m, r1, r2, migration_type = 0, death_rate = 1)
+lambda_invasion(i, K, m, r1, r2, migration_type = 0, death_rate = 1,
+  d = NA)
 }
 \arguments{
 \item{i}{number of cells of the focus type}
 
 \item{K}{deme carrying capacity}
-
-\item{d}{migration distance relative to 1/sqrt(K)}
 
 \item{m}{migration rate per cell, relative to birth rate}
 
@@ -22,6 +21,8 @@ lambda_invasion(i, K, d, m, r1, r2, migration_type = 0, death_rate = 1)
 \item{migration_type}{0 or 1 (see details)}
 
 \item{death_rate}{death rate of migrating cells, relative to death rate of cells in destination deme}
+
+\item{d}{migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)}
 }
 \value{
 The rate of migration followed by survival.
@@ -34,6 +35,6 @@ If migration_type = 0 (meaning that migration rate is correlated with birth rate
 then the migration rate will be multiplied by a factor of r2 * r1. Otherwise no adjustment will be made.
 }
 \examples{
-lambda_invasion(1, 2, 1, 0.1, 1, 1.1, 0)
-lambda_invasion(1, 2, 1, 0.1, 1, 1.1, 1)
+lambda_invasion(1, 2, 0.1, 1, 1.1, 0)
+lambda_invasion(1, 2, 0.1, 1, 1.1, 1)
 }

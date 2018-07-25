@@ -1,28 +1,36 @@
 #' Expected migration rate per deme
 #' 
 #' @param i number of cells in the deme
-#' @param K deme carrying capacity
-#' @param d migration distance relative to 1/sqrt(K)
 #' @param m migration rate per cell, relative to birth rate
 #' @param r1 reference birth rate
 #' @param r2 birth rate of migrating cells, relative to r1
 #' @param migration_type 0 or 1 (see details)
+#' @param d migration distance relative to 1/sqrt(K) (see details)
+#' @param K deme carrying capacity (only required if d is not NA)
 #' 
 #' @return The migration rate.
 #' 
-#' @details Assumes that min(d / sqrt(K), 1) is the probability that a migration attempt will land outside the deme. 
-#' Importantly, does not account for the chance that the migrating cell will land in an already-occupied deme.
-#' 
-#' If migration_type = 0 (meaning that migration rate is correlated with birth rate) 
+#' @details If migration_type = 0 (meaning that migration rate is correlated with birth rate) 
 #' then the migration rate will be multiplied by a factor of r2 * r1. Otherwise no adjustment will be made.
+#' 
+#' If d and K are set then the calculation assumes that min(d / sqrt(K), 1) is the probability 
+#' that a migration attempt will land outside the deme. 
+#' 
+#' Importantly, this function does not account for the chance that the migrating cell will 
+#' land in an already-occupied deme.
 #' 
 #' @export
 #' 
-#' @examples 
-#' lambda(1, 2, 1, 0.1, 0.9, 1/0.9, 0)
-#' lambda(1, 2, 1, 0.1, 0.9, 1/0.9, 1)
-lambda <- function(i, K, d, m, r1, r2, migration_type = 0) {
-  res <- m * i * min(d / sqrt(K), 1)
+#' @examples
+#' # if r1 * r2 = 1 then results are identical for migration_type = 0 and migration_type = 1: 
+#' lambda(1, 0.1, 0.9, 1/0.9, 0)
+#' lambda(1, 0.1, 0.9, 1/0.9, 1)
+lambda <- function(i, m, r1, r2, migration_type = 0, d = NA, K = NA) {
+  res <- m * i
+  if(!is.na(d)) {
+    if(is.na(K)) stop("If d is set then K must also be set.")
+    res <- res * min(d / sqrt(K), 1)
+  }
   if(migration_type == 0) return(r1 * r2 * res)
   else return(res)
 }
@@ -49,12 +57,12 @@ rho <- function(i, K, r) {
 #' 
 #' @param i number of cells of the focus type
 #' @param K deme carrying capacity
-#' @param d migration distance relative to 1/sqrt(K)
 #' @param m migration rate per cell, relative to birth rate
 #' @param r1 birth rate of cells in the destination deme, relative to reference birth rate
 #' @param r2 birth rate of migrating cells, relative to r1
 #' @param migration_type 0 or 1 (see details)
 #' @param death_rate death rate of migrating cells, relative to death rate of cells in destination deme
+#' @param d migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)
 #' 
 #' @return The rate of migration followed by survival.
 #' 
@@ -64,10 +72,10 @@ rho <- function(i, K, r) {
 #' then the migration rate will be multiplied by a factor of r2 * r1. Otherwise no adjustment will be made.
 #' 
 #' @examples 
-#' lambda_invasion(1, 2, 1, 0.1, 1, 1.1, 0)
-#' lambda_invasion(1, 2, 1, 0.1, 1, 1.1, 1)
-lambda_invasion <- function(i, K, d, m, r1, r2, migration_type = 0, death_rate = 1) {
-  res <- lambda(i, K, d, m, r1, r2, migration_type) * rho(1, K, r2)
+#' lambda_invasion(1, 2, 0.1, 1, 1.1, 0)
+#' lambda_invasion(1, 2, 0.1, 1, 1.1, 1)
+lambda_invasion <- function(i, K, m, r1, r2, migration_type = 0, death_rate = 1, d = NA) {
+  res <- lambda(i, m, r1, r2, migration_type, d, K) * rho(1, K, r2)
   # note that the destination deme temporarily has population size K+1
   return(res * K / (K + death_rate))
 }
@@ -99,11 +107,11 @@ trans_rate <- function(i, j, r, K) {
 #' Mean time until successful migration from a deme that is fully occupied by the focus cell type
 #' 
 #' @param K deme carrying capacity
-#' @param d migration distance relative to 1/sqrt(K)
 #' @param m migration rate per cell, relative to birth rate
 #' @param r1 birth rate of cells in the destination deme, relative to reference birth rate
 #' @param r2 birth rate of migrating cells, relative to r1
 #' @param migration_type 0, 1 or 4 (see details)
+#' @param d migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)
 #' 
 #' @return The waiting time.
 #' 
@@ -114,10 +122,10 @@ trans_rate <- function(i, j, r, K) {
 #' 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
 #' 
 #' @examples 
-#' time_migration(2, 1, 0.1, 1, 1.1, 0)
-#' time_migration(2, 1, 0.1, 1, 1.1, 4)
-time_migration <- function(K, d, m, r1, r2, migration_type) {
-  return(1 / lambda_invasion(K, K, d, m, r1, r2, migration_type))
+#' time_migration(2, 0.1, 1, 1.1, 0)
+#' time_migration(2, 0.1, 1, 1.1, 4)
+time_migration <- function(K, m, r1, r2, migration_type, d = NA) {
+  return(1 / lambda_invasion(K, K, m, r1, r2, migration_type, d))
 }
 
 #' Mean time until one cell achieves fixation, given that it reaches fixation
@@ -199,9 +207,9 @@ T_grow_j <- function(j, r1, r2, K) {
 #' @param r1 birth rate of cells in the destination deme, relative to reference birth rate
 #' @param r2 birth rate of migrating cells, relative to r1
 #' @param K deme carrying capacity
-#' @param d migration distance relative to 1/sqrt(K)
 #' @param m migration rate per cell, relative to birth rate
 #' @param migration_type 0, 1 or 4 (see details)
+#' @param d migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)
 #' 
 #' @return The waiting time.
 #' 
@@ -212,13 +220,13 @@ T_grow_j <- function(j, r1, r2, K) {
 #' 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
 #' 
 #' @examples 
-#' time_expected(1, 1.1, 2, 1, 0.1, 0)
-#' time_expected(1, 1.1, 2, 1, 0.1, 4)
-time_expected <- function(r1, r2, K, d, m, migration_type = 0){
+#' time_expected(1, 1.1, 2, 0.1, 0)
+#' time_expected(1, 1.1, 2, 0.1, 4)
+time_expected <- function(r1, r2, K, m, migration_type = 0, d = NA){
   
-  if(K == 1) return(time_migration(K, d, m, r1, r2, migration_type))
+  if(K == 1) return(time_migration(K, m, r1, r2, migration_type, d))
   
-  lambda_list <- sapply(1:K, lambda_invasion, K=K, d=d, m=m, r1=r1, r2=r2, migration_type = migration_type)
+  lambda_list <- sapply(1:K, lambda_invasion, K=K, m=m, r1=r1, r2=r2, migration_type = migration_type, d=d)
   t_list <- sapply(1:K, T_grow_j, r1=r1, r2=r2, K=K)
   
   # first summand
@@ -241,13 +249,13 @@ time_expected <- function(r1, r2, K, d, m, migration_type = 0){
 #' Maximum limit on dispersal speed for migration model
 #' 
 #' @param K deme carrying capacity
-#' @param d migration distance relative to 1/sqrt(K)
 #' @param m migration rate per cell, relative to birth rate
 #' @param r1 birth rate of cells in the destination deme, relative to reference birth rate
 #' @param r2 birth rate of migrating cells, relative to r1
 #' @param migration_type 0, 1 or 4 (see details)
 #' @param symmetric whether migration occurs in both directions
 #' @param two_dim whether to adjust for two-dimensional growth
+#' @param d migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)
 #' 
 #' @return The upper limit on the growth rate of the radius, measured in cells (not demes).
 #' 
@@ -260,12 +268,12 @@ time_expected <- function(r1, r2, K, d, m, migration_type = 0){
 #' 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
 #' 
 #' @examples 
-#' disp_rate_max(2, 1, 0.1, 1, 1.1, 0)
-#' disp_rate_max(2, 1, 0.1, 1, 1.1, 4)
-disp_rate_max <- function(K, d, m, r1, r2, migration_type = 0, symmetric = FALSE, two_dim = TRUE) {
+#' disp_rate_max(2, 0.1, 1, 1.1, 0)
+#' disp_rate_max(2, 0.1, 1, 1.1, 4)
+disp_rate_max <- function(K, m, r1, r2, migration_type = 0, symmetric = FALSE, two_dim = TRUE, d = NA) {
   m <- adjust_mig_rate(m, two_dim)
-  if(!symmetric) return(sqrt(K) / time_migration(K, d, m, r1, r2, migration_type))
-  else return((sqrt(K) / time_migration(K, d, m, r1, r2, migration_type) - sqrt(K) / time_migration(K, d, m, r1, 1 / r2, migration_type))/2)
+  if(!symmetric) return(sqrt(K) / time_migration(K, m, r1, r2, migration_type, d))
+  else return((sqrt(K) / time_migration(K, m, r1, r2, migration_type, d) - sqrt(K) / time_migration(K, m, r1, 1 / r2, migration_type, d))/2)
 }
 
 #' Minimum limit on dispersal speed for migration model
@@ -273,11 +281,11 @@ disp_rate_max <- function(K, d, m, r1, r2, migration_type = 0, symmetric = FALSE
 #' @param r1 birth rate of cells in the destination deme, relative to reference birth rate
 #' @param r2 birth rate of migrating cells, relative to r1
 #' @param K deme carrying capacity
-#' @param d migration distance relative to 1/sqrt(K)
 #' @param m migration rate per cell, relative to birth rate
 #' @param migration_type 0, 1 or 4 (see details)
 #' @param symmetric whether migration occurs in both directions
 #' @param two_dim whether to adjust for two-dimensional growth
+#' @param d migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)
 #' 
 #' @return The lower limit on the growth rate of the radius, measured in cells (not demes).
 #' 
@@ -290,13 +298,13 @@ disp_rate_max <- function(K, d, m, r1, r2, migration_type = 0, symmetric = FALSE
 #' 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
 #' 
 #' @examples 
-#' disp_rate_min(1, 1.1, 2, 1, 0.1, 0)
-#' disp_rate_min(1, 1.1, 2, 1, 0.1, 4)
-disp_rate_min <- function(r1, r2, K, d, m, migration_type = 0, symmetric = FALSE, two_dim = TRUE) {
+#' disp_rate_min(1, 1.1, 2, 0.1, 0)
+#' disp_rate_min(1, 1.1, 2, 0.1, 4)
+disp_rate_min <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, two_dim = TRUE, d = NA) {
   m <- adjust_mig_rate(m, two_dim)
-  if(!symmetric) return(sqrt(K) / (time_fixation(r1, r2, K) + time_migration(K, d, m, r1, r2, migration_type)))
-  else return((sqrt(K) / (time_fixation(r1, r2, K) + time_migration(K, d, m, r1, r2, migration_type)) - sqrt(K) / 
-                 (time_fixation(r1, 1 / r2, K) + time_migration(K, d, m, r1, 1 / r2, migration_type)))/2)
+  if(!symmetric) return(sqrt(K) / (time_fixation(r1, r2, K) + time_migration(K, m, r1, r2, migration_type, d)))
+  else return((sqrt(K) / (time_fixation(r1, r2, K) + time_migration(K, m, r1, r2, migration_type, d)) - sqrt(K) / 
+                 (time_fixation(r1, 1 / r2, K) + time_migration(K, m, r1, 1 / r2, migration_type, d)))/2)
 }
 
 #' Expected disperal speed for migration model, allowing dispersal to occur before fixation
@@ -304,23 +312,23 @@ disp_rate_min <- function(r1, r2, K, d, m, migration_type = 0, symmetric = FALSE
 #' @param r1 birth rate of cells in the destination deme, relative to reference birth rate
 #' @param r2 birth rate of migrating cells, relative to r1
 #' @param K deme carrying capacity
-#' @param d migration distance relative to 1/sqrt(K)
 #' @param m migration rate per cell, relative to birth rate
 #' @param migration_type 0, 1 or 4 (see details)
 #' @param symmetric whether migration occurs in both directions
 #' @param two_dim whether to adjust for two-dimensional growth
+#' @param d migration distance relative to 1/sqrt(K)
 #' 
 #' @return The growth rate of the radius, measured in cells (not demes).
 #' 
 #' @export
 #' 
 #' @examples 
-#' disp_rate(1, 1.1, 2, 1, 0.1, 0)
-#' disp_rate(1, 1.1, 2, 1, 0.1, 4)
-disp_rate <- function(r1, r2, K, d, m, migration_type = 0, symmetric = FALSE, two_dim = TRUE) {
+#' disp_rate(1, 1.1, 2, 0.1, 0)
+#' disp_rate(1, 1.1, 2, 0.1, 4)
+disp_rate <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, two_dim = TRUE, d = NA) {
   m <- adjust_mig_rate(m, two_dim)
-  if(!symmetric) return(sqrt(K) / time_expected(r1, r2, K, d, m, migration_type))
-  else return((sqrt(K) / time_expected(r1, r2, K, d, m, migration_type) - sqrt(K) / time_expected(r1, 1 / r2, K, d, m, migration_type))/2)
+  if(!symmetric) return(sqrt(K) / time_expected(r1, r2, K, m, migration_type, d))
+  else return((sqrt(K) / time_expected(r1, r2, K, m, migration_type, d) - sqrt(K) / time_expected(r1, 1 / r2, K, m, migration_type, d))/2)
 }
 
 #' Dispersal speed for deme fission model
@@ -493,11 +501,11 @@ disp_rate_demon <- function(K, r2, filled_grid = 0, migration_type = 0, migratio
   if(filled_grid) {
     m <- 1
     if(migration_rate_scales_with_K) m <- m / sqrt(K)
-    return(disp_rate(1, r2, K, sqrt(K), m, migration_type = 0, symmetric = FALSE, two_dim = TRUE))
+    return(disp_rate(1, r2, K, m, migration_type = 0, symmetric = FALSE, two_dim = TRUE, d = NA))
   }
   if(migration_type == 0 || migration_type == 1) {
     m <- mig_rate(K, migration_type, migration_edge_only, migration_rate_scales_with_K)
-    return(disp_rate(0.9, r2, K, sqrt(K), m, migration_type, symmetric = FALSE, two_dim = TRUE))
+    return(disp_rate(0.9, r2, K, m, migration_type, symmetric = FALSE, two_dim = TRUE, d = NA))
   } else if(migration_type == 2 || migration_type == 3) {
     m <- mig_rate(K, migration_type, migration_edge_only, migration_rate_scales_with_K)
     return(disp_rate_fission(r2, K, m, migration_type, migration_edge_only, two_dim = TRUE, NumCells))
