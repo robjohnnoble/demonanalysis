@@ -25,7 +25,7 @@ disp_rate_min(r1, r2, K, d, m, migration_type = 0, symmetric = FALSE,
 \item{two_dim}{whether to adjust for two-dimensional growth}
 }
 \value{
-The dispersal speed.
+The lower limit on the growth rate of the radius, measured in cells (not demes).
 }
 \description{
 Minimum limit on dispersal speed for migration model

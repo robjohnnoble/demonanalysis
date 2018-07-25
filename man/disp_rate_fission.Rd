@@ -23,7 +23,7 @@ disp_rate_fission(r2, K, m, migration_type = 2, migration_edge_only = 0,
 \item{NumCells}{total population size (all demes); required only if migration_type = 2 or 3 and migration_edge_only = 0}
 }
 \value{
-The dispersal speed.
+The growth rate of the radius, measured in cells (not demes).
 }
 \description{
 Dispersal speed for deme fission model

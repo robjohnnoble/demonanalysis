@@ -249,7 +249,7 @@ time_expected <- function(r1, r2, K, d, m, migration_type = 0){
 #' @param symmetric whether migration occurs in both directions
 #' @param two_dim whether to adjust for two-dimensional growth
 #' 
-#' @return The dispersal speed.
+#' @return The upper limit on the growth rate of the radius, measured in cells (not demes).
 #' 
 #' @export
 #' 
@@ -279,7 +279,7 @@ disp_rate_max <- function(K, d, m, r1, r2, migration_type = 0, symmetric = FALSE
 #' @param symmetric whether migration occurs in both directions
 #' @param two_dim whether to adjust for two-dimensional growth
 #' 
-#' @return The dispersal speed.
+#' @return The lower limit on the growth rate of the radius, measured in cells (not demes).
 #' 
 #' @export
 #' 
@@ -310,7 +310,7 @@ disp_rate_min <- function(r1, r2, K, d, m, migration_type = 0, symmetric = FALSE
 #' @param symmetric whether migration occurs in both directions
 #' @param two_dim whether to adjust for two-dimensional growth
 #' 
-#' @return The dispersal speed.
+#' @return The growth rate of the radius, measured in cells (not demes).
 #' 
 #' @export
 #' 
@@ -333,7 +333,7 @@ disp_rate <- function(r1, r2, K, d, m, migration_type = 0, symmetric = FALSE, tw
 #' @param two_dim whether to adjust for two-dimensional growth
 #' @param NumCells total population size (all demes); required only if migration_type = 2 or 3 and migration_edge_only = 0
 #' 
-#' @return The dispersal speed.
+#' @return The growth rate of the radius, measured in cells (not demes).
 #' 
 #' @export
 #' 
@@ -456,24 +456,30 @@ adjust_mig_rate <- function(m, two_dim) {
   else return(m)
 }
 
-#' A convenient wrapper for calculating dispersal rate for exanding tumours, using demon.cpp default parameter values
+#' A convenient wrapper for calculating dispersal rate using demon.cpp default parameter values
 #' 
 #' @param K deme carrying capacity
 #' @param r2 birth rate of migrating cells
+#' @param filled_grid whether the model is of a filled grid or an expanding tumour
 #' @param migration_type 0, 1, 2, 3 or 4 (see details)
 #' @param migration_edge_only whether migration occurs at the edge only
+#' @param migration_rate_scales_with_K whether to divide migration rate by sqrt(K)
 #' @param NumCells total population size (all demes); required only if migration_type = 2 or 3 and migration_edge_only = 0
 #' 
-#' @return The dispersal speed.
+#' @return The growth rate of the radius, measured in cells (not demes).
 #' 
 #' @export
 #' 
-#' @details Assumes migration_type = 0, migration_rate_scales_with_K = 1.
+#' @details If filled_grid = 1 then migration_type is set to 0.
 #' 
 #' @examples 
 #' # compare migration_edge_only = 0 versus migration_edge_only = 1:
 #' sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_type = 0)
 #' sapply(0:1, disp_rate_demon, K = 32, r2 = 1, migration_type = 2, NumCells = 1e6)
+#' 
+#' # filled grid example:
+#' sapply(1:4, disp_rate_demon, r2 = 1.1, filled_grid = 1)
+#' sapply(1:4, disp_rate_demon, r2 = 1.1, filled_grid = 1, migration_rate_scales_with_K = 0)
 #' 
 #' # no difference between migration_type = 0 and migration_type = 1 when r2 = 1/0.9 
 #' # (because 0.9 is the birth rate of normal cells):
@@ -483,11 +489,18 @@ adjust_mig_rate <- function(m, two_dim) {
 #' # otherwise expect a difference:
 #' sapply(0:1, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 0)
 #' sapply(0:1, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 1)
-disp_rate_demon <- function(K, r2, migration_type = 0, migration_edge_only = 0, NumCells = NA) {
+disp_rate_demon <- function(K, r2, filled_grid = 0, migration_type = 0, migration_edge_only = 0, migration_rate_scales_with_K = 1, NumCells = NA) {
+  if(filled_grid) {
+    m <- 1
+    if(migration_rate_scales_with_K) m <- m / sqrt(K)
+    return(disp_rate(1, r2, K, sqrt(K), m, migration_type = 0, symmetric = FALSE, two_dim = TRUE))
+  }
   if(migration_type == 0 || migration_type == 1) {
-    return(disp_rate(0.9, r2, K, sqrt(K), mig_rate(K, migration_type, migration_edge_only), migration_type, symmetric = FALSE, two_dim = TRUE))
+    m <- mig_rate(K, migration_type, migration_edge_only, migration_rate_scales_with_K)
+    return(disp_rate(0.9, r2, K, sqrt(K), m, migration_type, symmetric = FALSE, two_dim = TRUE))
   } else if(migration_type == 2 || migration_type == 3) {
-    return(disp_rate_fission(r2, K, mig_rate(K, migration_type, migration_edge_only), migration_type, migration_edge_only, two_dim = TRUE, NumCells))
+    m <- mig_rate(K, migration_type, migration_edge_only, migration_rate_scales_with_K)
+    return(disp_rate_fission(r2, K, m, migration_type, migration_edge_only, two_dim = TRUE, NumCells))
   } else {
     stop("Invalid type.")
   }

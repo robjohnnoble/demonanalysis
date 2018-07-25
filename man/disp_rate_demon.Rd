@@ -2,9 +2,10 @@
 % Please edit documentation in R/speedestimates.R
 \name{disp_rate_demon}
 \alias{disp_rate_demon}
-\title{A convenient wrapper for calculating dispersal rate for parameter values used in demon.cpp}
+\title{A convenient wrapper for calculating dispersal rate using demon.cpp default parameter values}
 \usage{
-disp_rate_demon(K, r2, migration_type = 0, migration_edge_only = 0,
+disp_rate_demon(K, r2, filled_grid = 0, migration_type = 0,
+  migration_edge_only = 0, migration_rate_scales_with_K = 1,
   NumCells = NA)
 }
 \arguments{
@@ -12,31 +13,40 @@ disp_rate_demon(K, r2, migration_type = 0, migration_edge_only = 0,
 
 \item{r2}{birth rate of migrating cells}
 
+\item{filled_grid}{whether the model is of a filled grid or an expanding tumour}
+
 \item{migration_type}{0, 1, 2, 3 or 4 (see details)}
 
 \item{migration_edge_only}{whether migration occurs at the edge only}
 
+\item{migration_rate_scales_with_K}{whether to divide migration rate by sqrt(K)}
+
 \item{NumCells}{total population size (all demes); required only if migration_type = 2 or 3 and migration_edge_only = 0}
 }
 \value{
-The dispersal speed.
+The growth rate of the radius, measured in cells (not demes).
 }
 \description{
-A convenient wrapper for calculating dispersal rate for parameter values used in demon.cpp
+A convenient wrapper for calculating dispersal rate using demon.cpp default parameter values
 }
 \details{
-Assumes migration_type = 0, migration_rate_scales_with_K = 1.
+If filled_grid = 1 then migration_type is set to 0.
 }
 \examples{
 # compare migration_edge_only = 0 versus migration_edge_only = 1:
 sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_type = 0)
-sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_type = 2, NumCells = 1e6)
+sapply(0:1, disp_rate_demon, K = 32, r2 = 1, migration_type = 2, NumCells = 1e6)
 
-# no difference between migration_type = 0 and migration_type = 1 when r2 = 1/0.9:
-sapply(0:3, disp_rate_demon, K = 32, r2 = 1/0.9, migration_edge_only = 0, NumCells = 1e6)
-sapply(0:3, disp_rate_demon, K = 32, r2 = 1/0.9, migration_edge_only = 1)
+# filled grid example:
+sapply(1:4, disp_rate_demon, r2 = 1.1, filled_grid = 1)
+sapply(1:4, disp_rate_demon, r2 = 1.1, filled_grid = 1, migration_rate_scales_with_K = 0)
+
+# no difference between migration_type = 0 and migration_type = 1 when r2 = 1/0.9 
+# (because 0.9 is the birth rate of normal cells):
+sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_edge_only = 0)
+sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_edge_only = 1)
 
 # otherwise expect a difference:
-sapply(0:3, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 0, NumCells = 1e6)
-sapply(0:3, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 1)
+sapply(0:1, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 0)
+sapply(0:1, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 1)
 }

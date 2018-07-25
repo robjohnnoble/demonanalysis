@@ -25,7 +25,7 @@ disp_rate_max(K, d, m, r1, r2, migration_type = 0, symmetric = FALSE,
 \item{two_dim}{whether to adjust for two-dimensional growth}
 }
 \value{
-The dispersal speed.
+The upper limit on the growth rate of the radius, measured in cells (not demes).
 }
 \description{
 Maximum limit on dispersal speed for migration model
