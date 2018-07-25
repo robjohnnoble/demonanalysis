@@ -120,8 +120,10 @@ trans_rate <- function(i, j, r, K) {
 #' @export
 #' 
 #' @details Meaning of migration_type:
-#' 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
-#' 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+#' \itemize{
+#'   \item 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
+#'   \item 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+#'   }
 #' 
 #' @examples 
 #' time_migration(2, 0.1, 1, 1.1, 0)
@@ -224,8 +226,10 @@ T_grow_j <- function(j, r1, r2, K) {
 #' @export
 #' 
 #' @details Meaning of migration_type:
-#' 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
-#' 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+#' \itemize{
+#'   \item 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
+#'   \item 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+#'   }
 #' 
 #' @examples 
 #' time_expected(1, 1.1, 2, 0.1, 0)
@@ -276,8 +280,10 @@ time_expected <- function(r1, r2, K, m, migration_type = 0, d = NA){
 #' @details Assumes that the time until fixation is negligible relative to the time until migration.
 #' 
 #' Meaning of migration_type:
-#' 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
-#' 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+#' \itemize{
+#'   \item 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
+#'   \item 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+#'   }
 #' 
 #' @examples 
 #' disp_rate_max(2, 0.1, 1, 1.1, 0)
@@ -306,8 +312,10 @@ disp_rate_max <- function(K, m, r1, r2, migration_type = 0, symmetric = FALSE, t
 #' @details Assumes that a cell type cannot attempt to migrate until it reaches fixation.
 #' 
 #' Meaning of migration_type:
-#' 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
-#' 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+#' \itemize{
+#'   \item 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
+#'   \item 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+#'   }
 #' 
 #' @examples 
 #' disp_rate_min(1, 1.1, 2, 0.1, 0)
@@ -362,18 +370,21 @@ disp_rate <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, two_d
 #' @details Assumes that a deme cannot attempt fission until its population size reaches K.
 #' 
 #' Meaning of migration_type:
-#' 2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
-#' 3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+#' \itemize{
+#'   \item 2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
+#'   \item 3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+#'   }
 #' 
 #' @examples 
 #' disp_rate_fission(1, 2, 0.1, NumCells = 1e6)
 #' disp_rate_fission(1, 2, 0.1, migration_type = 3, NumCells = 1e6)
 #' 
-#' # comparison with dispersal rate from simulation:
+#' # compare observed and predicted dispersal rates:
 #' df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
 #' include_diversities = FALSE)
-#' median(df$RadiusGrowthRate[which(df$NumCells > 400)]) # dispersal rate observed in simulation
-#' disp_rate_fission(1, 1, 1, migration_edge_only = 1) # predicted dispersal rate (a bit too low in this case)
+#' rate_obs <- median(df$RadiusGrowthRate[which(df$NumCells > 400)])
+#' rate_pred <- disp_rate_fission(1, 1, 1, migration_edge_only = 1)
+#' rate_pred / rate_obs # prediction is a bit too low in this case
 disp_rate_fission <- function(r2, K, m, migration_type = 2, migration_edge_only = 0, two_dim = TRUE, NumCells = NA) {
   # time_to_grow = time until deme population size reaches K
   if(K == 1) {
@@ -417,10 +428,12 @@ disp_rate_fission <- function(r2, K, m, migration_type = 2, migration_edge_only 
 #' @export
 #' 
 #' @details Meaning of migration_type:
-#' 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
-#' 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
-#' 2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
-#' 3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+#' \itemize{
+#'   \item 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
+#'   \item 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+#'   \item 2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
+#'   \item 3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+#'   }
 #' 
 #' @examples 
 #' mig_rate(32)
@@ -493,10 +506,12 @@ adjust_mig_rate <- function(m, two_dim) {
 #' @export
 #' 
 #' @details Meaning of migration_type:
-#' 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
-#' 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
-#' 2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
-#' 3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+#' \itemize{
+#'   \item 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
+#'   \item 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+#'   \item 2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
+#'   \item 3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+#'   }
 #' 
 #' If filled_grid = 1 then migration_type is set to 0.
 #' 

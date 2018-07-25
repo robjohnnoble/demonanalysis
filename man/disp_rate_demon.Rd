@@ -31,10 +31,12 @@ A convenient wrapper for calculating dispersal rate using demon.cpp default para
 }
 \details{
 Meaning of migration_type:
-0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
-1: migration, such that migration rate is independent of birth rate, and death rate is uniform
-2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
-3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+\itemize{
+  \item 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
+  \item 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+  \item 2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
+  \item 3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+  }
 
 If filled_grid = 1 then migration_type is set to 0.
 }

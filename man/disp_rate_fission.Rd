@@ -32,20 +32,19 @@ Dispersal speed for deme fission model
 Assumes that a deme cannot attempt fission until its population size reaches K.
 
 Meaning of migration_type:
-2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
-3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+\itemize{
+  \item 2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
+  \item 3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+  }
 }
 \examples{
 disp_rate_fission(1, 2, 0.1, NumCells = 1e6)
 disp_rate_fission(1, 2, 0.1, migration_type = 3, NumCells = 1e6)
 
-\dontrun{
-# find dispersal rate from simulation:
+# compare observed and predicted dispersal rates:
 df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
 include_diversities = FALSE)
-median(df$RadiusGrowthRate[which(df$NumCells > 400)])
-
-# predicted dispersal rate is a bit too low in this case:
-disp_rate_fission(1, 1, 1, migration_edge_only = 1)
-}
+rate_obs <- median(df$RadiusGrowthRate[which(df$NumCells > 400)])
+rate_pred <- disp_rate_fission(1, 1, 1, migration_edge_only = 1)
+rate_pred / rate_obs # prediction is a bit too low in this case
 }

@@ -27,8 +27,10 @@ Mean time until successful migration from a deme that is fully occupied by the f
 }
 \details{
 Meaning of migration_type:
-0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
-1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+\itemize{
+  \item 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
+  \item 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+  }
 }
 \examples{
 time_migration(2, 0.1, 1, 1.1, 0)
