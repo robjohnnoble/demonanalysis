@@ -121,8 +121,8 @@ trans_rate <- function(i, j, r, K) {
 #' 
 #' @details Meaning of migration_type:
 #' \itemize{
-#'   \item 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
-#'   \item 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+#'   \item 0: migration, such that a migration attempt occurs only following a birth event
+#'   \item 1: migration, such that migration is independent of birth
 #'   }
 #' 
 #' @examples 
@@ -227,8 +227,8 @@ T_grow_j <- function(j, r1, r2, K) {
 #' 
 #' @details Meaning of migration_type:
 #' \itemize{
-#'   \item 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
-#'   \item 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+#'   \item 0: migration, such that a migration attempt occurs only following a birth event
+#'   \item 1: migration, such that migration is independent of birth
 #'   }
 #' 
 #' @examples 
@@ -281,8 +281,8 @@ time_expected <- function(r1, r2, K, m, migration_type = 0, d = NA){
 #' 
 #' Meaning of migration_type:
 #' \itemize{
-#'   \item 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
-#'   \item 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+#'   \item 0: migration, such that a migration attempt occurs only following a birth event
+#'   \item 1: migration, such that migration is independent of birth
 #'   }
 #' 
 #' @examples 
@@ -313,8 +313,8 @@ disp_rate_max <- function(K, m, r1, r2, migration_type = 0, symmetric = FALSE, t
 #' 
 #' Meaning of migration_type:
 #' \itemize{
-#'   \item 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
-#'   \item 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
+#'   \item 0: migration, such that a migration attempt occurs only following a birth event
+#'   \item 1: migration, such that migration is independent of birth
 #'   }
 #' 
 #' @examples 
@@ -371,8 +371,8 @@ disp_rate <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, two_d
 #' 
 #' Meaning of migration_type:
 #' \itemize{
-#'   \item 2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
-#'   \item 3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+#'   \item 2: fission, such that a fission attempt occurs only following a birth event
+#'   \item 3: fission, such that fission is independent of birth
 #'   }
 #' 
 #' @examples 
@@ -429,10 +429,10 @@ disp_rate_fission <- function(r2, K, m, migration_type = 2, migration_edge_only 
 #' 
 #' @details Meaning of migration_type:
 #' \itemize{
-#'   \item 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
-#'   \item 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
-#'   \item 2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
-#'   \item 3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+#'   \item 0: migration, such that a migration attempt occurs only following a birth event
+#'   \item 1: migration, such that migration is independent of birth
+#'   \item 2: fission, such that a fission attempt occurs only following a birth event
+#'   \item 3: fission, such that fission is independent of birth
 #'   }
 #' 
 #' @examples 
@@ -507,10 +507,10 @@ adjust_mig_rate <- function(m, two_dim) {
 #' 
 #' @details Meaning of migration_type:
 #' \itemize{
-#'   \item 0: migration, such that migration rate is correlated with birth rate, and death rate is uniform
-#'   \item 1: migration, such that migration rate is independent of birth rate, and death rate is uniform
-#'   \item 2: fission, such that fission rate is correlated with birth rate, and death rate is uniform
-#'   \item 3: fission, such that fission rate is independent of birth rate, and death rate is uniform
+#'   \item 0: migration, such that a migration attempt occurs only following a birth event
+#'   \item 1: migration, such that migration is independent of birth
+#'   \item 2: fission, such that a fission attempt occurs only following a birth event
+#'   \item 3: fission, such that fission is independent of birth
 #'   }
 #' 
 #' If filled_grid = 1 then migration_type is set to 0.
