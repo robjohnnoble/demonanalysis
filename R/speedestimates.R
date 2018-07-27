@@ -481,13 +481,13 @@ mig_rate <- function(K, migration_type = 0, migration_edge_only = 0, migration_r
 #' 
 #' @export
 #' 
-#' @details Adjustment for two-dimensional growth entails multiplying the migration rate by 0.4, which is
+#' @details Adjustment for two-dimensional growth entails multiplying the migration rate by 
 #' a factor estimated from simulation results.
 #' 
 #' @examples 
 #' adjust_mig_rate(1, TRUE)
 adjust_mig_rate <- function(m, two_dim) {
-  if(two_dim) return(0.4 * m)
+  if(two_dim) return(0.38 * m)
   else return(m)
 }
 

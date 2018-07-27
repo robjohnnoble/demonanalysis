@@ -135,9 +135,9 @@ prob_successful_migration <- function(mat) {
     temp <- 0
     if(!is.na(mat[i, j])) {
       if(i == 1 || is.na(mat[i - 1, j])) temp = temp + 1
-      if(i == nrows || is.na(mat[i + 1, j] == 0)) temp = temp + 1
-      if(j == 1 || is.na(mat[i, j - 1] == 0)) temp = temp + 1
-      if(j == ncols || is.na(mat[i, j + 1] == 0)) temp = temp + 1
+      if(i == nrows || is.na(mat[i + 1, j])) temp = temp + 1
+      if(j == 1 || is.na(mat[i, j - 1])) temp = temp + 1
+      if(j == ncols || is.na(mat[i, j + 1])) temp = temp + 1
     }
     n_empty_neighbours <- n_empty_neighbours + temp
     if(temp > 0) n_edge_cells <- n_edge_cells + 1

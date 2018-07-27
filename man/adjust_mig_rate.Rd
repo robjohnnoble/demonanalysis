@@ -18,7 +18,7 @@ The migration rate.
 Adjust migration rate for probability that migrating cell lands in an already-occupied deme
 }
 \details{
-Adjustment for two-dimensional growth entails multiplying the migration rate by 0.4, which is
+Adjustment for two-dimensional growth entails multiplying the migration rate by 
 a factor estimated from simulation results.
 }
 \examples{
