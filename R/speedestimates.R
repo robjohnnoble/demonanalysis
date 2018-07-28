@@ -247,20 +247,11 @@ time_expected <- function(r1, r2, K, m, migration_type = 0, d = NA){
   lambda_list <- sapply(1:K, lambda_invasion, K=K, m=m, r1=r1, r2=r2, migration_type = migration_type, d=d)
   t_list <- sapply(1:K, T_grow_j, r1=r1, r2=r2, K=K)
   
-  # first summand
-  l <- 1:(K-1)
-  part1 <- (lambda_list[l] * t_list[l] + 1)
-  part2 <- (lambda_list[l] * t_list[l + 1] + 1) * exp(-lambda_list[l] * (t_list[l + 1] - t_list[l]))
-  exponent_sum <- sapply(1:(K-1), function(i) sum(lambda_list[1:(i-1)] * (t_list[1:(i-1)+1] - t_list[1:(i-1)])))
-  exponent_sum[1] <- 0
-  term1 <- sum(1/lambda_list[l] * exp(-exponent_sum[l]) * (part1[l] - part2[l]))
-  
-  # second summand
-  l <- 1:(K-1)
-  exponent_sum <- sum(lambda_list[l] * (t_list[l+1] - t_list[l]))
-  term2 <- 1/lambda_list[K] * exp(-exponent_sum) * (lambda_list[K] * t_list[K] + 1)
-  
-  return(term1 + term2)
+  l <- 2:K
+  exponent_sum <- sapply(l, function(i) sum(lambda_list[1:(i-1)] * (t_list[1:(i-1)+1] - t_list[1:(i-1)])))
+  term2 <- sum((1/lambda_list[l] - 1/lambda_list[l-1]) * exp(-exponent_sum[l-1]))
+
+  return(1 / lambda_list[1] + term2)
 }
 
 #' Maximum limit on dispersal speed for migration model
