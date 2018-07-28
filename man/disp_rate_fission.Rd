@@ -46,5 +46,5 @@ df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork
 include_diversities = FALSE)
 rate_obs <- median(df$RadiusGrowthRate[which(df$NumCells > 400)])
 rate_pred <- disp_rate_fission(1, 1, 1, migration_edge_only = 1)
-rate_pred / rate_obs # prediction is a bit too low in this case
+rate_pred / rate_obs
 }

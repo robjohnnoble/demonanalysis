@@ -19,7 +19,9 @@ Adjust migration rate for probability that migrating cell lands in an already-oc
 }
 \details{
 Adjustment for two-dimensional growth entails multiplying the migration rate by 
-a factor estimated from simulation results.
+factors estimated from simulation results. First factor: the number of cells at the edge 
+of the population, relative to the number expected if the population were a disc. 
+Second factor: for cells at the edge, the average proportion of nearest neighbours that are empty.
 }
 \examples{
 adjust_mig_rate(1, TRUE)

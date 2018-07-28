@@ -33,4 +33,10 @@ Expected disperal speed for migration model, allowing dispersal to occur before 
 \examples{
 disp_rate(1, 1.1, 2, 0.1, 0)
 disp_rate(1, 1.1, 2, 0.1, 1)
+
+# no difference between migration_type = 0 and migration_type = 1 when r1*r2 = 1:
+sapply(0:1, disp_rate, r1 = 0.5, r2 = 2, K = 32, m = 0.1)
+
+# otherwise expect a difference:
+sapply(0:1, disp_rate, r1 = 0.5, r2 = 3, K = 32, m = 0.1)
 }

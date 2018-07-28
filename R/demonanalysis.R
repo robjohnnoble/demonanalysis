@@ -129,6 +129,7 @@ muller_df_from_file <- function(file) {
 prob_successful_migration <- function(mat) {
   nrows <- dim(mat)[1]
   ncols <- dim(mat)[2]
+  n_cells <- 0
   n_edge_cells <- 0
   n_empty_neighbours <- 0
   for(i in 1:nrows) for(j in 1:ncols) {
@@ -138,11 +139,13 @@ prob_successful_migration <- function(mat) {
       if(i == nrows || is.na(mat[i + 1, j])) temp = temp + 1
       if(j == 1 || is.na(mat[i, j - 1])) temp = temp + 1
       if(j == ncols || is.na(mat[i, j + 1])) temp = temp + 1
+      n_cells <- n_cells + 1
     }
     n_empty_neighbours <- n_empty_neighbours + temp
     if(temp > 0) n_edge_cells <- n_edge_cells + 1
   }
-  return(c(n_empty_neighbours = n_empty_neighbours, 
+  return(c(n_cells = n_cells, 
+           n_empty_neighbours = n_empty_neighbours, 
            n_edge_cells = n_edge_cells, 
            prob = (n_empty_neighbours / n_edge_cells) / 4))
 }

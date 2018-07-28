@@ -248,13 +248,12 @@ time_expected <- function(r1, r2, K, m, migration_type = 0, d = NA){
   t_list <- sapply(1:K, T_grow_j, r1=r1, r2=r2, K=K)
   
   # first summand
-  l <- 1:K
-  part1 <- (lambda_list[l] * t_list[l] + 1) * exp(-lambda_list[l] * t_list[l])
-  part2 <- (lambda_list[l] * t_list[l + 1] + 1) * exp(-lambda_list[l] * t_list[l + 1])
+  l <- 1:(K-1)
+  part1 <- (lambda_list[l] * t_list[l] + 1)
+  part2 <- (lambda_list[l] * t_list[l + 1] + 1) * exp(-lambda_list[l] * (t_list[l + 1] - t_list[l]))
   exponent_sum <- sapply(1:(K-1), function(i) sum(lambda_list[1:(i-1)] * (t_list[1:(i-1)+1] - t_list[1:(i-1)])))
   exponent_sum[1] <- 0
-  l <- 1:(K-1)
-  term1 <- sum(1/lambda_list[l] * exp(-exponent_sum[l] + lambda_list[l] * t_list[l]) * (part1[l] - part2[l]))
+  term1 <- sum(1/lambda_list[l] * exp(-exponent_sum[l]) * (part1[l] - part2[l]))
   
   # second summand
   l <- 1:(K-1)
@@ -349,6 +348,12 @@ disp_rate_min <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, t
 #' @examples 
 #' disp_rate(1, 1.1, 2, 0.1, 0)
 #' disp_rate(1, 1.1, 2, 0.1, 1)
+#' 
+#' # no difference between migration_type = 0 and migration_type = 1 when r1*r2 = 1:
+#' sapply(0:1, disp_rate, r1 = 0.5, r2 = 2, K = 32, m = 0.1)
+#' 
+#' # otherwise expect a difference:
+#' sapply(0:1, disp_rate, r1 = 0.5, r2 = 3, K = 32, m = 0.1)
 disp_rate <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, two_dim = TRUE, d = NA) {
   m <- adjust_mig_rate(m, two_dim)
   if(!symmetric) return(sqrt(K) / time_expected(r1, r2, K, m, migration_type, d))
@@ -386,7 +391,7 @@ disp_rate <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, two_d
 #' include_diversities = FALSE)
 #' rate_obs <- median(df$RadiusGrowthRate[which(df$NumCells > 400)])
 #' rate_pred <- disp_rate_fission(1, 1, 1, migration_edge_only = 1)
-#' rate_pred / rate_obs # prediction is a bit too low in this case
+#' rate_pred / rate_obs
 disp_rate_fission <- function(r2, K, m, migration_type = 2, migration_edge_only = 0, two_dim = TRUE, NumCells = NA) {
   # time_to_grow = time until deme population size reaches K
   if(K == 1) {
@@ -482,7 +487,9 @@ mig_rate <- function(K, migration_type = 0, migration_edge_only = 0, migration_r
 #' @export
 #' 
 #' @details Adjustment for two-dimensional growth entails multiplying the migration rate by 
-#' a factor estimated from simulation results.
+#' factors estimated from simulation results. First factor: the number of cells at the edge 
+#' of the population, relative to the number expected if the population were a disc. 
+#' Second factor: for cells at the edge, the average proportion of nearest neighbours that are empty.
 #' 
 #' @examples 
 #' adjust_mig_rate(1, TRUE)
@@ -525,15 +532,6 @@ adjust_mig_rate <- function(m, two_dim) {
 #' # filled grid example:
 #' sapply(1:4, disp_rate_demon, r2 = 1.1, filled_grid = 1)
 #' sapply(1:4, disp_rate_demon, r2 = 1.1, filled_grid = 1, migration_rate_scales_with_K = 0)
-#' 
-#' # no difference between migration_type = 0 and migration_type = 1 when r2 = 1/0.9 
-#' # (because 0.9 is the birth rate of normal cells):
-#' sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_edge_only = 0)
-#' sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_edge_only = 1)
-#' 
-#' # otherwise expect a difference:
-#' sapply(0:1, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 0)
-#' sapply(0:1, disp_rate_demon, K = 32, r2 = 2, migration_edge_only = 1)
 disp_rate_demon <- function(K, r2, filled_grid = 0, migration_type = 0, migration_edge_only = 0, migration_rate_scales_with_K = 1, NumCells = NA) {
   if(filled_grid) {
     m <- 1
