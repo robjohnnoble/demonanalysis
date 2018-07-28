@@ -494,7 +494,7 @@ mig_rate <- function(K, migration_type = 0, migration_edge_only = 0, migration_r
 #' @examples 
 #' adjust_mig_rate(1, TRUE)
 adjust_mig_rate <- function(m, two_dim) {
-  if(two_dim) return(0.38 * m)
+  if(two_dim) return(1.6 * 0.38 * m)
   else return(m)
 }
 
