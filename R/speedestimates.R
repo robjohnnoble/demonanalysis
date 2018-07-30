@@ -66,7 +66,7 @@ rho <- function(i, K, r) {
 #' @param death_rate death rate of migrating cells, relative to death rate of cells in destination deme
 #' @param d migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)
 #' 
-#' @return The rate of migration followed by survival.
+#' @return The rate of migration followed by survival, when $i$ cells are attempting to migrate.
 #' 
 #' @export
 #' 
@@ -247,11 +247,13 @@ time_expected <- function(r1, r2, K, m, migration_type = 0, d = NA){
   lambda_list <- sapply(1:K, lambda_invasion, K=K, m=m, r1=r1, r2=r2, migration_type = migration_type, d=d)
   t_list <- sapply(1:K, T_grow_j, r1=r1, r2=r2, K=K)
   
-  l <- 2:K
-  exponent_sum <- sapply(l, function(i) sum(lambda_list[1:(i-1)] * (t_list[1:(i-1)+1] - t_list[1:(i-1)])))
-  term2 <- sum((1/lambda_list[l] - 1/lambda_list[l-1]) * exp(-exponent_sum[l-1]))
+  exponent_sum <- vector()
+  exponent_sum[1] <- 0
+  exponent_sum[2:K] <- cumsum(lambda_list[1:(K-1)] * (t_list[2:K] - t_list[1:(K-1)]))
+  exponent_sum[K+1] <- Inf
+  res <- sum((exp(-exponent_sum[1:K]) - exp(-exponent_sum[2:(K+1)])) / lambda_list[1:K])
 
-  return(1 / lambda_list[1] + term2)
+  return(res)
 }
 
 #' Maximum limit on dispersal speed for migration model

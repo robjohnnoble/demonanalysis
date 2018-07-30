@@ -25,7 +25,7 @@ lambda_invasion(i, K, m, r1, r2, migration_type = 0, death_rate = 1,
 \item{d}{migration distance relative to 1/sqrt(K); if NA then d is set to sqrt(K)}
 }
 \value{
-The rate of migration followed by survival.
+The rate of migration followed by survival, when $i$ cells are attempting to migrate.
 }
 \description{
 Rate of migration followed by survival
