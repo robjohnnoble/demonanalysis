@@ -251,7 +251,8 @@ time_expected <- function(r1, r2, K, m, migration_type = 0, d = NA){
   exponent_sum[1] <- 0
   exponent_sum[2:K] <- cumsum(lambda_list[1:(K-1)] * (t_list[2:K] - t_list[1:(K-1)]))
   exponent_sum[K+1] <- Inf
-  res <- sum((exp(-exponent_sum[1:K]) - exp(-exponent_sum[2:(K+1)])) / lambda_list[1:K])
+  p <- exp(-exponent_sum[1:(K+1)])
+  res <- sum((p[1:K] - p[2:(K+1)]) / lambda_list[1:K])
 
   return(res)
 }
