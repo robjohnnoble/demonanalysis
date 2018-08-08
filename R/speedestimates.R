@@ -142,6 +142,7 @@ time_migration <- function(K, m, r1, r2, migration_type, d = NA) {
 #' @param r2 birth rate of focus cell type
 #' @param K deme carrying capacity
 #' @param r_powers_shifted optional look-up vector
+#' @param approx if TRUE, return the approximate value when r2 -> r1 (weak selection)
 #' 
 #' @return The waiting time.
 #' 
@@ -150,20 +151,27 @@ time_migration <- function(K, m, r1, r2, migration_type, d = NA) {
 #' @details See Traulsen 2009, equation 1.38.
 #' 
 #' @examples 
-#' time_fixation(1, 1.1, 4)
-time_fixation <- function(r1, r2, K, r_powers_shifted = NA) {
+#' time_fixation(1, 1.001, 32)
+#' time_fixation(1, 1.001, 32, approx = TRUE)
+time_fixation <- function(r1, r2, K, r_powers_shifted = NA, approx = FALSE) {
   if(K == 1) return(0)
   if(r2 == 1) return(K - 1)
   
-  if(is.na(r_powers_shifted[1])) r_powers_shifted <- r2^(0:K)
+  delta <- r2 - 1
   
+  if(approx) return((K-1) * (1 + 1/72 * (-K^2-K+6)*delta^2))
+  
+  if(is.na(r_powers_shifted[1])) r_powers_shifted <- r2^(0:K)
   l <- 1:(K-1)
+  
   sum <- sum((1 - 1 / r_powers_shifted[l + 1]) * (r2 * l + K - l) * (1 - 1 / r_powers_shifted[K - l + 1]) / (l * (K - l)))
+  
   if(r2^K > 1e20) {
-    sum <- sum * 1 / (r2 - 1)
+    sum <- sum * 1 / delta
   } else {
-    sum <- sum * r2^K / ((r2^K - 1) * (r2 - 1))
+    sum <- sum * r2^K / ((r2^K - 1) * delta)
   }
+  
   return(sum/r1) # relative to the doubling time of a cell with birth rate 1
 }
 
@@ -187,6 +195,7 @@ time_fixation <- function(r1, r2, K, r_powers_shifted = NA) {
 T_grow_j <- function(j, r1, r2, K) {
   if(j > K) return(Inf)
   if(j <= 1 || K <= 1) return(0)
+  
   if(j == K) return(time_fixation(r1, r2, K))
   
   r_powers_shifted <- r2^(0:K) # need to add one to the index!

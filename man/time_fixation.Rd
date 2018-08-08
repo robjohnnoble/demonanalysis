@@ -4,7 +4,7 @@
 \alias{time_fixation}
 \title{Conditional fixation time}
 \usage{
-time_fixation(r1, r2, K, r_powers_shifted = NA)
+time_fixation(r1, r2, K, r_powers_shifted = NA, approx = FALSE)
 }
 \arguments{
 \item{r1}{birth rate of non-focus cells, relative to reference birth rate}
@@ -14,6 +14,8 @@ time_fixation(r1, r2, K, r_powers_shifted = NA)
 \item{K}{deme carrying capacity}
 
 \item{r_powers_shifted}{optional look-up vector}
+
+\item{approx}{if TRUE, return the approximate value when r2 -> r1 (weak selection)}
 }
 \value{
 The waiting time.
@@ -25,5 +27,6 @@ Mean time until one cell achieves fixation, given that it reaches fixation
 See Traulsen 2009, equation 1.38.
 }
 \examples{
-time_fixation(1, 1.1, 4)
+time_fixation(1, 1.001, 32)
+time_fixation(1, 1.001, 32, approx = TRUE)
 }
