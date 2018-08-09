@@ -139,7 +139,7 @@ time_migration <- function(K, m, r1, r2, migration_type, d = NA) {
 #' Mean time until one cell achieves fixation, given that it reaches fixation
 #' 
 #' @param r1 birth rate of non-focus cells, relative to reference birth rate
-#' @param r2 birth rate of focus cell type
+#' @param r2 birth rate of focus cell type, relative to r1
 #' @param K deme carrying capacity
 #' @param r_powers_shifted optional look-up vector
 #' @param approx if TRUE, return the approximate value when r2 -> r1 (weak selection)
@@ -155,7 +155,7 @@ time_migration <- function(K, m, r1, r2, migration_type, d = NA) {
 #' time_fixation(1, 1.001, 32, approx = TRUE)
 time_fixation <- function(r1, r2, K, r_powers_shifted = NA, approx = FALSE) {
   if(K == 1) return(0)
-  if(r2 == 1) return(K - 1)
+  if(r2 == 1) return((K - 1)/r1)
   
   delta <- r2 - 1
   
@@ -181,7 +181,7 @@ time_fixation <- function(r1, r2, K, r_powers_shifted = NA, approx = FALSE) {
 #' 
 #' @param j final population size of the focus type
 #' @param r1 birth rate of non-focus cells, relative to reference birth rate
-#' @param r2 birth rate of focus cell type
+#' @param r2 birth rate of focus cell type, relative to r1
 #' @param K deme carrying capacity
 #' 
 #' @return The waiting time.
@@ -506,7 +506,7 @@ adjust_mig_rate <- function(m, two_dim) {
 #' A convenient wrapper for calculating dispersal rate using demon.cpp default parameter values
 #' 
 #' @param K deme carrying capacity
-#' @param r2 birth rate of migrating cells
+#' @param r2 birth rate of migrating cells, relative to 1 (if filled_grid) or 0.9 (otherwise)
 #' @param filled_grid whether the model is of a filled grid or an expanding tumour
 #' @param migration_type 0, 1, 2, 3 (see details)
 #' @param migration_edge_only whether migration occurs at the edge only
@@ -530,7 +530,7 @@ adjust_mig_rate <- function(m, two_dim) {
 #' @examples 
 #' # compare migration_edge_only = 0 versus migration_edge_only = 1:
 #' sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_type = 0)
-#' sapply(0:1, disp_rate_demon, K = 32, r2 = 1, migration_type = 2, NumCells = 1e6)
+#' sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_type = 2, NumCells = 1e6)
 #' 
 #' # filled grid example:
 #' sapply(1:4, disp_rate_demon, r2 = 1.1, filled_grid = 1)

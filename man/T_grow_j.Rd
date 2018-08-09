@@ -11,7 +11,7 @@ T_grow_j(j, r1, r2, K)
 
 \item{r1}{birth rate of non-focus cells, relative to reference birth rate}
 
-\item{r2}{birth rate of focus cell type}
+\item{r2}{birth rate of focus cell type, relative to r1}
 
 \item{K}{deme carrying capacity}
 }

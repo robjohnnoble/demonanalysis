@@ -11,7 +11,7 @@ disp_rate_demon(K, r2, filled_grid = 0, migration_type = 0,
 \arguments{
 \item{K}{deme carrying capacity}
 
-\item{r2}{birth rate of migrating cells}
+\item{r2}{birth rate of migrating cells, relative to 1 (if filled_grid) or 0.9 (otherwise)}
 
 \item{filled_grid}{whether the model is of a filled grid or an expanding tumour}
 
@@ -43,7 +43,7 @@ If filled_grid = 1 then migration_type is set to 0.
 \examples{
 # compare migration_edge_only = 0 versus migration_edge_only = 1:
 sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_type = 0)
-sapply(0:1, disp_rate_demon, K = 32, r2 = 1, migration_type = 2, NumCells = 1e6)
+sapply(0:1, disp_rate_demon, K = 32, r2 = 1/0.9, migration_type = 2, NumCells = 1e6)
 
 # filled grid example:
 sapply(1:4, disp_rate_demon, r2 = 1.1, filled_grid = 1)
