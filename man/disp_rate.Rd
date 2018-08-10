@@ -5,7 +5,7 @@
 \title{Expected disperal speed for migration model}
 \usage{
 disp_rate(r1, r2, K, m, migration_type = 0, symmetric = FALSE,
-  two_dim = TRUE, d = NA)
+  two_dim = TRUE, d = NA, approx = FALSE)
 }
 \arguments{
 \item{r1}{birth rate of cells in the destination deme, relative to reference birth rate}
@@ -23,6 +23,8 @@ disp_rate(r1, r2, K, m, migration_type = 0, symmetric = FALSE,
 \item{two_dim}{whether to adjust for two-dimensional growth}
 
 \item{d}{migration distance relative to 1/sqrt(K)}
+
+\item{approx}{if TRUE, return the approximate value when r2 -> r1 (weak selection) and r1 = 1}
 }
 \value{
 The growth rate of the radius, measured in cells (not demes).
@@ -31,8 +33,9 @@ The growth rate of the radius, measured in cells (not demes).
 Expected disperal speed for migration model, allowing dispersal to occur before fixation
 }
 \examples{
-disp_rate(1, 1.1, 2, 0.1, 0)
-disp_rate(1, 1.1, 2, 0.1, 1)
+disp_rate(1, 1.01, 2, 0.1, 0)
+disp_rate(1, 1.01, 2, 0.1, 0, approx = TRUE)
+disp_rate(1, 1.01, 2, 0.1, 1)
 
 # no difference between migration_type = 0 and migration_type = 1 when r1*r2 = 1:
 sapply(0:1, disp_rate, r1 = 0.5, r2 = 2, K = 32, m = 0.1)

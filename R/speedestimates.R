@@ -343,22 +343,25 @@ disp_rate_min <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, t
 #' @param symmetric whether migration occurs in both directions
 #' @param two_dim whether to adjust for two-dimensional growth
 #' @param d migration distance relative to 1/sqrt(K)
+#' @param approx if TRUE, return the approximate value when r2 -> r1 (weak selection) and r1 = 1
 #' 
 #' @return The growth rate of the radius, measured in cells (not demes).
 #' 
 #' @export
 #' 
 #' @examples 
-#' disp_rate(1, 1.1, 2, 0.1, 0)
-#' disp_rate(1, 1.1, 2, 0.1, 1)
+#' disp_rate(1, 1.01, 2, 0.1, 0)
+#' disp_rate(1, 1.01, 2, 0.1, 0, approx = TRUE)
+#' disp_rate(1, 1.01, 2, 0.1, 1)
 #' 
 #' # no difference between migration_type = 0 and migration_type = 1 when r1*r2 = 1:
 #' sapply(0:1, disp_rate, r1 = 0.5, r2 = 2, K = 32, m = 0.1)
 #' 
 #' # otherwise expect a difference:
 #' sapply(0:1, disp_rate, r1 = 0.5, r2 = 3, K = 32, m = 0.1)
-disp_rate <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, two_dim = TRUE, d = NA) {
+disp_rate <- function(r1, r2, K, m, migration_type = 0, symmetric = FALSE, two_dim = TRUE, d = NA, approx = FALSE) {
   m <- adjust_mig_rate(m, two_dim)
+  if(approx) return(disp_rate(1, 1, K, m, two_dim = FALSE) + (K - 1) * m * (r2/r1 - 1))
   if(!symmetric) return(sqrt(K) / time_expected(r1, r2, K, m, migration_type, d))
   else return((sqrt(K) / time_expected(r1, r2, K, m, migration_type, d) - sqrt(K) / time_expected(r1, 1 / r2, K, m, migration_type, d))/2)
 }
