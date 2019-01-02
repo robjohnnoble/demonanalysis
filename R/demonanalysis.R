@@ -696,16 +696,19 @@ plot_all_charts <- function(path_or_dflist, output_filename = NA, file_type = "p
 #' 
 #' @examples
 #' plot_mutation_waves(output)
-plot_mutation_waves <- function(df) {
-  if(length(df) == 1) {
-    plot(0, type = 'n', axes = FALSE, ann = FALSE)
+plot_mutation_waves <- function (df) 
+{
+  if (length(df) == 1) {
+    plot(0, type = "n", axes = FALSE, ann = FALSE)
     return(NA)
   }
   start_ind <- which(colnames(df) == "CellsWith1Drivers")
   end_ind <- dim(df)[2]
   plot(CellsWith0Drivers ~ Generation, data = df, type = "l", 
-       ylim = c(10, max(df$NumCells)), log = "y", xlab = "Cell generations", ylab = "Number of cells")
-  for(i in start_ind:end_ind) lines(df[ , i][[1]] ~ df$Generation)
+    ylim = c(10, max(df$NumCells)), log = "y", xlab = "Cell generations", 
+    ylab = "Number of cells", col="brown")
+  title("Mutation waves")
+  for (i in start_ind:end_ind) lines(df[, i] ~ df$Generation, col=i)
 }
 
 #' Create a directory name including parameter names and values
