@@ -893,7 +893,8 @@ driver_geno_div_plot_batch <- function(input_dir, output_filename = NA, file_typ
     slice(1) %>% 
     ungroup()
   g1 <- ggplot(sum_df, aes(x = Generation, y = Diversity, group = interaction(K, migration_type, migration_edge_only, seed), colour = factor(K))) + 
-    geom_line()
+    geom_line() + 
+    facet_grid(cols = vars(migration_type), vars(migration_edge_only))
   
   if(!is.na(output_filename) & !is.na(output_dir)) {
     if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1000, height = 1000, res = 100)
