@@ -708,7 +708,7 @@ plot_mutation_waves <- function (df)
     ylim = c(10, max(df$NumCells)), log = "y", xlab = "Cell generations", 
     ylab = "Number of cells", col="brown")
   title("Mutation waves")
-  for (i in start_ind:end_ind) lines(df[, i] ~ df$Generation, col=i)
+  for (i in start_ind:end_ind) lines(df[, i] ~ df$Generation, col = i)
 }
 
 #' Create a directory name including parameter names and values
@@ -861,4 +861,46 @@ create_plots_batch <- function(input_dir, type = "plot", file_type = "png", outp
   apply_combinations(final_values, each_plot)
 }
 
+#' Create a plot of genotype diversity versus time for a batch of simulations
+#' 
+#' @param input_dir base input directory name
+#' @param output_filename name of output image file
+#' @param file_type either "pdf" or "png" (other values default to "pdf")
+#' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
+#' 
+#' @return either an image file or a plot displyed on screen
+#' 
+#' @export
+#' 
+#' @details Lines are coloured by combinations of parameter values.
+#' 
+#' @examples
+#' driver_geno_div_plot_batch(system.file("example_batch", "", 
+#' package = "demonanalysis", mustWork = TRUE))
+driver_geno_div_plot_batch <- function(input_dir, output_filename = NA, file_type = "png", output_dir = NA) {
+  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+  
+  inv_Simpson_index <- function(p) 1 / sum(p*p)
+  
+  df <- all_output(input_dir, df_type = "driver_phylo")
+  pars_and_values <- parameter_names_and_values(input_dir)
+  par_names <- c("Generation", levels(pars_and_values$name))
+  par_names[par_names == "log2_K"] <- "K"
+  
+  sum_df <- group_by_at(df, par_names) %>% 
+    mutate(Diversity = inv_Simpson_index(Population / sum(Population))) %>% 
+    slice(1) %>% 
+    ungroup()
+  g1 <- ggplot(sum_df, aes(x = Generation, y = Diversity, group = interaction(K, migration_type, migration_edge_only, seed), colour = factor(K))) + 
+    geom_line()
+  
+  if(!is.na(output_filename) & !is.na(output_dir)) {
+    if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1000, height = 1000, res = 100)
+    else pdf(paste0(output_dir,output_filename,".pdf"), width = 10, height = 10)
+  }
+  print(g1)
+  if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
+  
+  if(!is.na(output_filename)) print("Saved the plot", quote = FALSE)
+}
 
