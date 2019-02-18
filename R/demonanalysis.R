@@ -867,6 +867,7 @@ create_plots_batch <- function(input_dir, type = "plot", file_type = "png", outp
 #' @param output_filename name of output image file
 #' @param file_type either "pdf" or "png" (other values default to "pdf")
 #' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
+#' @param log_y whether to apply a log10 transformation to the y axis (default FALSE)
 #' 
 #' @return either an image file or a plot displyed on screen
 #' 
@@ -877,7 +878,7 @@ create_plots_batch <- function(input_dir, type = "plot", file_type = "png", outp
 #' @examples
 #' driver_geno_div_plot_batch(system.file("example_batch", "", 
 #' package = "demonanalysis", mustWork = TRUE))
-driver_geno_div_plot_batch <- function(input_dir, output_filename = NA, file_type = "png", output_dir = NA) {
+driver_geno_div_plot_batch <- function(input_dir, output_filename = NA, file_type = "png", output_dir = NA, log_y = FALSE) {
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
   inv_Simpson_index <- function(p) 1 / sum(p*p)
@@ -896,9 +897,11 @@ driver_geno_div_plot_batch <- function(input_dir, output_filename = NA, file_typ
     geom_line() + 
     facet_grid(cols = vars(migration_type), vars(migration_edge_only))
   
+  if(log_y) g1 <- g1 + scale_y_log10()
+  
   if(!is.na(output_filename) & !is.na(output_dir)) {
     if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1000, height = 1000, res = 100)
-    else pdf(paste0(output_dir,output_filename,".pdf"), width = 10, height = 10)
+    else pdf(paste0(output_dir,output_filename,".pdf"), width = 6, height = 6)
   }
   print(g1)
   if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
