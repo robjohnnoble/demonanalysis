@@ -886,6 +886,7 @@ driver_geno_div_plot_batch <- function(input_dir, output_filename = NA, file_typ
   pars_and_values <- parameter_names_and_values(input_dir)
   par_names <- c("Generation", levels(pars_and_values$name))
   par_names[par_names == "log2_K"] <- "K"
+  par_names[par_names == "log2_deme_carrying_capacity"] <- "K"
   
   sum_df <- group_by_at(df, par_names) %>% 
     mutate(Diversity = inv_Simpson_index(Population / sum(Population))) %>% 
