@@ -345,6 +345,18 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
     } else {
       temp <- cbind(df_pars, temp)
     }
+  } else if (df_type %in% c("driver_phylo")){
+    df_driver_phylo <- fread(file_driver_phylo)
+    
+    df_driver_phylo <- filter(df_driver_phylo, CellsPerSample == -1, NumSamples == 1, SampleDepth == -1)
+    df_driver_phylo <- df_driver_phylo[!duplicated(df_driver_phylo), ]
+    temp <- df_driver_phylo
+    # add parameter columns:
+    if(nrow(temp) == 0){
+      temp <- NULL
+    } else {
+      temp <- cbind(df_pars, temp)
+    }
   } else {
     stop("no valid df_type argument was passed")
   }
@@ -387,7 +399,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", vaf_cut_off = NA, generation = NA, numcells = NA) {
   
   df_type_list <- c("output", "driver_genotype_properties", "genotype_properties", 
-                    "allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts")
+                    "allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts", "driver_phylo")
   stopifnot(df_type %in% df_type_list)
   
   pars_and_values <- parameter_names_and_values(input_dir)
