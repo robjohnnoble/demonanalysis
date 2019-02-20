@@ -861,26 +861,20 @@ create_plots_batch <- function(input_dir, type = "plot", file_type = "png", outp
   apply_combinations(final_values, each_plot)
 }
 
-#' Create a plot of genotype diversity versus time for a batch of simulations
+#' Create a data frame of genotype diversity versus time for a batch of simulations
 #' 
 #' @param input_dir base input directory name
-#' @param output_filename name of output image file
-#' @param file_type either "pdf" or "png" (other values default to "pdf")
-#' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
-#' @param log_y whether to apply a log10 transformation to the y axis (default FALSE)
 #' 
-#' @return either an image file or a plot displyed on screen
+#' @return a data frame
 #' 
 #' @export
 #' 
-#' @details Lines are coloured by combinations of parameter values.
+#' @details
 #' 
 #' @examples
-#' driver_geno_div_plot_batch(system.file("example_batch", "", 
+#' driver_geno_div_df_batch(system.file("example_batch", "", 
 #' package = "demonanalysis", mustWork = TRUE))
-driver_geno_div_plot_batch <- function(input_dir, output_filename = NA, file_type = "png", output_dir = NA, log_y = FALSE, 
-                                       facet1 = "migration_type", facet2 = "migration_edge_only", height = 1, width = 1, ymax = 100) {
-  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+driver_geno_div_df_batch <- function(input_dir) {
   
   inv_Simpson_index <- function(p) 1 / sum(p*p)
   
@@ -894,10 +888,44 @@ driver_geno_div_plot_batch <- function(input_dir, output_filename = NA, file_typ
     mutate(Diversity = inv_Simpson_index(Population / sum(Population))) %>% 
     slice(1) %>% 
     ungroup()
+  
+  return(sum_df)
+}
+
+#' Plot genotype diversity versus time
+#' 
+#' @param sum_df data frame created by driver_geno_div_df_batch
+#' @param output_filename name of output image file
+#' @param file_type either "pdf" or "png" (other values default to "pdf")
+#' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
+#' @param log_y whether to apply a log10 transformation to the y axis (default FALSE)
+#' @param facet1 column name for facet rows
+#' @param facet2 column name for facet columns
+#' @param height relative image height
+#' @param width relative image width
+#' @param ymax maximum of y axis
+#' @param selected_seed seed number for which results will be highlighted
+#' 
+#' @return either an image file or a plot displyed on screen
+#' 
+#' @export
+#' 
+#' @details Lines are coloured by combinations of parameter values.
+#' 
+#' @examples
+#' sum_df <- driver_geno_div_df_batch(system.file("example_batch", "", 
+#' package = "demonanalysis", mustWork = TRUE))
+#' plot_driver_geno_div(sum_df)
+plot_driver_geno_div <- function(sum_df, output_filename = NA, file_type = "png", output_dir = NA, log_y = FALSE, 
+                                       facet1 = "migration_type", facet2 = "migration_edge_only", height = 1, width = 1, ymax = 100, selected_seed = NA) {
+  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+  
   g1 <- ggplot(sum_df, aes(x = Generation, y = Diversity, group = interaction(K, migration_type, migration_edge_only, seed, s_driver_birth), colour = factor(K))) + 
-    geom_line() + 
+    geom_line(col = "grey") + 
     facet_grid(reformulate(facet1, facet2)) + 
     theme_classic()
+  
+  if(!is.na(selected_seed)) g1 <- g1 + geom_line(data = filter(sum_df, seed == selected_seed), aes(x = Generation, y = Diversity), color = "black")
   
   if(log_y) g1 <- g1 + scale_y_log10(limits = c(1, ymax))
   else g1 <- g1 + scale_y_continuous(limits = c(1, ymax))
@@ -911,4 +939,3 @@ driver_geno_div_plot_batch <- function(input_dir, output_filename = NA, file_typ
   
   if(!is.na(output_filename)) print("Saved the plot", quote = FALSE)
 }
-
