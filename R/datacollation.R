@@ -274,7 +274,7 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
 #' df_type = "genotype_properties", vaf_cut_off = 0.002)
 #' combine_dfs(full_dir = system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
 #' df_type = "genotype_counts", numcells = 100)
-combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output", max_generation = TRUE, vaf_cut_off = NA, generation = NA, numcells = NA, num_parameters = NA) {
+combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output", max_generation = FALSE, vaf_cut_off = NA, generation = NA, numcells = NA, num_parameters = NA) {
   
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
   
@@ -349,6 +349,18 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
     } else {
       temp <- cbind(df_pars, temp)
     }
+  } else if (df_type %in% c("driver_phylo")){
+    df_driver_phylo <- fread(file_driver_phylo)
+    
+    df_driver_phylo <- filter(df_driver_phylo, CellsPerSample == -1, NumSamples == 1, SampleDepth == -1)
+    df_driver_phylo <- df_driver_phylo[!duplicated(df_driver_phylo), ]
+    temp <- df_driver_phylo
+    # add parameter columns:
+    if(nrow(temp) == 0){
+      temp <- NULL
+    } else {
+      temp <- cbind(df_pars, temp)
+    }
   } else {
     stop("no valid df_type argument was passed")
   }
@@ -388,10 +400,10 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 #' df_type = "genotype_properties", vaf_cut_off = 0.002)
 #' all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
 #' df_type = "allele_counts", generation = 10)
-all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", max_generation = TRUE, vaf_cut_off = NA, generation = NA, numcells = NA) {
+all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", max_generation = FALSE, vaf_cut_off = NA, generation = NA, numcells = NA) {
   
   df_type_list <- c("output", "driver_genotype_properties", "genotype_properties", 
-                    "allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts")
+                    "allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts", "driver_phylo")
   stopifnot(df_type %in% df_type_list)
   
   pars_and_values <- parameter_names_and_values(input_dir)
