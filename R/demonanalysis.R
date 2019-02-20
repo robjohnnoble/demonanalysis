@@ -893,9 +893,9 @@ driver_geno_div_plot_batch <- function(input_dir, output_filename = NA, file_typ
     mutate(Diversity = inv_Simpson_index(Population / sum(Population))) %>% 
     slice(1) %>% 
     ungroup()
-  g1 <- ggplot(sum_df, aes(x = Generation, y = Diversity, group = interaction(K, migration_type, migration_edge_only, seed), colour = factor(K))) + 
+  g1 <- ggplot(sum_df, aes(x = Generation, y = Diversity, group = interaction(K, migration_type, migration_edge_only, seed, s_driver_birth), colour = factor(K))) + 
     geom_line() + 
-    facet_grid(cols = vars(migration_type), vars(migration_edge_only))
+    facet_grid(cols = vars(migration_type), vars(migration_edge_only), vars(s_driver_birth))
   
   if(log_y) g1 <- g1 + scale_y_log10()
   
