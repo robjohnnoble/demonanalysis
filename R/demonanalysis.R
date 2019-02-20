@@ -878,7 +878,8 @@ create_plots_batch <- function(input_dir, type = "plot", file_type = "png", outp
 #' @examples
 #' driver_geno_div_plot_batch(system.file("example_batch", "", 
 #' package = "demonanalysis", mustWork = TRUE))
-driver_geno_div_plot_batch <- function(input_dir, output_filename = NA, file_type = "png", output_dir = NA, log_y = FALSE) {
+driver_geno_div_plot_batch <- function(input_dir, output_filename = NA, file_type = "png", output_dir = NA, log_y = FALSE, 
+                                       facet1 = "migration_type", facet2 = "migration_edge_only") {
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
   inv_Simpson_index <- function(p) 1 / sum(p*p)
@@ -895,7 +896,7 @@ driver_geno_div_plot_batch <- function(input_dir, output_filename = NA, file_typ
     ungroup()
   g1 <- ggplot(sum_df, aes(x = Generation, y = Diversity, group = interaction(K, migration_type, migration_edge_only, seed, s_driver_birth), colour = factor(K))) + 
     geom_line() + 
-    facet_grid(cols = vars(migration_type), vars(migration_edge_only), vars(s_driver_birth))
+    facet_grid(reformulate(facet1, facet2))
   
   if(log_y) g1 <- g1 + scale_y_log10()
   
