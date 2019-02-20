@@ -368,8 +368,8 @@ hist2 <- function(x, breaks, counts = 1) {
   df <- data.frame(x = x, counts = counts)
   
   hist <- df %>% mutate(bin = cut(x, breaks = breaks, labels = bin_nums, include.lowest = TRUE)) %>%
-    group_by(bin) %>% summarise(counts = sum(counts)) %>% 
-    mutate(mids = mids[bin], density = counts / (sum(counts) * widths[bin]))
+    group_by(bin) %>% summarise(counts = sum(as.numeric(counts))) %>% 
+    mutate(mids = mids[bin], density = counts / (sum(as.numeric(counts)) * widths[bin]))
   return(hist)
 }
 
