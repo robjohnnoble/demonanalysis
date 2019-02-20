@@ -869,8 +869,6 @@ create_plots_batch <- function(input_dir, type = "plot", file_type = "png", outp
 #' 
 #' @export
 #' 
-#' @details
-#' 
 #' @examples
 #' driver_geno_div_df_batch(system.file("example_batch", "", 
 #' package = "demonanalysis", mustWork = TRUE))
