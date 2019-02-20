@@ -293,7 +293,6 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
     df_driver_phylo <- fread(file_driver_phylo)
     
     df_driver_phylo <- filter(df_driver_phylo, CellsPerSample == -1, NumSamples == 1, SampleDepth == -1)
-    df_driver_phylo <- filter(df_driver_phylo, Population != 0 & Generation == max(Generation)) # growing tissue bug
     df_driver_phylo <- df_driver_phylo[!duplicated(df_driver_phylo), ]
     pop_df <- get_population_df(df_driver_phylo)
     

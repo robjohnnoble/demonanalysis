@@ -406,45 +406,6 @@ plot_counts <- function(file_or_dataframe, generation = NA, ...) {
   plot(hist$counts ~ hist$mids, type = "h", xlim = c(0, 1), ylab = "count", main = "", ...)
 }
 
-#' Plot counts of variant allele frequencies on log-log scales
-#' 
-#' @param file_or_dataframe file or data frame containing columns "Frequency" and "Count"
-#' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
-#' @param ... other parameters passed to plot
-#' 
-#' @return plot displyed on screen
-#' 
-#' @export
-#' 
-#' @examples
-#' plot_counts(system.file("extdata", "output_allele_counts.dat", 
-#' package = "demonanalysis", mustWork = TRUE))
-plot_counts_log <- function(file_or_dataframe, generation = NA, ...) {
-  if("data.frame" %in% class(file_or_dataframe)) df <- file_or_dataframe
-  else {
-    if(!file.exists(file_or_dataframe)) {
-      warning(paste0(file_or_dataframe, " not found"))
-      plot(0, type = 'n', axes = FALSE, ann = FALSE)
-      return(NA)
-    }
-    df <- read_delim_special(file_or_dataframe)
-  }
-  if("Generation" %in% colnames(df)) {
-    if(is.na(generation)) generation <- max(df$Generation)
-    if(generation != "nofilter") df <- filter_by_generation_or_numcells(df, NA, generation, NA)
-  }
-  
-  breaks <- 10^seq(-10, 0, length = 101)
-  hist <- hist2(df$Frequency, breaks, df$Count)
-  # xlong <- (breaks[(length(breaks)/4*3.5):length(breaks)])
-  # tmp_df <- data.frame(y=1/xlong^2, x=(xlong))
-  ggplot(hist, aes(x=mids, y=density)) + geom_point()  +
-    coord_trans(y="log10", x="log10") 
-  # geom_line(aes(x=x, y=y), data=tmp_df)
-  
-}
-
-
 #' Plot a histogram of variant allele frequencies with logit x-axis and log y-axis
 #' 
 #' @param file_or_dataframe file or data frame containing columns "Frequency" and "Count"
