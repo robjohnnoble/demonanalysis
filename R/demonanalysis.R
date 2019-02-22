@@ -263,9 +263,9 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
   if(!is.na(output_filename)) print("Saved the plot", quote = FALSE)
 }
 
-#' Plot allele count versus origin time, coloured by birth rate
+#' Plot allele count versus origin time
 #' 
-#' @param file file containing columns "Descendants" (or "AlleleCount" in older versions), "OriginTime and "BirthRate"
+#' @param file_or_dataframe file or data frame containing columns "Descendants" (or "AlleleCount" in older versions), "OriginTime and "BirthRate"
 #' @param log if TRUE then y-axis will be log-transformed (default FALSE)
 #' @param colour_by character containing name of column by which to colour the plot
 #' @param palette either a brewer palette or a vector of colours (if colour_by is categorical)
@@ -283,14 +283,17 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
 #' plot_allelecount_vs_origintime(system.file("extdata", "output_genotype_properties.dat", 
 #' package = "demonanalysis", mustWork = TRUE), colour_by = "DriverMutations", 
 #' palette = c("black", "blue", "grey", "red"), discrete = TRUE)
-plot_allelecount_vs_origintime <- function(file, log = FALSE, colour_by = "BirthRate", palette = NA, discrete = FALSE) {
-  if(!file.exists(file)) {
-    warning(paste0(file, " not found"))
-    plot(0, type = 'n', axes = FALSE, ann = FALSE)
-    return(NA)
+plot_allelecount_vs_origintime <- function(file_or_dataframe, log = FALSE, colour_by = "BirthRate", palette = NA, discrete = FALSE) {
+  if("data.frame" %in% class(file_or_dataframe)) df <- file_or_dataframe
+  else {
+    if(!file.exists(file_or_dataframe)) {
+      warning(paste0(file_or_dataframe, " not found"))
+      plot(0, type = 'n', axes = FALSE, ann = FALSE)
+      return(NA)
+    }
+    df <- read_delim_special(file_or_dataframe)
   }
   
-  df <- read_delim_special(file)
   df <- as.data.frame(df)
   colnames(df)[colnames(df) == "AlleleCount"] <- "Descendants"
   
@@ -875,6 +878,7 @@ create_plots_batch <- function(input_dir, type = "plot", file_type = "png", outp
 driver_geno_div_df_batch <- function(input_dir) {
   
   inv_Simpson_index <- function(p) 1 / sum(p*p)
+  inv_Simpson_index2 <- function(n, N) N*(N-1) / sum(n*(n-1))
   
   df <- all_output(input_dir, df_type = "driver_phylo")
   pars_and_values <- parameter_names_and_values(input_dir)
@@ -883,7 +887,8 @@ driver_geno_div_df_batch <- function(input_dir) {
   par_names[par_names == "log2_deme_carrying_capacity"] <- "K"
   
   sum_df <- group_by_at(df, par_names) %>% 
-    mutate(Diversity = inv_Simpson_index(Population / sum(Population))) %>% 
+    mutate(Diversity = inv_Simpson_index(Population / sum(Population)), 
+           Diversity2 = inv_Simpson_index2(Population, sum(Population))) %>% 
     slice(1) %>% 
     ungroup()
   

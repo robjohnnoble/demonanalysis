@@ -2,13 +2,13 @@
 % Please edit documentation in R/demonanalysis.R
 \name{plot_allelecount_vs_origintime}
 \alias{plot_allelecount_vs_origintime}
-\title{Plot allele count versus origin time, coloured by birth rate}
+\title{Plot allele count versus origin time}
 \usage{
-plot_allelecount_vs_origintime(file, log = FALSE, colour_by = "BirthRate",
-  palette = NA, discrete = FALSE)
+plot_allelecount_vs_origintime(file_or_dataframe, log = FALSE,
+  colour_by = "BirthRate", palette = NA, discrete = FALSE)
 }
 \arguments{
-\item{file}{file containing columns "Descendants" (or "AlleleCount" in older versions), "OriginTime and "BirthRate"}
+\item{file_or_dataframe}{file or data frame containing columns "Descendants" (or "AlleleCount" in older versions), "OriginTime and "BirthRate"}
 
 \item{log}{if TRUE then y-axis will be log-transformed (default FALSE)}
 
@@ -22,7 +22,7 @@ plot_allelecount_vs_origintime(file, log = FALSE, colour_by = "BirthRate",
 plot displyed on screen
 }
 \description{
-Plot allele count versus origin time, coloured by birth rate
+Plot allele count versus origin time
 }
 \examples{
 plot_allelecount_vs_origintime(system.file("extdata", "output_genotype_properties.dat", 

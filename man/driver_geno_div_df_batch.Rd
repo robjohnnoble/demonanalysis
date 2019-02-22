@@ -15,9 +15,6 @@ a data frame
 \description{
 Create a data frame of genotype diversity versus time for a batch of simulations
 }
-\details{
-
-}
 \examples{
 driver_geno_div_df_batch(system.file("example_batch", "", 
 package = "demonanalysis", mustWork = TRUE))
