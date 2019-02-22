@@ -274,7 +274,7 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
 #' df_type = "genotype_properties", vaf_cut_off = 0.002)
 #' combine_dfs(full_dir = system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
 #' df_type = "genotype_counts", numcells = 100)
-combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output", vaf_cut_off = NA, generation = NA, numcells = NA, num_parameters = NA) {
+combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output", max_generation = FALSE, vaf_cut_off = NA, generation = NA, numcells = NA, num_parameters = NA) {
   
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
   
@@ -318,6 +318,10 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
                      skewness = skewness(sweep_seq))
   } else if (df_type %in% c("allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts")){
     temp <- fread(paste0(full_dir, "/output_", df_type, ".dat"))
+    # only use last generation
+    if(max_generation){
+      temp <- temp %>% filter(Generation == max(Generation))
+    }
     # add parameter columns:
     if(nrow(temp) == 0){
       temp <- NULL
@@ -396,7 +400,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 #' df_type = "genotype_properties", vaf_cut_off = 0.002)
 #' all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
 #' df_type = "allele_counts", generation = 10)
-all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", vaf_cut_off = NA, generation = NA, numcells = NA) {
+all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", max_generation = FALSE, vaf_cut_off = NA, generation = NA, numcells = NA) {
   
   df_type_list <- c("output", "driver_genotype_properties", "genotype_properties", 
                     "allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts", "driver_phylo")
@@ -423,7 +427,7 @@ all_output <- function(input_dir, include_diversities = TRUE, df_type = "output"
     msg <- final_error_message(full_dir)
     print(paste0(full_dir, " ", msg), quote = FALSE)
     if(!identical(msg, character(0))) if(msg == "Exit code 0") return(combine_dfs(full_dir, include_diversities, 
-                                                                                  df_type, vaf_cut_off, generation, numcells, num_parameters))
+                                                                                  df_type, max_generation, vaf_cut_off, generation, numcells, num_parameters))
     return(data.frame())
   }
   res <- rbindlist(apply_combinations(final_values, each_df))

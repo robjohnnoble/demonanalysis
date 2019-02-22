@@ -371,8 +371,8 @@ hist2 <- function(x, breaks, counts = 1) {
   df <- data.frame(x = x, counts = counts)
   
   hist <- df %>% mutate(bin = cut(x, breaks = breaks, labels = bin_nums, include.lowest = TRUE)) %>%
-    group_by(bin) %>% summarise(counts = sum(counts)) %>% 
-    mutate(mids = mids[bin], density = counts / (sum(counts) * widths[bin]))
+    group_by(bin) %>% summarise(counts = sum(as.numeric(counts))) %>% 
+    mutate(mids = mids[bin], density = counts / (sum(as.numeric(counts)) * widths[bin]))
   return(hist)
 }
 
@@ -479,7 +479,7 @@ plot_logit_freq_dist <- function(file_or_dataframe, generation = NA, ...) {
 #' @examples
 #' plot_cum_dist(system.file("extdata", "output_allele_counts.dat", 
 #' package = "demonanalysis", mustWork = TRUE))
-plot_cum_dist <- function(file_or_dataframe, generation = NA, ...) {
+plot_cum_dist <- function(file_or_dataframe, generation = NA, max_y = NA, ...) {
   if("data.frame" %in% class(file_or_dataframe)) df1 <- file_or_dataframe
   else {
     if(!file.exists(file_or_dataframe)) {
@@ -503,13 +503,14 @@ plot_cum_dist <- function(file_or_dataframe, generation = NA, ...) {
   InverseFrequency <- seq(1/0.5, 1/0.1, by = 0.1)
   CumulativeCount <- sapply(1/InverseFrequency, cum_count, df = df1)
   
-  if(max(CumulativeCount) > 0) {
-    min_y <- 0
-    max_y <- max(CumulativeCount)
-  }
-  else {
-    min_y <- 0
-    max_y <- 1
+  min_y <- 0
+  if(is.na(max_y)){
+    if(max(CumulativeCount) > 0) {
+      max_y <- max(CumulativeCount)
+    }
+    else {
+      max_y <- 1
+    }    
   }
   
   plot(CumulativeCount ~ InverseFrequency, xaxt = "n", ylim = c(min_y, max_y), ylab = "cumulative count", ...)
