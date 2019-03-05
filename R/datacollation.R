@@ -318,10 +318,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
                      skewness = skewness(sweep_seq))
   } else if (df_type %in% c("allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts")){
     temp <- fread(paste0(full_dir, "/output_", df_type, ".dat"))
-    # only use last generation
-    if(max_generation){
-      temp <- temp %>% filter(Generation == max(Generation))
-    }
+
     # add parameter columns:
     if(nrow(temp) == 0){
       temp <- NULL
@@ -367,6 +364,10 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
   
   # filter if requested:
   temp <- filter_by_generation_or_numcells(temp, full_dir, generation, numcells)
+  # only use last generation
+  if(max_generation){
+    temp <- temp %>% filter(Generation == max(Generation))
+  }
   
   print(paste0("Result of combine_dfs has dimensions ", dim(temp)[1], " x ", dim(temp)[2]), quote = FALSE)
   
