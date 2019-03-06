@@ -401,7 +401,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 #' df_type = "genotype_properties", vaf_cut_off = 0.002)
 #' all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
 #' df_type = "allele_counts", generation = 10)
-all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", max_generation = FALSE, vaf_cut_off = NA, generation = NA, numcells = NA) {
+all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", max_generation = FALSE, vaf_cut_off = NA, generation = NA, numcells = NA, n_cores = NA) {
   
   df_type_list <- c("output", "driver_genotype_properties", "genotype_properties", 
                     "allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts", "driver_phylo")
@@ -431,7 +431,11 @@ all_output <- function(input_dir, include_diversities = TRUE, df_type = "output"
                                                                                   df_type, max_generation, vaf_cut_off, generation, numcells, num_parameters))
     return(data.frame())
   }
-  res <- rbindlist(apply_combinations(final_values, each_df))
+  if(is.na(n_cores)){
+    res <- rbindlist(apply_combinations(final_values, each_df))
+  } else {
+    res <- rbindlist(apply_combinations_parallel(n_cores, final_values, each_df))
+  }
   
   # report seed counts:
   print("Number of seeds:", quote = FALSE)
