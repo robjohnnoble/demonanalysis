@@ -316,7 +316,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
                      log_mean_autocor = log(mean(sweep_seq)), 
                      sqrt_mean_autocor = sqrt(mean(sweep_seq)), 
                      skewness = skewness(sweep_seq))
-  } else if (df_type %in% c("allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts")){
+  } else if (df_type %in% c("allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts", "diversities")){
     temp <- fread(paste0(full_dir, "/output_", df_type, ".dat"))
 
     # add parameter columns:
@@ -404,7 +404,8 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", max_generation = FALSE, vaf_cut_off = NA, generation = NA, numcells = NA, n_cores = NA) {
   
   df_type_list <- c("output", "driver_genotype_properties", "genotype_properties", 
-                    "allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts", "driver_phylo")
+                    "allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts", "driver_phylo",
+                   "diversities")
   stopifnot(df_type %in% df_type_list)
   
   pars_and_values <- parameter_names_and_values(input_dir)
