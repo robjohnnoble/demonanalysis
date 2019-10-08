@@ -4,8 +4,8 @@
 \alias{filter_by_generation_or_numcells}
 \title{Filter a data frame by Generation or NumCells}
 \usage{
-filter_by_generation_or_numcells(df, path, generation = NA, numcells = NA,
-  num_parameters = NA)
+filter_by_generation_or_numcells(df, path, generation = NA,
+  numcells = NA, num_parameters = NA)
 }
 \arguments{
 \item{df}{data frame}

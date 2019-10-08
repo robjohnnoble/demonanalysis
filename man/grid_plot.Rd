@@ -4,8 +4,8 @@
 \alias{grid_plot}
 \title{Plot a grid from a properly formatted data frame.}
 \usage{
-grid_plot(image_df, palette = NA, discrete = FALSE, add_legend = FALSE,
-  legend_title = "")
+grid_plot(image_df, palette = NA, discrete = FALSE,
+  add_legend = FALSE, legend_title = "")
 }
 \arguments{
 \item{image_df}{data frame formatted by image_df_from_grid_file}

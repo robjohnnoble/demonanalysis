@@ -5,7 +5,8 @@
 \title{Plot allele count versus origin time}
 \usage{
 plot_allelecount_vs_origintime(file_or_dataframe, log = FALSE,
-  colour_by = "BirthRate", palette = NA, discrete = FALSE)
+  colour_by = "BirthRate", palette = NA, discrete = FALSE,
+  print_plot = TRUE)
 }
 \arguments{
 \item{file_or_dataframe}{file or data frame containing columns "Descendants" (or "AlleleCount" in older versions), "OriginTime and "BirthRate"}
@@ -17,9 +18,11 @@ plot_allelecount_vs_origintime(file_or_dataframe, log = FALSE,
 \item{palette}{either a brewer palette or a vector of colours (if colour_by is categorical)}
 
 \item{discrete}{whether to use a discrete or continuous colour scale (default FALSE)}
+
+\item{print_plot}{whether to print the plot (otherwise the function returns a plot object)}
 }
 \value{
-plot displyed on screen
+plot object, or plot displyed on screen
 }
 \description{
 Plot allele count versus origin time

@@ -256,3 +256,114 @@ quadratic_diversity <- function(value, freq, sigma, threshold = 0.1) {
   }
   return(1 / (1 - sum))
 }
+
+#' Plot a phylogenetic tree
+#' 
+#' @param edges dataframe comprising an adjacency matrix (and optionally including Population column)
+#' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
+#' @param output_filename name of output image file
+#' @param fill fill colour of the nodes (excluding the root, which is always red)
+#' @param display whether to display the tree
+#' 
+#' @return either an image file or a plot displyed on screen
+#' 
+#' @export
+#' @import Rgraphviz
+#' @import dplyr
+#' @importFrom grDevices dev.off
+#' @importFrom grDevices pdf
+#' 
+#' @examples
+#' edges1 <- data.frame(Parent = c(0,1,1,2,2,3,3), Identity = 1:7, Population = c(2,10,5,10,20,10,3))
+#' plot_tree(edges1)
+plot_tree <- function(edges, output_dir = NA, output_filename = NA, fill = "black", display = TRUE) {
+  elist <- select(edges, Parent, Identity)
+  elist <- filter(elist, Parent != Identity)
+  elist <- as.data.frame(elist)
+  
+  M2 <- ftM2adjM(cbind(elist$Parent, elist$Identity), edgemode = "undirected")
+  gg <- as(M2, "graphNEL")
+  
+  if(!"Population" %in% colnames(edges)) edges$Population <- 1
+  
+  edges$Population <- edges$Population / sum(edges$Population)
+  node_sizes <- 10*(edges$Population)
+  names(node_sizes) <- edges$Identity
+  
+  nAttrs <- list()
+  attrs <- list()
+  nAttrs$width <- node_sizes
+  nAttrs$fillcolor <- c("0" = "red")
+  nAttrs$fontcolor <- c("0" = "red")
+  attrs$node$fixedsize <- FALSE
+  if(fill == "black") attrs$node$fontsize <- 0
+  attrs$node$fillcolor <- fill
+  attrs$node$fontcolor <- "black"
+  attrs$edge$arrowsize <- 0
+  
+  if(!is.na(output_dir)) pdf(paste0(output_dir, output_filename, ".pdf"), width = 5, height = 5)
+  if(display) {
+    plot.new()
+    plot(gg, nodeAttrs = nAttrs, attrs = attrs)
+  }
+  if(!is.na(output_dir)) dev.off()
+}
+
+#' Calculate the inverse Simpson index
+#' 
+#' @param pops vector of population sizes (or frequencies)
+#' 
+#' @return The inverse Simpson index (effective number of species)
+#' 
+#' @export
+#' 
+#' @examples
+#' inv_Simpson_index(c(rep(1, 100)))
+inv_Simpson_index <- function(pops) {
+  pops <- pops / sum(pops)
+  return(1 / sum(pops*pops))
+}
+
+#' Count the number of ancestors of a node in a phylogenetic tree
+#' 
+#' @param edges dataframe comprising an adjacency matrix
+#' @param node node for which to calculate the metric
+#' 
+#' @return Number of ancestors
+#' 
+#' @export
+#' @import ggmuller
+#' 
+#' @examples
+#' edges1 <- data.frame(Parent = c(0,1,1,2,2,3,3), Identity = 1:7, Population = c(2,10,5,10,20,10,3))
+#' count_drivers(edges1, 6)
+count_drivers <- function(edges, node) {
+  n <- 1
+  now <- node
+  while(now != "0") {
+    now <- move_up(edges, now)
+    n <- n + 1
+    if(n > 20) stop(paste0("Can't find the origin of node ", node))
+  }
+  return(n)
+}
+
+#' Calculate average number of ancestors per node (n) and diversity (D) for a phylogenetic tree
+#' 
+#' @param edges dataframe comprising an adjacency matrix, including Population
+#' 
+#' @return Vector containing average number of ancestors per node (n) and diversity (D)
+#' 
+#' @export
+#' 
+#' @examples
+#' edges1 <- data.frame(Parent = c(0,1,1,2,2,3,3), Identity = 1:7, Population = c(2,10,5,10,20,10,3))
+#' count_drivers(edges1, 6)
+metrics <- function(data) {
+  D <- inv_Simpson_index(data$Population)
+  
+  data$Drivers <- sapply(data$Identity, count_drivers, edges = data)
+  n <- sum(data$Drivers * data$Population / sum(data$Population))
+  return(c(n = n, D = D))
+}
+

@@ -4,8 +4,8 @@
 \alias{disp_rate_fission}
 \title{Dispersal speed for deme fission model}
 \usage{
-disp_rate_fission(r2, K, m, migration_type = 2, migration_edge_only = 0,
-  two_dim = TRUE, NumCells = NA)
+disp_rate_fission(r2, K, m, migration_type = 2,
+  migration_edge_only = 0, two_dim = TRUE, NumCells = NA)
 }
 \arguments{
 \item{r2}{birth rate relative to reference birth rate}

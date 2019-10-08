@@ -4,7 +4,8 @@
 \alias{all_statuses}
 \title{Return the final line (or an earlier line) of every error log in a batch of simulations.}
 \usage{
-all_statuses(input_dir, adjust = 0, summary = FALSE, with_names = FALSE)
+all_statuses(input_dir, adjust = 0, summary = FALSE,
+  with_names = FALSE)
 }
 \arguments{
 \item{input_dir}{base input directory name}

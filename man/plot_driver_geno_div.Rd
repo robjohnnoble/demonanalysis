@@ -6,8 +6,8 @@
 \usage{
 plot_driver_geno_div(sum_df, output_filename = NA, file_type = "png",
   output_dir = NA, log_y = FALSE, facet1 = "migration_type",
-  facet2 = "migration_edge_only", height = 1, width = 1, ymax = 100,
-  selected_seed = NA)
+  facet2 = "migration_edge_only", height = 1, width = 1,
+  ymax = 100, selected_seed = NA)
 }
 \arguments{
 \item{sum_df}{data frame created by driver_geno_div_df_batch}

@@ -5,7 +5,8 @@
 \title{Combine (and optionally process) data for one simulation}
 \usage{
 combine_dfs(full_dir, include_diversities = TRUE, df_type = "output",
-  vaf_cut_off = NA, generation = NA, numcells = NA, num_parameters = NA)
+  max_generation = FALSE, vaf_cut_off = NA, generation = NA,
+  numcells = NA, num_parameters = NA)
 }
 \arguments{
 \item{full_dir}{base input directory name}

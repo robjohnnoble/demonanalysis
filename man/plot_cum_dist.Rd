@@ -4,7 +4,7 @@
 \alias{plot_cum_dist}
 \title{Plot cumulative density of variant allele frequencies versus inverse allele frequency}
 \usage{
-plot_cum_dist(file_or_dataframe, generation = NA, ...)
+plot_cum_dist(file_or_dataframe, generation = NA, max_y = NA, ...)
 }
 \arguments{
 \item{file_or_dataframe}{file or data frame containing columns "Frequency" and "Count"}

@@ -10,4 +10,4 @@ Imports: dplyr (>= 0.7.0), ggplot2, ggmuller, readr, gridExtra, TeachingDemos, a
 Suggests: knitr, rmarkdown,
     testthat
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1

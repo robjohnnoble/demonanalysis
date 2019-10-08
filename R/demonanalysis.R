@@ -263,6 +263,49 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
   if(!is.na(output_filename)) print("Saved the plot", quote = FALSE)
 }
 
+#' Create a set of plots for Figure 2
+plot_figure2 <- function(path, output_filename = NA, file_type = "png", output_dir = NA, trim = -1) {
+  if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
+  if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
+  
+  Muller_df <- muller_df_from_file(paste0(path, "driver_phylo.dat"))
+  if(class(Muller_df) != "data.frame") return(NA)
+  
+  long_palette <- c("#8A7C64", "#599861", "#89C5DA", "#DA5724", "#74D944", "#CE50CA", 
+                    "#3F4921", "#C0717C", "#CBD588", "#5F7FC7", "#673770", "#D3D93E", 
+                    "#38333E", "#508578", "#D7C1B1", "#689030", "#AD6F3B", "#CD9BCD", 
+                    "#D14285", "#6DDE88", "#652926", "#7FDCC0", "#C84248", "#8569D5", 
+                    "#5E738F", "#D1A33D")
+  dd <- 0:25
+  dd.col <- long_palette
+  names(dd.col) <- dd
+  
+  h1 <- Muller_plot(Muller_df, colour_by = "col_index", palette = dd.col)
+
+  image_df <- image_df_from_grid_file(paste0(path, "output_driversgrid.dat"), trim)
+  image_df[which(image_df$z > 0), "z"] <- as.character(image_df[which(image_df$z > 0), "z"] %% 25 + 1)
+  g1 <- grid_plot(image_df, palette = dd.col, discrete = TRUE)
+  
+  origins_df <- read_delim_special(paste0(path, "output_genotype_properties.dat"))
+  origins_df <- filter(origins_df, Descendants > 100)
+  origins_df <- mutate(origins_df, DriverIdentity = ifelse(DriverIdentity == 0, 0, as.character(DriverIdentity %% 25 + 1)))
+  f1 <- plot_allelecount_vs_origintime(origins_df, colour_by = "DriverIdentity", 
+                                       palette = dd.col, discrete = TRUE, print_plot = FALSE) 
+  f1 <- f1 + theme(legend.position="none")
+  
+  if(!is.na(output_filename)) print(paste0("Created all plots for file ", output_filename), quote = FALSE)
+  
+  if(!is.na(output_filename) & !is.na(output_dir)) {
+    if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 2000, height = 700, res = 100)
+    else pdf(paste0(output_dir,output_filename,".pdf"), width = 20, height = 7)
+  }
+  lay <- rbind(c(1,1,2,3))
+  print(grid.arrange(h1, g1, f1, layout_matrix = lay))
+  if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
+  
+  if(!is.na(output_filename)) print("Saved the plot", quote = FALSE)
+}
+
 #' Plot allele count versus origin time
 #' 
 #' @param file_or_dataframe file or data frame containing columns "Descendants" (or "AlleleCount" in older versions), "OriginTime and "BirthRate"
@@ -270,8 +313,9 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
 #' @param colour_by character containing name of column by which to colour the plot
 #' @param palette either a brewer palette or a vector of colours (if colour_by is categorical)
 #' @param discrete whether to use a discrete or continuous colour scale (default FALSE)
+#' @param print_plot whether to print the plot (otherwise the function returns a plot object)
 #' 
-#' @return plot displyed on screen
+#' @return plot object, or plot displyed on screen
 #' 
 #' @importFrom grDevices col2rgb
 #' 
@@ -284,7 +328,7 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
 #' package = "demonanalysis", mustWork = TRUE), colour_by = "DriverMutations", 
 #' palette = c("black", "blue", "grey", "red"), discrete = TRUE)
 plot_allelecount_vs_origintime <- function (file_or_dataframe, log = FALSE, colour_by = "BirthRate", 
-                                               palette = NA, discrete = FALSE) 
+                                               palette = NA, discrete = FALSE, print_plot = TRUE) 
 {
   if ("data.frame" %in% class(file_or_dataframe)) 
     df <- file_or_dataframe
@@ -338,7 +382,8 @@ plot_allelecount_vs_origintime <- function (file_or_dataframe, log = FALSE, colo
   }
   if (log) 
     q <- q + scale_y_continuous(trans = "log10")
-  print(q)
+  if(print_plot) print(q)
+  else return(q)
 }
 
 #' Alternative to base hist function (using dplyr)

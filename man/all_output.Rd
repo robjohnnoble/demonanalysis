@@ -6,7 +6,8 @@
 data files per simulation.}
 \usage{
 all_output(input_dir, include_diversities = TRUE, df_type = "output",
-  vaf_cut_off = NA, generation = NA, numcells = NA)
+  max_generation = FALSE, vaf_cut_off = NA, generation = NA,
+  numcells = NA)
 }
 \arguments{
 \item{input_dir}{base input directory name}
