@@ -270,6 +270,8 @@ quadratic_diversity <- function(value, freq, sigma, threshold = 0.1) {
 #' @export
 #' @import Rgraphviz
 #' @import dplyr
+#' @import graph
+#' @import Rgraphviz
 #' @importFrom grDevices dev.off
 #' @importFrom grDevices pdf
 #' 
@@ -303,8 +305,7 @@ plot_tree <- function(edges, output_dir = NA, output_filename = NA, fill = "blac
   
   if(!is.na(output_dir)) pdf(paste0(output_dir, output_filename, ".pdf"), width = 5, height = 5)
   if(display) {
-    plot.new()
-    plot(gg, nodeAttrs = nAttrs, attrs = attrs)
+    Rgraphviz::plot(gg, nodeAttrs = nAttrs, attrs = attrs)
   }
   if(!is.na(output_dir)) dev.off()
 }
