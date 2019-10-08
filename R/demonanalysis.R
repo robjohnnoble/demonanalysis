@@ -16,6 +16,16 @@ apply_combinations <- function(vec, fn, ...){
   apply(tmp, 1, fn, ...) # the result of applying fn to each row of tmp
 }
 
+apply_combinations_parallel <- function(n_cores, vec, fn, ...){
+  library(parallel)
+  cl <- makeCluster(n_cores)
+  vecs <- mapply(seq, 0, vec, SIMPLIFY = FALSE) # a list of n sequences, where n = length(vec)
+  tmp <- do.call(expand.grid, vecs) # a data frame where each row is a permuation of values from the n sequences
+  res <- parApply(cl, tmp, 1, fn, ...) # the result of applying fn to each row of tmp
+  stopCluster(cl)
+  return(res)
+}
+
 #' Attempt to read a tab-delimited file and return the contents, or NA if the file doesn't exist
 #' 
 #' @param file tab-delimited file
