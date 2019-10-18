@@ -335,7 +335,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
       VAF <- data$Descendants / coverage
       return(VAF)
     }
-    temp$pop_size <- (df_out %>% filter(Generation == max(Generation)) %>% select(NumCells))$NumCells
+    temp$pop_size <- (df_out %>% filter(Generation == max(Generation)) %>% select(NumCells) %>% slice(1))$NumCells
     temp$VAF <- calc_VAF(temp)
     if(!is.na(vaf_cut_off)) {
       temp <- temp %>% filter(VAF >= vaf_cut_off | Population > 0)
