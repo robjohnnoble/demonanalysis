@@ -17,5 +17,5 @@ Calculate average number of ancestors per node (n) and diversity (D) for a phylo
 }
 \examples{
 edges1 <- data.frame(Parent = c(0,1,1,2,2,3,3), Identity = 1:7, Population = c(2,10,5,10,20,10,3))
-count_drivers(edges1, 6)
+metrics(edges1)
 }

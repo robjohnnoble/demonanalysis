@@ -223,7 +223,7 @@ grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FAL
 #' 
 #' @examples
 #' plot_all_images(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-plot_all_images <- function(path, output_filename = NA, file_type = "png", output_dir = NA, trim = -1) {
+plot_all_images <- function(path, output_filename = NA, file_type = "png", output_dir = NA, trim = -1, include_genotype_plots = TRUE) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
@@ -239,35 +239,61 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
   dd.col <- long_palette
   names(dd.col) <- dd
   
-  h1 <- Muller_plot(Muller_df, colour_by = "col_index", palette = dd.col)
-  h2 <- Muller_pop_plot(Muller_df, colour_by = "col_index", palette = dd.col)
-  h3 <- Muller_plot(Muller_df, colour_by = "BirthRate", add_legend = TRUE)
+  b_grid <- image_df_from_grid_file(paste0(path, "output_birthratesgrid.dat"), trim)
   
-  image_df <- image_df_from_grid_file(paste0(path, "output_driversgrid.dat"), trim)
-  image_df[which(image_df$z > 0), "z"] <- as.character(image_df[which(image_df$z > 0), "z"] %% 25 + 1)
-  g1 <- grid_plot(image_df, palette = dd.col, discrete = TRUE)
+  if(include_genotype_plots) {
+    h1 <- Muller_plot(Muller_df, colour_by = "col_index", palette = dd.col)
+    h2 <- Muller_pop_plot(Muller_df, colour_by = "col_index", palette = dd.col)
+  }
+  min_birth_rate <- min(c(b_grid$z, Muller_df$BirthRate), na.rm = TRUE)
+  max_birth_rate <- max(c(b_grid$z, Muller_df$BirthRate), na.rm = TRUE)
+  h3 <- Muller_plot(Muller_df, colour_by = "BirthRate", add_legend = FALSE) + 
+    scale_fill_distiller(palette = "RdBu", direction = -1, 
+                         limits = c(min_birth_rate, max_birth_rate)) + 
+    theme(line = element_blank(), rect = element_blank()) + 
+    scale_x_continuous(breaks = c(0, round(max(Muller_df$Generation)))) + 
+    scale_y_continuous(breaks = NULL)
   
-  image_df <- image_df_from_grid_file(paste0(path, "output_birthratesgrid.dat"), trim)
-  g2 <- grid_plot(image_df, add_legend = TRUE, legend_title = "BirthRate")
+  if(include_genotype_plots) {
+    image_df <- image_df_from_grid_file(paste0(path, "output_driversgrid.dat"), trim)
+    image_df[which(image_df$z > 0), "z"] <- as.character(image_df[which(image_df$z > 0), "z"] %% 25 + 1)
+    g1 <- grid_plot(image_df, palette = dd.col, discrete = TRUE)
+  }
+  
+  g2 <- grid_plot(b_grid, add_legend = TRUE, legend_title = "Mean cell\nproliferation rate   ") + 
+    scale_fill_distiller(name = "Mean cell\nproliferation rate   ", palette ="RdBu", 
+                         direction = -1, na.value="white", 
+                         limits = c(min_birth_rate, max_birth_rate))
   
   image_df <- image_df_from_grid_file(paste0(path, "output_passengersgrid.dat"), trim)
-  g3 <- grid_plot(image_df, add_legend = TRUE, legend_title = "Passengers")
+  g3 <- grid_plot(image_df, add_legend = TRUE, legend_title = "Mean passenger\nmutations per cell")
   
-  image_df <- image_df_from_grid_file(paste0(path, "output_popgrid.dat"), trim)
-  image_df[which(image_df$z == 0), "z"] <- NA
-  g4 <- grid_plot(image_df, add_legend = TRUE, legend_title = "Population")
+  if(include_genotype_plots) {
+    image_df <- image_df_from_grid_file(paste0(path, "output_popgrid.dat"), trim)
+    image_df[which(image_df$z == 0), "z"] <- NA
+    g4 <- grid_plot(image_df, add_legend = TRUE, legend_title = "Tumour cells\nper gland")
+  }
   
   if(!is.na(output_filename)) print(paste0("Created all plots for file ", output_filename), quote = FALSE)
   
-  if(!is.na(output_filename) & !is.na(output_dir)) {
-    if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1000, height = 1000, res = 100)
-    else pdf(paste0(output_dir,output_filename,".pdf"), width = 10, height = 10)
+  if(include_genotype_plots) {
+    if(!is.na(output_filename) & !is.na(output_dir)) {
+      if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1000, height = 1000, res = 100)
+      else pdf(paste0(output_dir,output_filename,".pdf"), width = 10, height = 10)
+    }
+    lay <- rbind(c(1,1,2),
+                 c(3,3,3),
+                 c(4,4,5),
+                 c(NA,6,7))
+    print(grid.arrange(h1, g1, h2, h3, g2, g3, g4, layout_matrix = lay, heights = c(1, 1, 0.75, 0.75)))
+  } else {
+    if(!is.na(output_filename) & !is.na(output_dir)) {
+      if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1000, height = 180, res = 100)
+      else pdf(paste0(output_dir,output_filename,".pdf"), width = 10, height = 1.8)
+    }
+    lay <- rbind(c(1,2,3))
+    print(grid.arrange(h3, g2, g3, layout_matrix = lay))
   }
-  lay <- rbind(c(1,1,2),
-               c(3,3,3),
-               c(4,4,5),
-               c(NA,6,7))
-  print(grid.arrange(h1, g1, h2, h3, g2, g3, g4, layout_matrix = lay, heights = c(1, 1, 0.75, 0.75)))
   if(!is.na(output_filename) & !is.na(output_dir)) dev.off()
   
   if(!is.na(output_filename)) print("Saved the plot", quote = FALSE)
