@@ -155,8 +155,9 @@ sweep_times <- function(phylo, threshold, min_pop = 0) {
 #' @param breaks Number of breaks for determining lag (used only if lag_type = "proportions"; default 10)
 #' @param lag_gens Lag in terms of generations (used only if lag_type = "generations"; default 500)
 #' 
-#' @return For each generation g in pop_df, the output vector quantifies the change in genotype frequencies 
-#' compared to generation g - lag_gens (by summing the squares of the differences).
+#' @return For each generation g in pop_df, excluding the first generation, the output vector quantifies 
+#' the change in genotype frequencies compared to generation g - lag_gens (by summing the squares of the 
+#' differences). The length of the output sequence is one less than the number of rows in the input dataframe.
 #' 
 #' @export
 #' @import dplyr
@@ -195,7 +196,7 @@ sweep_sequence <- function(pop_df, lag_type = "generations", breaks = 10, lag_ge
   #pop_df <- filter(pop_df, Generation >= min(pop_df$Generation, na.rm = TRUE) + (max(pop_df$Generation, na.rm = TRUE) - min(pop_df$Generation, na.rm = TRUE))/breaks)
   sum_df <- group_by(pop_df, Generation) %>% 
     summarise(sum_diff = sum(diff, na.rm=TRUE))
-  return(sum_df$sum_diff)
+  return(sum_df$sum_diff)[-1] # remove the first value, which is always zero
 }
 
 #' Get genotype frequencies in increasing order of size
