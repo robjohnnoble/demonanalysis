@@ -126,12 +126,12 @@ add_columns <- function(df, num_parameters) {
 
 #' Add relative time column to a dataframe, and diversity at the new time zero
 #' 
-#' @param df dataframe with columns including "gen_adj", "NumCells" and "DriverEdgeDiversity"
+#' @param df dataframe with columns including "Generation", "NumCells" and "DriverEdgeDiversity"
 #' @param start_size value of NumCells at which new_time should be set to zero
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' 
 #' @return the same dataframe with additional columns: "new_time" is the time elapsed since
-#' NumCells = start_size; "div0" is DriverEdgeDiversity when NumCells = start_size; 
+#' NumCells = start_size; "div0" is DriverDiversity when NumCells = start_size; 
 #' "rank_div0" is div0 rescaled to a rank between 0 and 1
 #' 
 #' @importFrom scales rescale
@@ -147,11 +147,13 @@ add_relative_time <- function(df, start_size, num_parameters) {
   col_nums <- c(1:num_parameters)
   
   df <- df %>% group_by_at(col_nums) %>% 
-    mutate(new_time = gen_adj - min(gen_adj[NumCells >= start_size], na.rm = TRUE)) %>% 
-    mutate(div0 = min(DriverEdgeDiversity[gen_adj == min(gen_adj[NumCells >= start_size & 
-           (!is.na(DriverEdgeDiversity) | Generation == max(Generation))], na.rm = TRUE)])) %>% 
-    mutate(GrowthRate0 = min(GrowthRate[gen_adj == min(gen_adj[NumCells >= start_size & 
+    mutate(new_time = Generation - min(Generation[NumCells >= start_size], na.rm = TRUE)) %>% 
+    mutate(div0 = min(DriverDiversity[Generation == min(Generation[NumCells >= start_size & 
+           (!is.na(DriverDiversity) | Generation == max(Generation))], na.rm = TRUE)])) %>% 
+    mutate(GrowthRate0 = min(GrowthRate[Generation == min(Generation[NumCells >= start_size & 
            (!is.na(GrowthRate) | Generation == max(Generation))], na.rm = TRUE)])) %>% 
+    mutate(MeanBirthRate0 = min(MeanBirthRate[Generation == min(Generation[NumCells >= start_size & 
+           (!is.na(MeanBirthRate) | Generation == max(Generation))], na.rm = TRUE)])) %>% 
     ungroup()
   
   col_nums <- col_nums[col_nums != which(colnames(df) == "seed")]
@@ -159,6 +161,7 @@ add_relative_time <- function(df, start_size, num_parameters) {
   df <- df %>% group_by_at(col_nums) %>% 
     mutate(rank_div0 = rescale(rank(div0))) %>% 
     mutate(rank_GrowthRate0 = rescale(rank(GrowthRate0))) %>% 
+    mutate(rank_MeanBirthRate0 = rescale(rank(MeanBirthRate0))) %>% 
     ungroup()
 
   return(df)
@@ -475,7 +478,7 @@ count_seeds <- function(data, num_parameters) {
 #' 
 #' @return a dataframe with one row for each unique combination of parameter values (including seed), 
 #' "gap" and "start_size", (i.e. it summarises over time) and which has added columns "start_time" 
-#' (proportional time until NumCells reached start_size), "end_time" (proportional time until NumCells 
+#' (generations until NumCells reached start_size), "end_time" (generations until NumCells 
 #' reached end_size), "waiting_time" (difference between start_time and end_time), and "outcome" 
 #' (NumCells after "gap")
 #' 
@@ -486,7 +489,7 @@ count_seeds <- function(data, num_parameters) {
 #' num_parameters = count_parameters(system.file("extdata", "", 
 #' package = "demonanalysis", mustWork = TRUE))
 #' comb_df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-#' get_summary(comb_df, c(100, 300), c(0.35, 0.65), 1000, num_parameters)
+#' get_summary(comb_df, c(100, 300), c(10, 20), 1000, num_parameters)
 get_summary <- function(data, start_size_range, gap_range, final_size, num_parameters) {
   summary <- data.frame()
   data <- data %>% group_by_at(1:num_parameters)
@@ -495,10 +498,10 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
       if(start_size < final_size) {
         new_summary1 <- data %>% 
           filter(NumCells >= start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
-          summarise(start_time = min(gen_adj, na.rm = TRUE))
+          summarise(start_time = min(Generation, na.rm = TRUE))
         new_summary2 <- data %>% 
           filter(NumCells >= final_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
-          summarise(end_time = min(gen_adj, na.rm = TRUE))
+          summarise(end_time = min(Generation, na.rm = TRUE))
         new_summary12 <- merge(new_summary1, new_summary2, all.x = TRUE)
         new_summary12 <- new_summary12 %>% 
           mutate(waiting_time = end_time - start_time)
@@ -510,7 +513,7 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
       }
       new_summary3 <- data %>% 
         filter(NumCells > start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
-        filter(gen_adj < min(gen_adj, na.rm = TRUE) + gap) %>% 
+        filter(Generation < min(Generation, na.rm = TRUE) + gap) %>% 
         summarise(outcome = max(NumCells, na.rm = TRUE))
       new_summary3a <- data %>% 
         filter(NumCells > start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
@@ -518,7 +521,7 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
       new_summary3$outcome <- ifelse(new_summary3$outcome == new_summary3a$outcome, NA, new_summary3$outcome)
       new_summary4 <- data %>% 
         filter(NumCells > start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
-        filter(gen_adj == min(gen_adj, na.rm = TRUE)) %>%
+        filter(Generation == min(Generation, na.rm = TRUE)) %>%
         mutate(gap = gap, start_size = start_size)
       summary <- rbind(summary, merge(merge(new_summary12, new_summary3, all.x = TRUE), new_summary4, all.x = TRUE))
     }
