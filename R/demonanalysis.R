@@ -90,6 +90,7 @@ image_df_from_grid_file <- function(file, trim = -1, as_matrix = FALSE) {
 #' Read a "phylo" dataframe and process it for plotting
 #' 
 #' @param file file name including path
+#' @param cutoff Numeric cutoff; genotypes that never become more abundant than this value are omitted
 #' 
 #' @return a dataframe formatted for plotting
 #' 
@@ -101,7 +102,7 @@ image_df_from_grid_file <- function(file, trim = -1, as_matrix = FALSE) {
 #' @examples
 #' Muller_df <- muller_df_from_file(system.file("extdata", 
 #' "driver_phylo.dat", package = "demonanalysis", mustWork = TRUE))
-muller_df_from_file <- function(file) {
+muller_df_from_file <- function(file, cutoff = 0) {
   if(!file.exists(file)) {
     warning(paste0(file, " not found"))
     return(NA)
@@ -114,7 +115,7 @@ muller_df_from_file <- function(file) {
   pop_df <- pop_df %>% mutate(col_index = pop_df$Identity)
   pop_df$col_index[pop_df$col_index > 0] <- pop_df$col_index[pop_df$col_index > 0] %% 25 + 1
   pop_df$col_index <- as.character(pop_df$col_index)
-  return(get_Muller_df(edges, pop_df))
+  return(get_Muller_df(edges, pop_df, cutoff = cutoff))
 }
 
 #' For cells at the boundary of a population, find mean proportion of nearest neighbour sites that are empty
@@ -211,6 +212,7 @@ grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FAL
 #' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
 #' @param output_filename name of output image file
 #' @param file_type either "pdf" or "png" (other values default to "pdf")
+#' @param cutoff Numeric cutoff; genotypes that never become more abundant than this value are omitted from Muller plots
 #' 
 #' @return either an image file or a plot displyed on screen
 #' 
@@ -223,11 +225,11 @@ grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FAL
 #' 
 #' @examples
 #' plot_all_images(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-plot_all_images <- function(path, output_filename = NA, file_type = "png", output_dir = NA, trim = -1, include_genotype_plots = TRUE) {
+plot_all_images <- function(path, output_filename = NA, file_type = "png", output_dir = NA, trim = -1, include_genotype_plots = TRUE, cutoff = 0) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
-  Muller_df <- muller_df_from_file(paste0(path, "driver_phylo.dat"))
+  Muller_df <- muller_df_from_file(paste0(path, "driver_phylo.dat"), cutoff = cutoff)
   if(class(Muller_df) != "data.frame") return(NA)
   
   long_palette <- c("#8A7C64", "#599861", "#89C5DA", "#DA5724", "#74D944", "#CE50CA", 
@@ -300,11 +302,11 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
 }
 
 #' Create a set of plots for Figure 2
-plot_figure2 <- function(path, output_filename = NA, file_type = "png", output_dir = NA, trim = -1) {
+plot_figure2 <- function(path, output_filename = NA, file_type = "png", output_dir = NA, trim = -1, cutoff = 0) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
-  Muller_df <- muller_df_from_file(paste0(path, "driver_phylo.dat"))
+  Muller_df <- muller_df_from_file(paste0(path, "driver_phylo.dat"), cutoff = cutoff)
   if(class(Muller_df) != "data.frame") return(NA)
   
   long_palette <- c("#8A7C64", "#599861", "#89C5DA", "#DA5724", "#74D944", "#CE50CA", 
