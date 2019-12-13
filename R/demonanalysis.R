@@ -213,6 +213,8 @@ grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FAL
 #' @param output_filename name of output image file
 #' @param file_type either "pdf" or "png" (other values default to "pdf")
 #' @param cutoff Numeric cutoff; genotypes that never become more abundant than this value are omitted from Muller plots
+#' @param min_birth_rate minimum value for birth rate scale (set automatically by default)
+#' @param max_birth_rate maximum value for birth rate scale (set automatically by default)
 #' 
 #' @return either an image file or a plot displyed on screen
 #' 
@@ -225,7 +227,8 @@ grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FAL
 #' 
 #' @examples
 #' plot_all_images(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-plot_all_images <- function(path, output_filename = NA, file_type = "png", output_dir = NA, trim = -1, include_genotype_plots = TRUE, cutoff = 0) {
+plot_all_images <- function(path, output_filename = NA, file_type = "png", output_dir = NA, trim = -1, include_genotype_plots = TRUE, 
+                            cutoff = 0, min_birth_rate = NA, max_birth_rate = NA) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
@@ -247,14 +250,14 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
     h1 <- Muller_plot(Muller_df, colour_by = "col_index", palette = dd.col)
     h2 <- Muller_pop_plot(Muller_df, colour_by = "col_index", palette = dd.col)
   }
-  min_birth_rate <- min(c(b_grid$z, Muller_df$BirthRate), na.rm = TRUE)
-  max_birth_rate <- max(c(b_grid$z, Muller_df$BirthRate), na.rm = TRUE)
-  h3 <- Muller_plot(Muller_df, colour_by = "BirthRate", add_legend = FALSE) + 
+  if(is.na(min_birth_rate)) min_birth_rate <- min(c(b_grid$z, Muller_df$BirthRate), na.rm = TRUE)
+  if(is.na(max_birth_rate)) max_birth_rate <- max(c(b_grid$z, Muller_df$BirthRate), na.rm = TRUE)
+  h3 <- Muller_plot(Muller_df, colour_by = "BirthRate", add_legend = TRUE) + 
     scale_fill_distiller(palette = "RdBu", direction = -1, 
-                         limits = c(min_birth_rate, max_birth_rate)) + 
-    theme(line = element_blank(), rect = element_blank()) + 
-    scale_x_continuous(breaks = c(0, round(max(Muller_df$Generation)))) + 
-    scale_y_continuous(breaks = NULL)
+                         limits = c(min_birth_rate, max_birth_rate)) #+ 
+    #theme(line = element_blank(), rect = element_blank()) + 
+    #scale_x_continuous(breaks = c(0, round(max(Muller_df$Generation)))) + 
+    #scale_y_continuous(breaks = NULL)
   
   if(include_genotype_plots) {
     image_df <- image_df_from_grid_file(paste0(path, "output_driversgrid.dat"), trim)
@@ -262,8 +265,8 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
     g1 <- grid_plot(image_df, palette = dd.col, discrete = TRUE)
   }
   
-  g2 <- grid_plot(b_grid, add_legend = TRUE, legend_title = "Mean cell\nproliferation rate   ") + 
-    scale_fill_distiller(name = "Mean cell\nproliferation rate   ", palette ="RdBu", 
+  g2 <- grid_plot(b_grid, add_legend = FALSE, legend_title = "Mean cell\ndivision rate   ") + 
+    scale_fill_distiller(name = "Mean cell\ndivision rate   ", palette ="RdBu", 
                          direction = -1, na.value="white", 
                          limits = c(min_birth_rate, max_birth_rate))
   
@@ -287,7 +290,7 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
                  c(3,3,3),
                  c(4,4,5),
                  c(NA,6,7))
-    print(grid.arrange(h1, g1, h2, h3, g2, g3, g4, layout_matrix = lay, heights = c(1, 1, 0.75, 0.75)))
+    print(grid.arrange(h1, g1, h2, h3, g2, g3, g4, layout_matrix = lay, heights = c(1, 1, 1, 0.75)))
   } else {
     if(!is.na(output_filename) & !is.na(output_dir)) {
       if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1000, height = 180, res = 100)
