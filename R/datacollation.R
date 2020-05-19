@@ -68,15 +68,22 @@ parameter_names_and_values <- function(input_dir) {
     values <- as.numeric(unlist(values))
     final_dir <- dirs_list[which.max(values)] # final subfolder (with largest parameter value)
     
-    splits <- strsplit(final_dir, "_")[[1]]
-    parameter_val <- as.numeric(splits[length(splits)])
-    parameter_name <- substr(final_dir, 1, nchar(final_dir) - nchar(parameter_val) - 1)
-    
-    out_df <- rbind(out_df, data.frame("name" = parameter_name, "final_value" = parameter_val))
-    
-    parent_dir <- paste0(parent_dir, "/", final_dir)
-    
-    if("parameters.dat" %in% list.files(parent_dir, recursive = FALSE, full.names = FALSE)) break
+    if(length(final_dir)==0){
+      
+      warning(paste("simulation did not succeed in directory ", parent_dir ))
+      break
+      
+    }else{
+      splits <- strsplit(final_dir, "_")[[1]]
+      parameter_val <- as.numeric(splits[length(splits)])
+      parameter_name <- substr(final_dir, 1, nchar(final_dir) - nchar(parameter_val) - 1)
+      
+      out_df <- rbind(out_df, data.frame("name" = parameter_name, "final_value" = parameter_val))
+      
+      parent_dir <- paste0(parent_dir, "/", final_dir)
+      
+      if("parameters.dat" %in% list.files(parent_dir, recursive = FALSE, full.names = FALSE)) break
+    }
   }
   return(out_df)
 }
