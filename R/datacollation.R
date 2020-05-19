@@ -548,6 +548,72 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
   return(summary)
 }
 
+
+#' Function to return the lower bound of the confidence interval of a Spearman's rank correlation coef???cient.
+#' This function is created to work with find_correlations
+#' @param Var1 first variable of interest
+#' @param Var2 second variable of interest
+#' 
+#' @return lower bound of the confidence interval of a Spearman's rank correlation coef???cient, computed by bootpstraping, 
+#' with nrep = 500 the number of replicates for bootstraping and conf.level = 0.95 the con???dence level of the interval.
+#' return NA if no confidence interval has been computed, instead of NULL.
+#' 
+#' @importFrom RVAideMemoire spearman.ci
+corCI_low<-function(Var1, Var2){
+
+  cor.result<-spearman.ci(Var1, Var2, nrep = 500, conf.level = 0.95)#Computes the con???dence interval of a Spearman's rank correlation coef???cient by bootstraping.
+  
+  if(is.null(cor.result$conf.int)){
+    return(NA)
+  }else{
+    return(cor.result$conf.int[1])#return the lower bound of the confidence interval
+  }
+  
+}
+
+
+#' Function to return the upper bound of the confidence interval of a Spearman's rank correlation coef???cient.
+#' This function is created to work with find_correlations
+#' @param Var1 first variable of interest
+#' @param Var2 second variable of interest
+#' 
+#' @return upper bound of the confidence interval of a Spearman's rank correlation coef???cient, computed by bootpstraping, 
+#' with nrep = 500 the number of replicates for bootstraping and conf.level = 0.95 the con???dence level of the interval.
+#' return NA if no confidence interval has been computed, instead of NULL.
+#' 
+#' @importFrom RVAideMemoire spearman.ci
+corCI_high<-function(Var1, Var2){
+  
+  cor.result<-spearman.ci(Var1, Var2, nrep = 500, conf.level = 0.95)#Computes the con???dence interval of a Spearman's rank correlation coef???cient by bootstraping.
+  if(is.null(cor.result$conf.int)){
+    return(NA)
+  }else{
+    return(cor.result$conf.int[2])   #return the upper bound of the confidence interval 
+  }
+  
+}
+
+#' Function to return the p.value of a two.sided test, using the spearman correlation coefficient for the test
+#' This function is created to work with find_correlations
+#' @param Var1 first variable of interest
+#' @param Var2 second variable of interest
+#' 
+#' @return  p.value of a two.sided test, using the spearman correlation coefficient for the test.
+#' pvalue are computed via the asymptotic t approximation (exact=FALSE).
+#' return NA if no p.value has been computed, instead of NULL.
+#' 
+#' @importFrom stats cor.test
+#' 
+cor_pval<-function(Var1, Var2){
+  cor.result<-cor.test(Var1,Var2,  method = "spearman", alternative = "two.sided", exact=FALSE)
+  if(is.null(cor.result$p.value)){
+    return(NA)
+  }else{
+    return(cor.result$p.value)    
+  }
+  
+}
+
 #' Generic function to find a correlation between two columns of a dataframe
 #' 
 #' @param summary dataframe
@@ -570,12 +636,12 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
 #' find_correlations(s1, "a", "b", "c", 3)
 find_correlations <- function(summary, factor1, factor2, result_name, min_count) {
   summary %>% 
-    mutate_(variance = interp(~var(var1), var1 = as.name(factor2))) %>% 
+    mutate_(variance = interp(~var(var1, na.rm = TRUE), var1 = as.name(factor2))) %>% 
     filter(variance > 0) %>% # to avoid warnings when all values of factor2 are identical
     mutate_(count1 = interp(~length(var1), var1 = as.name(factor1)), 
             count2 = interp(~length(var2), var2 = as.name(factor2))) %>% 
     filter(count1 >= min_count, count2 >= min_count) %>% 
-    summarise_(temp_name = interp(~cor(var1, var2, method = "spearman"), var1 = as.name(factor1), var2 = as.name(factor2))) %>% 
+    summarise_(temp_name = interp(~cor(var1, var2, method = "spearman", use="na.or.complete"), var1 = as.name(factor1), var2 = as.name(factor2))) %>% #  use="na.or.complete" ensure that missing values are handled by casewise deletion, and if there are no complete cases, that gives NA.
     rename_(.dots = setNames("temp_name", paste0(result_name)))
 }
 
