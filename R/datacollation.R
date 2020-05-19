@@ -672,7 +672,8 @@ find_correlations <- function(summary, factor1, factor2, result_name, min_count,
 #' 
 #' @return Dataframe with one row for each unique combination of parameter values, gap and start_size 
 #' (i.e. it summarises over "seed"), and including columns containing the correlations between "outcome" 
-#' and each variable in col_names_list.
+#' and each variable in col_names_list and the associated pValues for the two.sided test of the correlation coefficient.
+#' If the argument ReturnCI=TRUE, the 0.95 Confidence Intervals for the correlation coefficients are also computed.
 #' 
 #' @import dplyr
 #' @importFrom stats var
@@ -680,7 +681,7 @@ find_correlations <- function(summary, factor1, factor2, result_name, min_count,
 #' 
 #' @examples
 #' get_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), 16, min_count = 5)
-get_cor_summary <- function(summary, col_names_list, num_parameters, min_count) {
+get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE) {
   col_nums <- c(1:num_parameters, which(colnames(summary) == "gap"), which(colnames(summary) == "start_size"))
   col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
   summary <- summary %>% 
@@ -695,7 +696,14 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count) 
               num_seeds = n())
   result_names_list <- paste0("Cor_", col_names_list)
   cor_summary_list <- list()
-  for(i in 1:length(col_names_list)) cor_summary_list[[i]] <- find_correlations(summary, "outcome", col_names_list[i], result_names_list[i], min_count)
+  for(i in 1:length(col_names_list)){
+    
+    if(Verbose){
+      print(col_names_list[i])
+    }
+    
+    cor_summary_list[[i]] <- find_correlations(summary, "outcome", col_names_list[i], result_names_list[i], min_count, ReturnCI)
+  } 
   for(i in 1:length(col_names_list)) cor_summary <- merge(cor_summary, cor_summary_list[[i]], all.x = TRUE)
   return(cor_summary)
 }
@@ -710,7 +718,7 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count) 
 #' @return Dataframe with one row for each unique combination of parameter values and start_size 
 #' (i.e. it summarises over "seed"), and including columns containing the correlations between "waiting_time" 
 #' and each variable in col_names_list and the associated pValues for the two.sided test of the correlation coefficient.
-#' If the argument ReturnCI=TRUE, the 0.95 Confidence Intervals for the correlation coefficients are also computed
+#' If the argument ReturnCI=TRUE, the 0.95 Confidence Intervals for the correlation coefficients are also computed.
 #' 
 #' @import dplyr
 #' @importFrom stats var
