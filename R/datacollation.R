@@ -709,7 +709,8 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count) 
 #' 
 #' @return Dataframe with one row for each unique combination of parameter values and start_size 
 #' (i.e. it summarises over "seed"), and including columns containing the correlations between "waiting_time" 
-#' and each variable in col_names_list.
+#' and each variable in col_names_list and the associated pValues for the two.sided test of the correlation coefficient.
+#' If the argument ReturnCI=TRUE, the 0.95 Confidence Intervals for the correlation coefficients are also computed
 #' 
 #' @import dplyr
 #' @importFrom stats var
