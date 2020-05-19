@@ -722,7 +722,7 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count) 
 #' c(paste0("DriverDiversityFrom1SamplesAtDepth", 0:10), 
 #' paste0("DriverDiversityFrom4SamplesAtDepth", 0:10)), 
 #' 16, min_count = 5)
-get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_count) {
+get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE ) {
   col_nums <- c(1:num_parameters, which(colnames(summary) == "start_size"))
   col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
   summary <- summary %>% 
@@ -738,7 +738,15 @@ get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_co
               num_seeds = n())
   result_names_list <- paste0("Cor_", col_names_list)
   cor_summary_list <- list()
-  for(i in 1:length(col_names_list)) cor_summary_list[[i]] <- find_correlations(summary, "waiting_time", col_names_list[i], result_names_list[i], min_count)
+  for(i in 1:length(col_names_list)){
+    
+    if(Verbose){
+      print(col_names_list[i])
+    }
+    
+    cor_summary_list[[i]] <- find_correlations(summary, "waiting_time", col_names_list[i], result_names_list[i], min_count, ReturnCI)
+    
+  }
   for(i in 1:length(col_names_list)) cor_summary <- merge(cor_summary, cor_summary_list[[i]], all.x = TRUE)
   
   cor_summary <- arrange(cor_summary, K, migration_type, migration_edge_only, start_size)
