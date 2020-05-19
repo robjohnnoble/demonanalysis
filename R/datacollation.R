@@ -624,6 +624,7 @@ cor_pval<-function(Var1, Var2){
 #' 
 #' @return Correlation between the two columns (or NA if either factor1 or factor2 contains NA, 
 #' or if all values of factor1 or factor2 are identical).
+#' Also return the pValue on the spearman correlation coefficient and the associated confidence interval at a 0.95 level.
 #' 
 #' @import dplyr
 #' @import lazyeval
@@ -634,16 +635,32 @@ cor_pval<-function(Var1, Var2){
 #' @examples
 #' s1 <- data.frame(a = 1:3, b = 1:3 * (1 + rnorm(3) / 10))
 #' find_correlations(s1, "a", "b", "c", 3)
-find_correlations <- function(summary, factor1, factor2, result_name, min_count) {
-  summary %>% 
+#' find_correlations(s1, "a", "b", "c", 3, TRUE) # also return 0.95-CI on the spearman correlation coefficient
+find_correlations <- function(summary, factor1, factor2, result_name, min_count, ReturnCI =FALSE ) {
+  output<-summary %>% 
     mutate_(variance = interp(~var(var1, na.rm = TRUE), var1 = as.name(factor2))) %>% 
     filter(variance > 0) %>% # to avoid warnings when all values of factor2 are identical
     mutate_(count1 = interp(~length(var1), var1 = as.name(factor1)), 
             count2 = interp(~length(var2), var2 = as.name(factor2))) %>% 
-    filter(count1 >= min_count, count2 >= min_count) %>% 
+    filter(count1 >= min_count, count2 >= min_count) 
+  
+  if(ReturnCI){
+    output<-output %>% 
     summarise_(temp_name = interp(~cor(var1, var2, method = "spearman", use="na.or.complete"), var1 = as.name(factor1), var2 = as.name(factor2)),#  use="na.or.complete" ensure that missing values are handled by casewise deletion, and if there are no complete cases, that gives NA.
-               temp_name_pval = interp(~cor_pval(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2))) %>%
-    rename_(.dots = setNames(c("temp_name", "temp_name_pval") , paste0(result_name,  c("", "_pVal")) ))
+               temp_name_pval = interp(~cor_pval(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2)),
+               temp_name_cilow = interp(~corCI_low(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2)),
+               temp_name_cihigh = interp(~corCI_high(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2))) %>%
+      rename_(.dots = setNames(c("temp_name", "temp_name_pval","temp_name_cilow", "temp_name_cihigh") , paste0(result_name,  c("", "_pVal", "_CI_low", "_CI_high")) ))
+  }else{
+    output<-output %>% 
+      summarise_(temp_name = interp(~cor(var1, var2, method = "spearman", use="na.or.complete"), var1 = as.name(factor1), var2 = as.name(factor2)),#  use="na.or.complete" ensure that missing values are handled by casewise deletion, and if there are no complete cases, that gives NA.
+                 temp_name_pval = interp(~cor_pval(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2))) %>%
+      rename_(.dots = setNames(c("temp_name", "temp_name_pval") , paste0(result_name,  c("", "_pVal")) ))
+    
+  }
+
+  return(output)
+
 }
 
 #' Generate summary dataframe of correlations with "outcome"
