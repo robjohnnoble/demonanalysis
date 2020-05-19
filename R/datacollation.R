@@ -641,8 +641,9 @@ find_correlations <- function(summary, factor1, factor2, result_name, min_count)
     mutate_(count1 = interp(~length(var1), var1 = as.name(factor1)), 
             count2 = interp(~length(var2), var2 = as.name(factor2))) %>% 
     filter(count1 >= min_count, count2 >= min_count) %>% 
-    summarise_(temp_name = interp(~cor(var1, var2, method = "spearman", use="na.or.complete"), var1 = as.name(factor1), var2 = as.name(factor2))) %>% #  use="na.or.complete" ensure that missing values are handled by casewise deletion, and if there are no complete cases, that gives NA.
-    rename_(.dots = setNames("temp_name", paste0(result_name)))
+    summarise_(temp_name = interp(~cor(var1, var2, method = "spearman", use="na.or.complete"), var1 = as.name(factor1), var2 = as.name(factor2)),#  use="na.or.complete" ensure that missing values are handled by casewise deletion, and if there are no complete cases, that gives NA.
+               temp_name_pval = interp(~cor_pval(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2))) %>%
+    rename_(.dots = setNames(c("temp_name", "temp_name_pval") , paste0(result_name,  c("", "_pVal")) ))
 }
 
 #' Generate summary dataframe of correlations with "outcome"
