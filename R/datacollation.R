@@ -669,11 +669,17 @@ find_correlations <- function(summary, factor1, factor2, result_name, min_count,
 #' @param col_names_list char vector of column names in the summary dataframe
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' @param min_count minimum number of items in each column (otherwise result will be NA)
+#' @param Verbose if TRUE, helpful to debug, print the name of the variables with which compute the correlation
+#' @param ReturnCI if true, also return the 0.95 level confidence interval computed by bootstraping.
+#' @param CombinedMutationRate if true, then correlation coefficients are computed without grouping simulations by mu_driver_birth (not yet compattible with CombinedFitnessEffect=TRUE)
+#' @param CombinedFitnessEffect if true, then correlation coefficients are computed without grouping simulations by s_driver_birth (not yet compattible with CombinedMutationRate=TRUE)
 #' 
 #' @return Dataframe with one row for each unique combination of parameter values, gap and start_size 
 #' (i.e. it summarises over "seed"), and including columns containing the correlations between "outcome" 
 #' and each variable in col_names_list and the associated pValues for the two.sided test of the correlation coefficient.
 #' If the argument ReturnCI=TRUE, the 0.95 Confidence Intervals for the correlation coefficients are also computed.
+#' Argument CombinedMutationRate, resp. CombinedFitnessEffect, allows to compute the correlation coefficients while not grouping simulations
+#' by mu_driver_birth, resp. s_driver_birth.
 #' 
 #' @import dplyr
 #' @importFrom stats var
@@ -681,9 +687,26 @@ find_correlations <- function(summary, factor1, factor2, result_name, min_count,
 #' 
 #' @examples
 #' get_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), 16, min_count = 5)
-get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE) {
+get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, CombinedMutationRate =FALSE, CombinedFitnessEffect=FALSE ) {
+  
   col_nums <- c(1:num_parameters, which(colnames(summary) == "gap"), which(colnames(summary) == "start_size"))
-  col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
+  
+  # The following lines allow to compute the correlation with waiting time while combining either the mutation rates or the fitness effects.
+  #This is usefull when random mutation rates or fitness effects have been used for the batch.
+  if(CombinedMutationRate){
+    
+    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "mu_driver_birth"))))]
+    
+  }else if(CombinedFitnessEffect){
+    
+    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "s_driver_birth"))))]
+    
+  }else{
+    
+    col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
+    
+  }
+  
   summary <- summary %>% 
     group_by_at(col_nums) %>% 
     filter(!is.na(outcome)) %>% 
