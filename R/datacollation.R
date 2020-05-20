@@ -671,8 +671,8 @@ find_correlations <- function(summary, factor1, factor2, result_name, min_count,
 #' @param min_count minimum number of items in each column (otherwise result will be NA)
 #' @param Verbose if TRUE, helpful to debug, print the name of the variables with which compute the correlation
 #' @param ReturnCI if true, also return the 0.95 level confidence interval computed by bootstraping.
-#' @param CombinedMutationRate if true, then correlation coefficients are computed without grouping simulations by mu_driver_birth (not yet compattible with CombinedFitnessEffect=TRUE)
-#' @param CombinedFitnessEffect if true, then correlation coefficients are computed without grouping simulations by s_driver_birth (not yet compattible with CombinedMutationRate=TRUE)
+#' @param CombinedMutationRate if true, then correlation coefficients are computed without grouping simulations by mu_driver_birth 
+#' @param CombinedFitnessEffect if true, then correlation coefficients are computed without grouping simulations by s_driver_birth 
 #' 
 #' @return Dataframe with one row for each unique combination of parameter values, gap and start_size 
 #' (i.e. it summarises over "seed"), and including columns containing the correlations between "outcome" 
@@ -695,7 +695,11 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, 
   #This is usefull when random mutation rates or fitness effects have been used for the batch.
   if(CombinedMutationRate){
     
-    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "mu_driver_birth"))))]
+    if(CombinedFitnessEffect){
+      col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "mu_driver_birth", "s_driver_birth"))))]
+    }else{
+      col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "mu_driver_birth"))))]
+    }
     
   }else if(CombinedFitnessEffect){
     
@@ -739,8 +743,8 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, 
 #' @param min_count minimum number of items in each column (otherwise result will be NA)
 #' @param Verbose if TRUE, helpful to debug, print the name of the variables with which compute the correlation
 #' @param ReturnCI if true, also return the 0.95 level confidence interval computed by bootstraping.
-#' @param CombinedMutationRate if true, then correlation coefficients are computed without grouping simulations by mu_driver_birth (not yet compattible with CombinedFitnessEffect=TRUE)
-#' @param CombinedFitnessEffect if true, then correlation coefficients are computed without grouping simulations by s_driver_birth (not yet compattible with CombinedMutationRate=TRUE)
+#' @param CombinedMutationRate if true, then correlation coefficients are computed without grouping simulations by mu_driver_birth 
+#' @param CombinedFitnessEffect if true, then correlation coefficients are computed without grouping simulations by s_driver_birth 
 #' 
 #' @return Dataframe with one row for each unique combination of parameter values and start_size 
 #' (i.e. it summarises over "seed"), and including columns containing the correlations between "waiting_time" 
@@ -767,8 +771,12 @@ get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_co
   #This is usefull when random mutation rates or fitness effects have been used for the batch.
    if(CombinedMutationRate){
      
-    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "mu_driver_birth"))))]
-    
+     if(CombinedFitnessEffect){
+       col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "mu_driver_birth", "s_driver_birth"))))]
+     }else{
+       col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "mu_driver_birth"))))]
+     }
+
   }else if(CombinedFitnessEffect){
     
     col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "s_driver_birth"))))]
