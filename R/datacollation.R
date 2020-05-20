@@ -744,13 +744,14 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, 
 #' @param ReturnCI if true, also return the 0.95 level confidence interval computed by bootstraping.
 #' @param CombinedMutationRate if true, then correlation coefficients are computed without grouping simulations by mu_driver_birth 
 #' @param CombinedFitnessEffect if true, then correlation coefficients are computed without grouping simulations by s_driver_birth 
+#' @param CombinedPassengerMutationRate if true, then correlation coefficients are computed without grouping simulations by mu_passenger (which should be the case if treatment was introduced in the simulation) 
 #' 
 #' @return Dataframe with one row for each unique combination of parameter values and start_size 
 #' (i.e. it summarises over "seed"), and including columns containing the correlations between "waiting_time" 
 #' and each variable in col_names_list and the associated pValues for the two.sided test of the correlation coefficient.
 #' If the argument ReturnCI=TRUE, the 0.95 Confidence Intervals for the correlation coefficients are also computed.
-#' Argument CombinedMutationRate, resp. CombinedFitnessEffect, allows to compute the correlation coefficients while not grouping simulations
-#' by mu_driver_birth, resp. s_driver_birth.
+#' Argument CombinedMutationRate, resp. CombinedFitnessEffect, resp.CombinedPassengerMutationRate, allows to compute the correlation coefficients while not grouping simulations
+#' by mu_driver_birth, resp. s_driver_birth, resp.mu_passenger .
 #' 
 #' @import dplyr
 #' @importFrom stats var
@@ -763,27 +764,24 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, 
 #' c(paste0("DriverDiversityFrom1SamplesAtDepth", 0:10), 
 #' paste0("DriverDiversityFrom4SamplesAtDepth", 0:10)), 
 #' 16, min_count = 5)
-get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, CombinedMutationRate =FALSE, CombinedFitnessEffect=FALSE ) {
+get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, CombinedMutationRate =FALSE, CombinedFitnessEffect=FALSE, CombinedPassengerMutationRate=FALSE ) {
   col_nums <- c(1:num_parameters, which(colnames(summary) == "start_size"))
- 
-  # The following lines allow to compute the correlation with waiting time while combining either the mutation rates or the fitness effects.
+  
+  col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
+  
+  # The following lines allow to compute the correlations with waiting time without grouping simulations by mu_driver_birth and/or s_driver_birth and/or mu_passenger
   #This is usefull when random mutation rates or fitness effects have been used for the batch.
-   if(CombinedMutationRate){
-     
-     if(CombinedFitnessEffect){
-       col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "mu_driver_birth", "s_driver_birth"))))]
-     }else{
-       col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "mu_driver_birth"))))]
-     }
-
-  }else if(CombinedFitnessEffect){
-    
-    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "s_driver_birth"))))]
-    
-  }else{
-    
-    col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
-    
+  
+  if(CombinedMutationRate){
+    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("mu_driver_birth"))))]
+  }
+  
+  if(CombinedFitnessEffect){
+    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("s_driver_birth"))))]
+  }
+  
+  if(CombinedPassengerMutationRate){
+    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("mu_passenger"))))]
   }
   
   
