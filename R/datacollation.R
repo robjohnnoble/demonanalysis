@@ -731,6 +731,9 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, 
     cor_summary_list[[i]] <- find_correlations(summary, "outcome", col_names_list[i], result_names_list[i], min_count, ReturnCI)
   } 
   for(i in 1:length(col_names_list)) cor_summary <- merge(cor_summary, cor_summary_list[[i]], all.x = TRUE)
+  
+  cor_summary <- arrange(cor_summary, K, migration_type, migration_edge_only, start_size)
+  
   return(cor_summary)
 }
 
