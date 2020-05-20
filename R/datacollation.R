@@ -263,6 +263,8 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
 #' @param generation Generation at which to filter (default NA corresponds to no filtering)
 #' @param numcells Number of cells at which to filter (default NA corresponds to no filtering)
 #' @param num_parameters Number of parameters, accounting for the first set of columns in the dataframe (optional, but may improve speed)
+#' @param ExitCode4 Allow to deal with simulations including treatment. Simulations for which the tumor die at the treatment time end with "Exit Code =4",
+#' we need to deal in a specific way with these simulations when combining the output (as these simulations have no lines after the treatment).
 #' 
 #' @return the combined dataframe
 #' 
@@ -295,19 +297,63 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
   file_allele_counts <- paste0(full_dir, "/output_allele_counts.dat")
   
   df_out <- fread(file_out)
+  
+  if(ExitCode4){
+    
+    #first check that the new data frame as the column "treated", else this will not work
+    if(! "Treated" %in% colnames(df_out)){
+      warning(paste0("file ",file_out, " does not contain the variable Treated, but ExitCode4=TRUE, which is incompatible !" ))
+    }
+    df_out<-subset(df_out, df_out$Treated==0) #remove the last line corresponding to the update once no cells are remaining
+  }
+  
   df_pars <- fread(file_pars)
   
   if (df_type == "output"){
-    # procedure for 'traditional' df_out (output.dat)
-    if(include_diversities) df_div <- fread(file_div)
+    
+    if (df_type == "output"){
+      # procedure for 'traditional' df_out (output.dat)
+      if(include_diversities){
+        
+        df_div <- fread(file_div)
+        
+        if(ExitCode4){
+          
+          #first check that the data frame as the column "treated", else this will not work
+          if(! "Treated" %in% colnames(df_div)){
+            warning(paste0("file ",file_div, " does not contain the variable Treated, but ExitCode4=TRUE, which is incompatible !" ))
+          }
+          
+          df_div<-subset(df_div, df_div$Treated==0) #remove the last line corresponding to the update once no cells are remaining
+        }
+      } 
+      
     df_driver_phylo <- fread(file_driver_phylo)
+    
+    if(ExitCode4){
+      
+      #first check that the data frame as the column "treated", else this will not work
+      if(! "Treated" %in% colnames(df_driver_phylo)){
+        warning(paste0("file ",file_driver_phylo, " does not contain the variable Treated, but ExitCode4=TRUE, which is incompatible !" ))
+      }
+      
+      df_driver_phylo<-subset(df_driver_phylo, df_driver_phylo$Treated==0)#remove the last lines corresponding to the update once no cells are remaining
+    }
+    
     
     df_driver_phylo <- filter(df_driver_phylo, CellsPerSample == -1, NumSamples == 1, SampleDepth == -1)
     df_driver_phylo <- df_driver_phylo[!duplicated(df_driver_phylo), ]
-    pop_df <- get_population_df(df_driver_phylo)
     
-    if(include_diversities) temp <- merge(df_out, df_div, all = TRUE)
-    else temp <- df_out
+    pop_df <- get_population_df(df_driver_phylo) #should run with the version of get_population_df dealing with treatment.
+    
+    if(include_diversities){
+      temp <- merge(df_out, df_div, all = TRUE)
+
+      temp<-temp[order(Generation, Treated), ]#ensure that the output file is correctly ordered
+
+    }else{ 
+      temp <- df_out
+    }
     
     # add parameter columns:
     if(nrow(temp) == 0){
@@ -318,7 +364,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
     
     # adds maxgen and gen_adj columns
     if(is.na(num_parameters)) num_parameters <- count_parameters(full_dir)
-    temp <- add_columns(temp, num_parameters) 
+    temp <- add_columns(temp, num_parameters)  #should run with the version of add_columns dealing with treatment.
     
     # add sweep_seq columns (specific for output.dat?)
     sweep_seq <- sweep_sequence(pop_df, lag_type = "proportions", breaks = 10)
@@ -357,7 +403,19 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
       temp <- cbind(df_pars, temp)
     }
   } else if (df_type %in% c("driver_phylo")){
+    
     df_driver_phylo <- fread(file_driver_phylo)
+    
+    if(ExitCode4){
+      
+      #first check that the data frame as the column "treated", else this will not work
+      if(! "Treated" %in% colnames(df_driver_phylo)){
+        warning(paste0("file ",file_driver_phylo, " does not contain the variable Treated, but ExitCode4=TRUE, which is incompatible !" ))
+      }
+      
+      df_driver_phylo<-subset(df_driver_phylo, df_driver_phylo$Treated==0)#remove the last lines corresponding to the update once no cells are remaining
+      
+    }
     
     df_driver_phylo <- filter(df_driver_phylo, CellsPerSample == -1, NumSamples == 1, SampleDepth == -1)
     df_driver_phylo <- df_driver_phylo[!duplicated(df_driver_phylo), ]
