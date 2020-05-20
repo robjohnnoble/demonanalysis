@@ -731,9 +731,26 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, 
 #' c(paste0("DriverDiversityFrom1SamplesAtDepth", 0:10), 
 #' paste0("DriverDiversityFrom4SamplesAtDepth", 0:10)), 
 #' 16, min_count = 5)
-get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE ) {
+get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, CombinedMutationRate =FALSE, CombinedFitnessEffect=FALSE ) {
   col_nums <- c(1:num_parameters, which(colnames(summary) == "start_size"))
-  col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
+ 
+  # The following lines allow to compute the correlation with waiting time while combining either the mutation rates or the fitness effects.
+  #This is usefull when random mutation rates or fitness effects have been used for the batch.
+   if(CombinedMutationRate){
+     
+    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "mu_driver_birth"))))]
+    
+  }else if(CombinedFitnessEffect){
+    
+    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "s_driver_birth"))))]
+    
+  }else{
+    
+    col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
+    
+  }
+  
+  
   summary <- summary %>% 
     group_by_at(col_nums) %>% 
     filter(gap == min(gap, na.rm = TRUE)) %>% # choice of gap value doesn't affect the result
