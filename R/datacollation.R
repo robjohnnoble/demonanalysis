@@ -875,6 +875,12 @@ get_Variable_cor_summary <- function(summary,MainVariable,  col_names_list, num_
   col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
   
   if(! is.null(VariablesToNotGroupBy)){
+    
+    #if at least one variable of VariablesToNotGroupByis not in the colnames of summary return a warning
+    if(sum(! VariablesToNotGroupBy %in% colnames(sum_df))){
+      warning(paste0("Variable(s) ", VariablesToNotGroupBy[! VariablesToNotGroupBy %in% colnames(sum_df)], " of argument VariablesToNotGroupBy NOT in colnames of summary !"))
+    }
+    
     col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% VariablesToNotGroupBy)))]
     
   }
