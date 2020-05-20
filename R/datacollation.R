@@ -848,7 +848,7 @@ refresh_data_files <- function() {
 }
 
  
-#' Generate summary dataframe of correlations with the variable of interest "MainVariable" and the variables in col_names_list
+#' Generate summary dataframe of correlations with the variable of interest "MainVariable" and the variables in col_names_list at different "start size"
 #' 
 #' @param summary dataframe including columns named "seed", "Generation", "start_time", "start_size", "gap" and "waiting_time"
 #' @param col_names_list char vector of column names in the summary dataframe
@@ -902,6 +902,7 @@ get_Variable_cor_summary <- function(summary,MainVariable,  col_names_list, num_
     filter(!is.na(get(MainVariable))) %>% 
     filter(!is.infinite(get(MainVariable))) %>% 
     filter(var(get(MainVariable)) > 0)
+  
   cor_summary <- summary %>% 
     summarise(mean_start_time = mean(start_time), 
               mean_DriverDiversity = mean(DriverDiversity), 
@@ -936,3 +937,79 @@ get_Variable_cor_summary <- function(summary,MainVariable,  col_names_list, num_
   
   return(cor_summary)
 }
+
+
+#' Generate summary dataframe of correlations with the variable of interest "MainVariable" and the variables in col_names_list  at different "final size"
+#' 
+#' @param summary dataframe including columns named "seed", "Generation", "start_time", "start_size", "gap" and "waiting_time"
+#' @param col_names_list char vector of column names in the summary dataframe
+#' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
+#' @param min_count minimum number of items in each column (otherwise result will be NA)
+#' @param Verbose if TRUE, helpful to debug, print the name of the variables with which compute the correlation
+#' @param ReturnCI if true, also return the 0.95 level confidence interval computed by bootstraping.
+#' 
+#' @return Dataframe with one row for each unique combination of parameter values and start_size 
+#' (i.e. it summarises over "seed"), and including columns containing the correlations between "waiting_time" 
+#' and each variable in col_names_list and the associated pValues for the two.sided test of the correlation coefficient.
+#' If the argument ReturnCI=TRUE, the 0.95 Confidence Intervals for the correlation coefficients are also computed.
+#' 
+#' @import dplyr
+#' @importFrom stats var
+#' @export
+get_Variable_cor_summary_FinalSize <- function(summary, MainVariable,  col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE) {
+  
+  col_nums <- c(1:num_parameters, which(colnames(summary) == "FinalSize"))
+  
+  if(MainVariable=="outcome"){
+    col_nums <-  c(col_nums, which(colnames(summary) == "gap"))
+  }
+  
+  
+  col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed"))))]
+  
+  summary <- summary %>% 
+    group_by_at(col_nums) %>% 
+    filter(gap == min(gap, na.rm = TRUE)) %>% # choice of gap value doesn't affect the result
+    filter(!is.na(get(MainVariable))) %>% 
+    filter(!is.infinite(get(MainVariable)))  %>% 
+    filter(var(get(MainVariable))  > 0)
+  
+  cor_summary <- summary %>% 
+    summarise(mean_start_time = mean(start_time), 
+              mean_DriverDiversity = mean(DriverDiversity), 
+              mean_waiting_time = mean(waiting_time), 
+              meanToRename=mean(get(MainVariable)),
+              mean_autocor = mean(mean_autocor), 
+              num_seeds = n())
+  
+  
+  if( paste0("mean_",MainVariable ) %in% colnames(cor_summary)){
+    #if MainVariable is a variable among "start_time", "DriverDiversity", "waiting_time", "autocor",
+    #then we would have duplication of columns, and this is prevented
+    cor_summary$meanToRename<-NULL
+  }else{
+    colnames(cor_summary)[which(colnames(cor_summary)=="meanToRename")]<-paste0("mean_",MainVariable )
+    
+  }
+  
+  
+  result_names_list <- paste0("Cor_", col_names_list)
+  cor_summary_list <- list()
+  
+  for(i in 1:length(col_names_list)){
+    
+    if(Verbose){
+      print(col_names_list[i])
+    }
+    
+    cor_summary_list[[i]] <- find_correlations(summary, eval(MainVariable), col_names_list[i], result_names_list[i], min_count,ReturnCI)
+    
+  }
+  
+  for(i in 1:length(col_names_list)) cor_summary <- merge(cor_summary, cor_summary_list[[i]], all.x = TRUE)
+  
+  cor_summary <- arrange(cor_summary, K, migration_type, migration_edge_only, FinalSize)
+  
+  return(cor_summary)
+}
+
