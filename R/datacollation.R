@@ -99,6 +99,7 @@ parameter_names_and_values <- function(input_dir) {
 #' SmoothRadius is the radius of a disc of area NumCells, after loess smoothing; 
 #' GrowthRate and RadiusGrowthRate are the rates of change of SmoothNumCells and SmoothRadius, 
 #' relative to Generation.
+#' Deal differently with dataframe containing the column "Treated".
 #' 
 #' @importFrom stats loess
 #' 
@@ -109,20 +110,37 @@ parameter_names_and_values <- function(input_dir) {
 #' Generation = c(1:10, 3:12), NumCells = rep(1:10, times = 2) + rnorm(20, 0, 0.1))
 #' add_columns(df, 2)
 add_columns <- function(df, num_parameters) {
-  df <- df %>% group_by_at(1:num_parameters) %>% 
-    mutate(maxgen = max(Generation, na.rm = TRUE)) %>% 
-    mutate(gen_adj = Generation / maxgen) %>% 
-    ungroup()
   
-  df <- df %>% group_by_at(1:num_parameters) %>% 
-    mutate(SmoothNumCells = 10^loess(log10(NumCells) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
-    mutate(SmoothRadius = 10^loess(log10(sqrt(NumCells/pi)) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
-    ungroup()
+  # the following line ensures that each row of df is unique
+  df<-unique(df)
   
-  df <- df %>% group_by_at(1:num_parameters) %>% 
-    mutate(GrowthRate = (SmoothNumCells - lag(SmoothNumCells, 1)) / (Generation - lag(Generation, 1))) %>% 
-    mutate(RadiusGrowthRate = (SmoothRadius - lag(SmoothRadius, 1)) / (Generation - lag(Generation, 1))) %>% 
-    ungroup()
+  if("Treated" %in% colnames(df)){
+    
+    #ensure that added columns are added separately for data recorded before the treatment and data recorded after.
+    
+    df <- df %>% group_by_at(c(1:num_parameters, which(colnames(df) =="Treated") )) %>%
+      mutate(SmoothNumCells = 10^loess(log10(NumCells) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
+      mutate(SmoothRadius = 10^loess(log10(sqrt(NumCells/pi)) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
+      ungroup()
+    
+    
+    
+    df <- df %>%  group_by_at(c(1:num_parameters, which(colnames(df) =="Treated") ))%>% 
+      mutate(GrowthRate = (SmoothNumCells - lag(SmoothNumCells, 1)) / (Generation - lag(Generation, 1))) %>% 
+      mutate(RadiusGrowthRate = (SmoothRadius - lag(SmoothRadius, 1)) / (Generation - lag(Generation, 1))) %>% 
+      ungroup()
+    
+  }else{
+    
+    df <- df %>% group_by_at(1:num_parameters) %>% 
+      mutate(SmoothNumCells = 10^loess(log10(NumCells) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
+      mutate(SmoothRadius = 10^loess(log10(sqrt(NumCells/pi)) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
+      ungroup()
+    
+    df <- df %>% group_by_at(1:num_parameters) %>% mutate(GrowthRate = (SmoothNumCells -lag(SmoothNumCells, 1))/(Generation - lag(Generation,1))) %>%
+      mutate(RadiusGrowthRate = (SmoothRadius - lag(SmoothRadius,1))/(Generation - lag(Generation, 1))) %>% 
+      ungroup()
+  }
   
   # replace NA values:
   df[is.na(df$GrowthRate), "GrowthRate"] <- df[!is.na(df$GrowthRate) & is.na(lag(df$GrowthRate, 1)), "GrowthRate"]
