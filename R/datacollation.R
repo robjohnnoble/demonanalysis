@@ -714,11 +714,17 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, 
 #' @param col_names_list char vector of column names in the summary dataframe
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' @param min_count minimum number of items in each column (otherwise result will be NA)
+#' @param Verbose if TRUE, helpful to debug, print the name of the variables with which compute the correlation
+#' @param ReturnCI if true, also return the 0.95 level confidence interval computed by bootstraping.
+#' @param CombinedMutationRate if true, then correlation coefficients are computed without grouping simulations by mu_driver_birth (not yet compattible with CombinedFitnessEffect=TRUE)
+#' @param CombinedFitnessEffect if true, then correlation coefficients are computed without grouping simulations by s_driver_birth (not yet compattible with CombinedMutationRate=TRUE)
 #' 
 #' @return Dataframe with one row for each unique combination of parameter values and start_size 
 #' (i.e. it summarises over "seed"), and including columns containing the correlations between "waiting_time" 
 #' and each variable in col_names_list and the associated pValues for the two.sided test of the correlation coefficient.
 #' If the argument ReturnCI=TRUE, the 0.95 Confidence Intervals for the correlation coefficients are also computed.
+#' Argument CombinedMutationRate, resp. CombinedFitnessEffect, allows to compute the correlation coefficients while not grouping simulations
+#' by mu_driver_birth, resp. s_driver_birth.
 #' 
 #' @import dplyr
 #' @importFrom stats var
