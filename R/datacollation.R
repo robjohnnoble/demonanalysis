@@ -282,7 +282,8 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
 #' @param numcells Number of cells at which to filter (default NA corresponds to no filtering)
 #' @param num_parameters Number of parameters, accounting for the first set of columns in the dataframe (optional, but may improve speed)
 #' @param ExitCode4 Allow to deal with simulations including treatment. Simulations for which the tumor die at the treatment time end with "Exit Code =4",
-#' we need to deal in a specific way with these simulations when combining the output (as these simulations have no lines after the treatment).
+#' we need to deal in a specific way (i.e need to remove the lines with Treated==1) with these simulations when combining the output
+#' (as these simulations have most columns containing missing valeus/NA after the treatment).
 #' 
 #' @return the combined dataframe
 #' 
