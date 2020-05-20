@@ -854,40 +854,28 @@ refresh_data_files <- function() {
 #' @param min_count minimum number of items in each column (otherwise result will be NA)
 #' @param Verbose if TRUE, helpful to debug, print the name of the variables with which compute the correlation
 #' @param ReturnCI if true, also return the 0.95 level confidence interval computed by bootstraping.
-#' @param CombinedMutationRate if true, then correlation coefficients are computed without grouping simulations by mu_driver_birth 
-#' @param CombinedFitnessEffect if true, then correlation coefficients are computed without grouping simulations by s_driver_birth 
+#' @param VariablesToNotGroupBy vector of column names by which we don't want to group the simulation. For example, if mutation rate (mu_driver_birth)
+#' are random, then we don't want to group the simulations by the variable mu_driver_birth, so we need to set VariablesToNotGroupBy=c("mu_driver_birth")
+#' This is more general than creating a boolean argument as CombinedMutationRate=TRUE/FALSE.
 #' 
 #' @return Dataframe with one row for each unique combination of parameter values and start_size 
 #' (i.e. it summarises over "seed"), and including columns containing the correlations between "waiting_time" 
 #' and each variable in col_names_list and the associated pValues for the two.sided test of the correlation coefficient.
 #' If the argument ReturnCI=TRUE, the 0.95 Confidence Intervals for the correlation coefficients are also computed.
-#' Argument CombinedMutationRate, resp. CombinedFitnessEffect, allows to compute the correlation coefficients while not grouping simulations
-#' by mu_driver_birth, resp. s_driver_birth.
+#' Argument VariablesToNotGroupBy allows to compute the correlation coefficients while not grouping simulations
+#' by variables contained into VariablesToNotGroupBy.
 #' 
 #' @import dplyr
 #' @importFrom stats var
 #' @export
-get_Variable_cor_summary <- function(summary,MainVariable,  col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, CombinedMutationRate =FALSE, CombinedFitnessEffect=FALSE) {
+get_Variable_cor_summary <- function(summary,MainVariable,  col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL) {
   
   col_nums <- c(1:num_parameters, which(colnames(summary) == "start_size"))
   
-  # The following lines allow to compute the correlation with waiting time while combining either the mutation rates or the fitness effects.
-  #This is usefull when random mutation rates or fitness effects have been used for the batch.
-  if(CombinedMutationRate){
-    
-    if(CombinedFitnessEffect){
-      col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "mu_driver_birth", "s_driver_birth"))))]
-    }else{
-      col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "mu_driver_birth"))))]
-    }
-    
-  }else if(CombinedFitnessEffect){
-    
-    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed", "s_driver_birth"))))]
-    
-  }else{
-    
-    col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
+  col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
+  
+  if(! is.null(VariablesToNotGroupBy)){
+    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% VariablesToNotGroupBy)))]
     
   }
   
