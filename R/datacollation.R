@@ -947,16 +947,21 @@ get_Variable_cor_summary <- function(summary,MainVariable,  col_names_list, num_
 #' @param min_count minimum number of items in each column (otherwise result will be NA)
 #' @param Verbose if TRUE, helpful to debug, print the name of the variables with which compute the correlation
 #' @param ReturnCI if true, also return the 0.95 level confidence interval computed by bootstraping.
+#' @param VariablesToNotGroupBy vector of column names by which we don't want to group the simulation. For example, if mutation rate (mu_driver_birth)
+#' are random, then we don't want to group the simulations by the variable mu_driver_birth, so we need to set VariablesToNotGroupBy=c("mu_driver_birth")
+#' This is more general than creating a boolean argument as CombinedMutationRate=TRUE/FALSE. 
 #' 
 #' @return Dataframe with one row for each unique combination of parameter values and start_size 
 #' (i.e. it summarises over "seed"), and including columns containing the correlations between "waiting_time" 
 #' and each variable in col_names_list and the associated pValues for the two.sided test of the correlation coefficient.
 #' If the argument ReturnCI=TRUE, the 0.95 Confidence Intervals for the correlation coefficients are also computed.
+#' Argument VariablesToNotGroupBy allows to compute the correlation coefficients while not grouping simulations
+#' by variables contained into VariablesToNotGroupBy.
 #' 
 #' @import dplyr
 #' @importFrom stats var
 #' @export
-get_Variable_cor_summary_FinalSize <- function(summary, MainVariable,  col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE) {
+get_Variable_cor_summary_FinalSize <- function(summary, MainVariable,  col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL) {
   
   col_nums <- c(1:num_parameters, which(colnames(summary) == "FinalSize"))
   
@@ -966,6 +971,17 @@ get_Variable_cor_summary_FinalSize <- function(summary, MainVariable,  col_names
   
   
   col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed"))))]
+  
+  if(! is.null(VariablesToNotGroupBy)){
+    
+    #if at least one variable of VariablesToNotGroupByis not in the colnames of summary return a warning
+    if(sum(! VariablesToNotGroupBy %in% colnames(sum_df))){
+      warning(paste0("Variable(s) ", VariablesToNotGroupBy[! VariablesToNotGroupBy %in% colnames(sum_df)], " of argument VariablesToNotGroupBy NOT in colnames of summary !"))
+    }
+    
+    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% VariablesToNotGroupBy)))]
+    
+  }
   
   summary <- summary %>% 
     group_by_at(col_nums) %>% 
