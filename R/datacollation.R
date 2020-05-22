@@ -305,7 +305,7 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
 #' df_type = "genotype_properties", vaf_cut_off = 0.002)
 #' combine_dfs(full_dir = system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
 #' df_type = "genotype_counts", numcells = 100)
-combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output", max_generation = FALSE, vaf_cut_off = NA, generation = NA, numcells = NA, num_parameters = NA) {
+combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output", max_generation = FALSE, vaf_cut_off = NA, generation = NA, numcells = NA, num_parameters = NA, ExitCode4=FALSE) {
   
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
   
@@ -470,7 +470,8 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 #' @param vaf_cut_off exclude genotypes with vaf lower cut off from combined_df
 #' @param generation Generation at which to filter (default NA corresponds to no filtering)
 #' @param numcells Number of cells at which to filter (default NA corresponds to no filtering)
-#' 
+#' @param ExitCode4 : if TRUE, this means that we want to include in the analysis the simulations whose error message is Exit Code 4. This 
+#' will call the function combine_dfs with argument ExitCode4=TRUE. 
 #' @return a combined dataframe
 #' 
 #' @importFrom data.table rbindlist
@@ -488,7 +489,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 #' df_type = "genotype_properties", vaf_cut_off = 0.002)
 #' all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
 #' df_type = "allele_counts", generation = 10)
-all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", max_generation = FALSE, vaf_cut_off = NA, generation = NA, numcells = NA, n_cores = NA) {
+all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", max_generation = FALSE, vaf_cut_off = NA, generation = NA, numcells = NA, n_cores = NA,ExitCode4=FALSE) {
   
   df_type_list <- c("output", "driver_genotype_properties", "genotype_properties", 
                     "allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts", "driver_phylo",
@@ -515,10 +516,26 @@ all_output <- function(input_dir, include_diversities = TRUE, df_type = "output"
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
     print(paste0(full_dir, " ", msg), quote = FALSE)
-    if(!identical(msg, character(0))) if(msg == "Exit code 0") return(combine_dfs(full_dir, include_diversities, 
-                                                                                  df_type, max_generation, vaf_cut_off, generation, numcells, num_parameters))
-    return(data.frame())
+    
+    #Modifications to deal with treatment => use combine_dfs with argument ExitCode4
+    if(!identical(msg, character(0))){
+      
+      if(msg == "Exit code 0"){
+        return(combine_dfs(full_dir, include_diversities, 
+                                    df_type, max_generation, vaf_cut_off, generation, numcells, num_parameters))
+        
+      }else if (msg == "Exit code 4"){
+        # if some of the simulations got "Exit code 4" and that we want to include them into the analysis, i.e by using ExitCode4=TRUE,
+        # then we need to call combine_dfs with argument ExitCode4=TRUE 
+        if(ExitCode4){
+          return(combine_dfs(full_dir, include_diversities, 
+                                      df_type, max_generation, vaf_cut_off, generation, numcells, num_parameters,ExitCode4=ExitCode4 ))
+        }
+        
+      }
+    }     return(data.frame())
   }
+  
   if(is.na(n_cores)){
     res <- rbindlist(apply_combinations(final_values, each_df))
   } else {
