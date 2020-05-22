@@ -114,6 +114,11 @@ add_columns <- function(df, num_parameters) {
   # the following line ensures that each row of df is unique
   df<-unique(df)
   
+  df <- df %>% group_by_at(1:num_parameters) %>% 
+    mutate(maxgen = max(Generation, na.rm = TRUE)) %>% 
+    mutate(gen_adj = Generation / maxgen) %>% 
+    ungroup()
+  
   if("Treated" %in% colnames(df)){
     
     #ensure that added columns are added separately for data recorded before the treatment and data recorded after.
