@@ -114,14 +114,16 @@ add_columns <- function(df, num_parameters) {
   # the following line ensures that each row of df is unique
   df<-unique(df)
   
-  df <- df %>% group_by_at(1:num_parameters) %>% 
-    mutate(maxgen = max(Generation, na.rm = TRUE)) %>% 
-    mutate(gen_adj = Generation / maxgen) %>% 
-    ungroup()
+  
   
   if("Treated" %in% colnames(df)){
     
     #ensure that added columns are added separately for data recorded before the treatment and data recorded after.
+    
+    df <- df %>% group_by_at(c(1:num_parameters, which(colnames(df) =="Treated") )) %>% 
+      mutate(maxgen = max(Generation, na.rm = TRUE)) %>% 
+      mutate(gen_adj = Generation / maxgen) %>% 
+      ungroup()
     
     df <- df %>% group_by_at(c(1:num_parameters, which(colnames(df) =="Treated") )) %>%
       mutate(SmoothNumCells = 10^loess(log10(NumCells) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
@@ -136,6 +138,11 @@ add_columns <- function(df, num_parameters) {
       ungroup()
     
   }else{
+    
+    df <- df %>% group_by_at(1:num_parameters) %>% 
+      mutate(maxgen = max(Generation, na.rm = TRUE)) %>% 
+      mutate(gen_adj = Generation / maxgen) %>% 
+      ungroup()
     
     df <- df %>% group_by_at(1:num_parameters) %>% 
       mutate(SmoothNumCells = 10^loess(log10(NumCells) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
