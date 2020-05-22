@@ -18,7 +18,11 @@ apply_combinations <- function(vec, fn, ...){
 
 apply_combinations_parallel <- function(n_cores, vec, fn, ...){
   library(parallel)
-  cl <- makeCluster(n_cores)
+  # Adding the argument type="FORK" to makeCluster solves the problem of variables and function scope 
+  #(this option means that the function automatically knows all environment variables)
+  # !!!! Notice that this only works on mac and linux, else we would need to use « clusterExport » and «clusterEvalQ» : 
+  #something like : clusterExport(cl, list("all_output", "combine_dfs", "get_population_df", "fread"))!!!! to test if needed!!!!
+  cl <- makeCluster(n_cores,  type="FORK")
   vecs <- mapply(seq, 0, vec, SIMPLIFY = FALSE) # a list of n sequences, where n = length(vec)
   tmp <- do.call(expand.grid, vecs) # a data frame where each row is a permuation of values from the n sequences
   res <- parApply(cl, tmp, 1, fn, ...) # the result of applying fn to each row of tmp
