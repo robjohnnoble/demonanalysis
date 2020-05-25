@@ -68,15 +68,22 @@ parameter_names_and_values <- function(input_dir) {
     values <- as.numeric(unlist(values))
     final_dir <- dirs_list[which.max(values)] # final subfolder (with largest parameter value)
     
-    splits <- strsplit(final_dir, "_")[[1]]
-    parameter_val <- as.numeric(splits[length(splits)])
-    parameter_name <- substr(final_dir, 1, nchar(final_dir) - nchar(parameter_val) - 1)
-    
-    out_df <- rbind(out_df, data.frame("name" = parameter_name, "final_value" = parameter_val))
-    
-    parent_dir <- paste0(parent_dir, "/", final_dir)
-    
-    if("parameters.dat" %in% list.files(parent_dir, recursive = FALSE, full.names = FALSE)) break
+    if(length(final_dir)==0){
+      
+      warning(paste("simulation did not succeed in directory ", parent_dir ))
+      break
+      
+    }else{
+      splits <- strsplit(final_dir, "_")[[1]]
+      parameter_val <- as.numeric(splits[length(splits)])
+      parameter_name <- substr(final_dir, 1, nchar(final_dir) - nchar(parameter_val) - 1)
+      
+      out_df <- rbind(out_df, data.frame("name" = parameter_name, "final_value" = parameter_val))
+      
+      parent_dir <- paste0(parent_dir, "/", final_dir)
+      
+      if("parameters.dat" %in% list.files(parent_dir, recursive = FALSE, full.names = FALSE)) break
+    }
   }
   return(out_df)
 }
@@ -92,6 +99,7 @@ parameter_names_and_values <- function(input_dir) {
 #' SmoothRadius is the radius of a disc of area NumCells, after loess smoothing; 
 #' GrowthRate and RadiusGrowthRate are the rates of change of SmoothNumCells and SmoothRadius, 
 #' relative to Generation.
+#' Deal differently with dataframe containing the column "Treated".
 #' 
 #' @importFrom stats loess
 #' 
@@ -102,20 +110,49 @@ parameter_names_and_values <- function(input_dir) {
 #' Generation = c(1:10, 3:12), NumCells = rep(1:10, times = 2) + rnorm(20, 0, 0.1))
 #' add_columns(df, 2)
 add_columns <- function(df, num_parameters) {
-  df <- df %>% group_by_at(1:num_parameters) %>% 
-    mutate(maxgen = max(Generation, na.rm = TRUE)) %>% 
-    mutate(gen_adj = Generation / maxgen) %>% 
-    ungroup()
   
-  df <- df %>% group_by_at(1:num_parameters) %>% 
-    mutate(SmoothNumCells = 10^loess(log10(NumCells) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
-    mutate(SmoothRadius = 10^loess(log10(sqrt(NumCells/pi)) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
-    ungroup()
+  # the following line ensures that each row of df is unique
+  df<-unique(df)
   
-  df <- df %>% group_by_at(1:num_parameters) %>% 
-    mutate(GrowthRate = (SmoothNumCells - lag(SmoothNumCells, 1)) / (Generation - lag(Generation, 1))) %>% 
-    mutate(RadiusGrowthRate = (SmoothRadius - lag(SmoothRadius, 1)) / (Generation - lag(Generation, 1))) %>% 
-    ungroup()
+  
+  
+  if("Treated" %in% colnames(df)){
+    
+    #ensure that added columns are added separately for data recorded before the treatment and data recorded after.
+    
+    df <- df %>% group_by_at(c(1:num_parameters, which(colnames(df) =="Treated") )) %>% 
+      mutate(maxgen = max(Generation, na.rm = TRUE)) %>% 
+      mutate(gen_adj = Generation / maxgen) %>% 
+      ungroup()
+    
+    df <- df %>% group_by_at(c(1:num_parameters, which(colnames(df) =="Treated") )) %>%
+      mutate(SmoothNumCells = 10^loess(log10(NumCells) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
+      mutate(SmoothRadius = 10^loess(log10(sqrt(NumCells/pi)) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
+      ungroup()
+    
+    
+    
+    df <- df %>%  group_by_at(c(1:num_parameters, which(colnames(df) =="Treated") ))%>% 
+      mutate(GrowthRate = (SmoothNumCells - lag(SmoothNumCells, 1)) / (Generation - lag(Generation, 1))) %>% 
+      mutate(RadiusGrowthRate = (SmoothRadius - lag(SmoothRadius, 1)) / (Generation - lag(Generation, 1))) %>% 
+      ungroup()
+    
+  }else{
+    
+    df <- df %>% group_by_at(1:num_parameters) %>% 
+      mutate(maxgen = max(Generation, na.rm = TRUE)) %>% 
+      mutate(gen_adj = Generation / maxgen) %>% 
+      ungroup()
+    
+    df <- df %>% group_by_at(1:num_parameters) %>% 
+      mutate(SmoothNumCells = 10^loess(log10(NumCells) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
+      mutate(SmoothRadius = 10^loess(log10(sqrt(NumCells/pi)) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
+      ungroup()
+    
+    df <- df %>% group_by_at(1:num_parameters) %>% mutate(GrowthRate = (SmoothNumCells -lag(SmoothNumCells, 1))/(Generation - lag(Generation,1))) %>%
+      mutate(RadiusGrowthRate = (SmoothRadius - lag(SmoothRadius,1))/(Generation - lag(Generation, 1))) %>% 
+      ungroup()
+  }
   
   # replace NA values:
   df[is.na(df$GrowthRate), "GrowthRate"] <- df[!is.na(df$GrowthRate) & is.na(lag(df$GrowthRate, 1)), "GrowthRate"]
@@ -256,6 +293,9 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
 #' @param generation Generation at which to filter (default NA corresponds to no filtering)
 #' @param numcells Number of cells at which to filter (default NA corresponds to no filtering)
 #' @param num_parameters Number of parameters, accounting for the first set of columns in the dataframe (optional, but may improve speed)
+#' @param ExitCode4 Allow to deal with simulations including treatment. Simulations for which the tumor die at the treatment time end with "Exit Code =4",
+#' we need to deal in a specific way (i.e need to remove the lines with Treated==1) with these simulations when combining the output
+#' (as these simulations have most columns containing missing valeus/NA after the treatment).
 #' 
 #' @return the combined dataframe
 #' 
@@ -277,7 +317,7 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
 #' df_type = "genotype_properties", vaf_cut_off = 0.002)
 #' combine_dfs(full_dir = system.file("extdata", "", package = "demonanalysis", mustWork = TRUE), 
 #' df_type = "genotype_counts", numcells = 100)
-combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output", max_generation = FALSE, vaf_cut_off = NA, generation = NA, numcells = NA, num_parameters = NA) {
+combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output", max_generation = FALSE, vaf_cut_off = NA, generation = NA, numcells = NA, num_parameters = NA, ExitCode4=FALSE) {
   
   if(substr(full_dir, nchar(full_dir), nchar(full_dir)) == "/") full_dir <- substr(full_dir, 1, nchar(full_dir) - 1)
   
@@ -288,19 +328,63 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
   file_allele_counts <- paste0(full_dir, "/output_allele_counts.dat")
   
   df_out <- fread(file_out)
+  
+  if(ExitCode4){
+    
+    #first check that the new data frame as the column "treated", else this will not work
+    if(! "Treated" %in% colnames(df_out)){
+      warning(paste0("file ",file_out, " does not contain the variable Treated, but ExitCode4=TRUE, which is incompatible !" ))
+    }
+    df_out<-subset(df_out, df_out$Treated==0) #remove the last line corresponding to the update once no cells are remaining
+  }
+  
   df_pars <- fread(file_pars)
   
   if (df_type == "output"){
-    # procedure for 'traditional' df_out (output.dat)
-    if(include_diversities) df_div <- fread(file_div)
+    
+    if (df_type == "output"){
+      # procedure for 'traditional' df_out (output.dat)
+      if(include_diversities){
+        
+        df_div <- fread(file_div)
+        
+        if(ExitCode4){
+          
+          #first check that the data frame as the column "treated", else this will not work
+          if(! "Treated" %in% colnames(df_div)){
+            warning(paste0("file ",file_div, " does not contain the variable Treated, but ExitCode4=TRUE, which is incompatible !" ))
+          }
+          
+          df_div<-subset(df_div, df_div$Treated==0) #remove the last line corresponding to the update once no cells are remaining
+        }
+      } 
+      
     df_driver_phylo <- fread(file_driver_phylo)
+    
+    if(ExitCode4){
+      
+      #first check that the data frame as the column "treated", else this will not work
+      if(! "Treated" %in% colnames(df_driver_phylo)){
+        warning(paste0("file ",file_driver_phylo, " does not contain the variable Treated, but ExitCode4=TRUE, which is incompatible !" ))
+      }
+      
+      df_driver_phylo<-subset(df_driver_phylo, df_driver_phylo$Treated==0)#remove the last lines corresponding to the update once no cells are remaining
+    }
+    
     
     df_driver_phylo <- filter(df_driver_phylo, CellsPerSample == -1, NumSamples == 1, SampleDepth == -1)
     df_driver_phylo <- df_driver_phylo[!duplicated(df_driver_phylo), ]
-    pop_df <- get_population_df(df_driver_phylo)
     
-    if(include_diversities) temp <- merge(df_out, df_div, all = TRUE)
-    else temp <- df_out
+    pop_df <- get_population_df(df_driver_phylo) #should run with the version of get_population_df dealing with treatment.
+    
+    if(include_diversities){
+      temp <- merge(df_out, df_div, all = TRUE)
+
+      temp<-temp[order(Generation, Treated), ]#ensure that the output file is correctly ordered
+
+    }else{ 
+      temp <- df_out
+    }
     
     # add parameter columns:
     if(nrow(temp) == 0){
@@ -311,7 +395,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
     
     # adds maxgen and gen_adj columns
     if(is.na(num_parameters)) num_parameters <- count_parameters(full_dir)
-    temp <- add_columns(temp, num_parameters) 
+    temp <- add_columns(temp, num_parameters)  #should run with the version of add_columns dealing with treatment.
     
     # add sweep_seq columns (specific for output.dat?)
     sweep_seq <- sweep_sequence(pop_df, lag_type = "proportions", breaks = 10)
@@ -350,7 +434,19 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
       temp <- cbind(df_pars, temp)
     }
   } else if (df_type %in% c("driver_phylo")){
+    
     df_driver_phylo <- fread(file_driver_phylo)
+    
+    if(ExitCode4){
+      
+      #first check that the data frame as the column "treated", else this will not work
+      if(! "Treated" %in% colnames(df_driver_phylo)){
+        warning(paste0("file ",file_driver_phylo, " does not contain the variable Treated, but ExitCode4=TRUE, which is incompatible !" ))
+      }
+      
+      df_driver_phylo<-subset(df_driver_phylo, df_driver_phylo$Treated==0)#remove the last lines corresponding to the update once no cells are remaining
+      
+    }
     
     df_driver_phylo <- filter(df_driver_phylo, CellsPerSample == -1, NumSamples == 1, SampleDepth == -1)
     df_driver_phylo <- df_driver_phylo[!duplicated(df_driver_phylo), ]
@@ -386,7 +482,8 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 #' @param vaf_cut_off exclude genotypes with vaf lower cut off from combined_df
 #' @param generation Generation at which to filter (default NA corresponds to no filtering)
 #' @param numcells Number of cells at which to filter (default NA corresponds to no filtering)
-#' 
+#' @param ExitCode4 : if TRUE, this means that we want to include in the analysis the simulations whose error message is Exit Code 4. This 
+#' will call the function combine_dfs with argument ExitCode4=TRUE. 
 #' @return a combined dataframe
 #' 
 #' @importFrom data.table rbindlist
@@ -404,7 +501,7 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 #' df_type = "genotype_properties", vaf_cut_off = 0.002)
 #' all_output(system.file("example_batch", "", package = "demonanalysis", mustWork = TRUE), 
 #' df_type = "allele_counts", generation = 10)
-all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", max_generation = FALSE, vaf_cut_off = NA, generation = NA, numcells = NA, n_cores = NA) {
+all_output <- function(input_dir, include_diversities = TRUE, df_type = "output", max_generation = FALSE, vaf_cut_off = NA, generation = NA, numcells = NA, n_cores = NA,ExitCode4=FALSE) {
   
   df_type_list <- c("output", "driver_genotype_properties", "genotype_properties", 
                     "allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts", "driver_phylo",
@@ -431,10 +528,26 @@ all_output <- function(input_dir, include_diversities = TRUE, df_type = "output"
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
     print(paste0(full_dir, " ", msg), quote = FALSE)
-    if(!identical(msg, character(0))) if(msg == "Exit code 0") return(combine_dfs(full_dir, include_diversities, 
-                                                                                  df_type, max_generation, vaf_cut_off, generation, numcells, num_parameters))
-    return(data.frame())
+    
+    #Modifications to deal with treatment => use combine_dfs with argument ExitCode4
+    if(!identical(msg, character(0))){
+      
+      if(msg == "Exit code 0"){
+        return(combine_dfs(full_dir, include_diversities, 
+                                    df_type, max_generation, vaf_cut_off, generation, numcells, num_parameters))
+        
+      }else if (msg == "Exit code 4"){
+        # if some of the simulations got "Exit code 4" and that we want to include them into the analysis, i.e by using ExitCode4=TRUE,
+        # then we need to call combine_dfs with argument ExitCode4=TRUE 
+        if(ExitCode4){
+          return(combine_dfs(full_dir, include_diversities, 
+                                      df_type, max_generation, vaf_cut_off, generation, numcells, num_parameters,ExitCode4=ExitCode4 ))
+        }
+        
+      }
+    }     return(data.frame())
   }
+  
   if(is.na(n_cores)){
     res <- rbindlist(apply_combinations(final_values, each_df))
   } else {
@@ -541,6 +654,72 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
   return(summary)
 }
 
+
+#' Function to return the lower bound of the confidence interval of a Spearman's rank correlation coef???cient.
+#' This function is created to work with find_correlations
+#' @param Var1 first variable of interest
+#' @param Var2 second variable of interest
+#' 
+#' @return lower bound of the confidence interval of a Spearman's rank correlation coef???cient, computed by bootpstraping, 
+#' with nrep = 500 the number of replicates for bootstraping and conf.level = 0.95 the con???dence level of the interval.
+#' return NA if no confidence interval has been computed, instead of NULL.
+#' 
+#' @importFrom RVAideMemoire spearman.ci
+corCI_low<-function(Var1, Var2){
+
+  cor.result<-spearman.ci(Var1, Var2, nrep = 500, conf.level = 0.95)#Computes the con???dence interval of a Spearman's rank correlation coef???cient by bootstraping.
+  
+  if(is.null(cor.result$conf.int)){
+    return(NA)
+  }else{
+    return(cor.result$conf.int[1])#return the lower bound of the confidence interval
+  }
+  
+}
+
+
+#' Function to return the upper bound of the confidence interval of a Spearman's rank correlation coef???cient.
+#' This function is created to work with find_correlations
+#' @param Var1 first variable of interest
+#' @param Var2 second variable of interest
+#' 
+#' @return upper bound of the confidence interval of a Spearman's rank correlation coef???cient, computed by bootpstraping, 
+#' with nrep = 500 the number of replicates for bootstraping and conf.level = 0.95 the con???dence level of the interval.
+#' return NA if no confidence interval has been computed, instead of NULL.
+#' 
+#' @importFrom RVAideMemoire spearman.ci
+corCI_high<-function(Var1, Var2){
+  
+  cor.result<-spearman.ci(Var1, Var2, nrep = 500, conf.level = 0.95)#Computes the con???dence interval of a Spearman's rank correlation coef???cient by bootstraping.
+  if(is.null(cor.result$conf.int)){
+    return(NA)
+  }else{
+    return(cor.result$conf.int[2])   #return the upper bound of the confidence interval 
+  }
+  
+}
+
+#' Function to return the p.value of a two.sided test, using the spearman correlation coefficient for the test
+#' This function is created to work with find_correlations
+#' @param Var1 first variable of interest
+#' @param Var2 second variable of interest
+#' 
+#' @return  p.value of a two.sided test, using the spearman correlation coefficient for the test.
+#' pvalue are computed via the asymptotic t approximation (exact=FALSE).
+#' return NA if no p.value has been computed, instead of NULL.
+#' 
+#' @importFrom stats cor.test
+#' 
+cor_pval<-function(Var1, Var2){
+  cor.result<-cor.test(Var1,Var2,  method = "spearman", alternative = "two.sided", exact=FALSE)
+  if(is.null(cor.result$p.value)){
+    return(NA)
+  }else{
+    return(cor.result$p.value)    
+  }
+  
+}
+
 #' Generic function to find a correlation between two columns of a dataframe
 #' 
 #' @param summary dataframe
@@ -551,6 +730,7 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
 #' 
 #' @return Correlation between the two columns (or NA if either factor1 or factor2 contains NA, 
 #' or if all values of factor1 or factor2 are identical).
+#' Also return the pValue on the spearman correlation coefficient and the associated confidence interval at a 0.95 level.
 #' 
 #' @import dplyr
 #' @import lazyeval
@@ -561,15 +741,32 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
 #' @examples
 #' s1 <- data.frame(a = 1:3, b = 1:3 * (1 + rnorm(3) / 10))
 #' find_correlations(s1, "a", "b", "c", 3)
-find_correlations <- function(summary, factor1, factor2, result_name, min_count) {
-  summary %>% 
-    mutate_(variance = interp(~var(var1), var1 = as.name(factor2))) %>% 
+#' find_correlations(s1, "a", "b", "c", 3, TRUE) # also return 0.95-CI on the spearman correlation coefficient
+find_correlations <- function(summary, factor1, factor2, result_name, min_count, ReturnCI =FALSE ) {
+  output<-summary %>% 
+    mutate_(variance = interp(~var(var1, na.rm = TRUE), var1 = as.name(factor2))) %>% 
     filter(variance > 0) %>% # to avoid warnings when all values of factor2 are identical
     mutate_(count1 = interp(~length(var1), var1 = as.name(factor1)), 
             count2 = interp(~length(var2), var2 = as.name(factor2))) %>% 
-    filter(count1 >= min_count, count2 >= min_count) %>% 
-    summarise_(temp_name = interp(~cor(var1, var2, method = "spearman"), var1 = as.name(factor1), var2 = as.name(factor2))) %>% 
-    rename_(.dots = setNames("temp_name", paste0(result_name)))
+    filter(count1 >= min_count, count2 >= min_count) 
+  
+  if(ReturnCI){
+    output<-output %>% 
+    summarise_(temp_name = interp(~cor(var1, var2, method = "spearman", use="na.or.complete"), var1 = as.name(factor1), var2 = as.name(factor2)),#  use="na.or.complete" ensure that missing values are handled by casewise deletion, and if there are no complete cases, that gives NA.
+               temp_name_pval = interp(~cor_pval(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2)),
+               temp_name_cilow = interp(~corCI_low(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2)),
+               temp_name_cihigh = interp(~corCI_high(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2))) %>%
+      rename_(.dots = setNames(c("temp_name", "temp_name_pval","temp_name_cilow", "temp_name_cihigh") , paste0(result_name,  c("", "_pVal", "_CI_low", "_CI_high")) ))
+  }else{
+    output<-output %>% 
+      summarise_(temp_name = interp(~cor(var1, var2, method = "spearman", use="na.or.complete"), var1 = as.name(factor1), var2 = as.name(factor2)),#  use="na.or.complete" ensure that missing values are handled by casewise deletion, and if there are no complete cases, that gives NA.
+                 temp_name_pval = interp(~cor_pval(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2))) %>%
+      rename_(.dots = setNames(c("temp_name", "temp_name_pval") , paste0(result_name,  c("", "_pVal")) ))
+    
+  }
+
+  return(output)
+
 }
 
 #' Generate summary dataframe of correlations with "outcome"
@@ -578,10 +775,19 @@ find_correlations <- function(summary, factor1, factor2, result_name, min_count)
 #' @param col_names_list char vector of column names in the summary dataframe
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' @param min_count minimum number of items in each column (otherwise result will be NA)
+#' @param Verbose if TRUE, helpful to debug, print the name of the variables with which compute the correlation
+#' @param ReturnCI if true, also return the 0.95 level confidence interval computed by bootstraping.
+#' @param VariablesToNotGroupBy vector of column names by which we don't want to group the simulation. For example, if mutation rate (mu_driver_birth)
+#' are random, then we don't want to group the simulations by the variable mu_driver_birth, so we need to set VariablesToNotGroupBy=c("mu_driver_birth")
+#' This is more general than creating a boolean argument as CombinedMutationRate=TRUE/FALSE. 
+#' 
 #' 
 #' @return Dataframe with one row for each unique combination of parameter values, gap and start_size 
 #' (i.e. it summarises over "seed"), and including columns containing the correlations between "outcome" 
-#' and each variable in col_names_list.
+#' and each variable in col_names_list and the associated pValues for the two.sided test of the correlation coefficient.
+#' If the argument ReturnCI=TRUE, the 0.95 Confidence Intervals for the correlation coefficients are also computed.
+#' Argument VariablesToNotGroupBy allows to compute the correlation coefficients while not grouping simulations
+#' by variables contained into VariablesToNotGroupBy.
 #' 
 #' @import dplyr
 #' @importFrom stats var
@@ -589,9 +795,27 @@ find_correlations <- function(summary, factor1, factor2, result_name, min_count)
 #' 
 #' @examples
 #' get_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), 16, min_count = 5)
-get_cor_summary <- function(summary, col_names_list, num_parameters, min_count) {
+get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL ) {
+  
   col_nums <- c(1:num_parameters, which(colnames(summary) == "gap"), which(colnames(summary) == "start_size"))
+  
   col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
+  
+  # The following lines allow to compute the correlations with outcome without grouping simulations by variables in VariablesToNotGroupBy
+  # This is usefull when variables contained in VariablesToNotGroupBy are set to random in the batch (e.g random mutation rates or fitness effects or mu_passenger).
+  
+  if(! is.null(VariablesToNotGroupBy)){
+    
+    #if at least one variable of VariablesToNotGroupByis not in the colnames of summary return a warning
+    if(sum(! VariablesToNotGroupBy %in% colnames(sum_df))){
+      warning(paste0("Variable(s) ", VariablesToNotGroupBy[! VariablesToNotGroupBy %in% colnames(sum_df)], " of argument VariablesToNotGroupBy NOT in colnames of summary !"))
+    }
+    
+    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% VariablesToNotGroupBy)))]
+    
+  }
+  
+  
   summary <- summary %>% 
     group_by_at(col_nums) %>% 
     filter(!is.na(outcome)) %>% 
@@ -604,8 +828,18 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count) 
               num_seeds = n())
   result_names_list <- paste0("Cor_", col_names_list)
   cor_summary_list <- list()
-  for(i in 1:length(col_names_list)) cor_summary_list[[i]] <- find_correlations(summary, "outcome", col_names_list[i], result_names_list[i], min_count)
+  for(i in 1:length(col_names_list)){
+    
+    if(Verbose){
+      print(col_names_list[i])
+    }
+    
+    cor_summary_list[[i]] <- find_correlations(summary, "outcome", col_names_list[i], result_names_list[i], min_count, ReturnCI)
+  } 
   for(i in 1:length(col_names_list)) cor_summary <- merge(cor_summary, cor_summary_list[[i]], all.x = TRUE)
+  
+  cor_summary <- arrange(cor_summary, K, migration_type, migration_edge_only, start_size)
+  
   return(cor_summary)
 }
 
@@ -615,10 +849,18 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count) 
 #' @param col_names_list char vector of column names in the summary dataframe
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' @param min_count minimum number of items in each column (otherwise result will be NA)
+#' @param Verbose if TRUE, helpful to debug, print the name of the variables with which compute the correlation
+#' @param ReturnCI if true, also return the 0.95 level confidence interval computed by bootstraping.
+#' @param VariablesToNotGroupBy vector of column names by which we don't want to group the simulation. For example, if mutation rate (mu_driver_birth)
+#' are random, then we don't want to group the simulations by the variable mu_driver_birth, so we need to set VariablesToNotGroupBy=c("mu_driver_birth")
+#' This is more general than creating a boolean argument as CombinedMutationRate=TRUE/FALSE. 
 #' 
 #' @return Dataframe with one row for each unique combination of parameter values and start_size 
 #' (i.e. it summarises over "seed"), and including columns containing the correlations between "waiting_time" 
-#' and each variable in col_names_list.
+#' and each variable in col_names_list and the associated pValues for the two.sided test of the correlation coefficient.
+#' If the argument ReturnCI=TRUE, the 0.95 Confidence Intervals for the correlation coefficients are also computed.
+#' Argument VariablesToNotGroupBy allows to compute the correlation coefficients while not grouping simulations
+#' by variables contained into VariablesToNotGroupBy.
 #' 
 #' @import dplyr
 #' @importFrom stats var
@@ -631,9 +873,26 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count) 
 #' c(paste0("DriverDiversityFrom1SamplesAtDepth", 0:10), 
 #' paste0("DriverDiversityFrom4SamplesAtDepth", 0:10)), 
 #' 16, min_count = 5)
-get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_count) {
+get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL  ) {
   col_nums <- c(1:num_parameters, which(colnames(summary) == "start_size"))
+  
   col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
+  
+  # The following lines allow to compute the correlations with waiting time without grouping simulations by variables in VariablesToNotGroupBy
+  # This is usefull when variables contained in VariablesToNotGroupBy are set to random in the batch (e.g random mutation rates or fitness effects or mu_passenger).
+  
+  if(! is.null(VariablesToNotGroupBy)){
+    
+    #if at least one variable of VariablesToNotGroupByis not in the colnames of summary return a warning
+    if(sum(! VariablesToNotGroupBy %in% colnames(sum_df))){
+      warning(paste0("Variable(s) ", VariablesToNotGroupBy[! VariablesToNotGroupBy %in% colnames(sum_df)], " of argument VariablesToNotGroupBy NOT in colnames of summary !"))
+    }
+    
+    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% VariablesToNotGroupBy)))]
+    
+  }
+  
+  
   summary <- summary %>% 
     group_by_at(col_nums) %>% 
     filter(gap == min(gap, na.rm = TRUE)) %>% # choice of gap value doesn't affect the result
@@ -647,7 +906,15 @@ get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_co
               num_seeds = n())
   result_names_list <- paste0("Cor_", col_names_list)
   cor_summary_list <- list()
-  for(i in 1:length(col_names_list)) cor_summary_list[[i]] <- find_correlations(summary, "waiting_time", col_names_list[i], result_names_list[i], min_count)
+  for(i in 1:length(col_names_list)){
+    
+    if(Verbose){
+      print(col_names_list[i])
+    }
+    
+    cor_summary_list[[i]] <- find_correlations(summary, "waiting_time", col_names_list[i], result_names_list[i], min_count, ReturnCI)
+    
+  }
   for(i in 1:length(col_names_list)) cor_summary <- merge(cor_summary, cor_summary_list[[i]], all.x = TRUE)
   
   cor_summary <- arrange(cor_summary, K, migration_type, migration_edge_only, start_size)
@@ -685,3 +952,186 @@ refresh_data_files <- function() {
   output_genotype_counts <- read_delim(system.file("extdata", "output_genotype_counts.dat", package = "demonanalysis", mustWork = TRUE), "\t")
   save(output_genotype_counts, file="data/output_genotype_counts.RData")
 }
+
+ 
+#' Generate summary dataframe of correlations with the variable of interest "MainVariable" and the variables in col_names_list at different "start size"
+#' 
+#' @param summary dataframe including columns named "seed", "Generation", "start_time", "start_size", "gap" and "waiting_time"
+#' @param col_names_list char vector of column names in the summary dataframe
+#' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
+#' @param min_count minimum number of items in each column (otherwise result will be NA)
+#' @param Verbose if TRUE, helpful to debug, print the name of the variables with which compute the correlation
+#' @param ReturnCI if true, also return the 0.95 level confidence interval computed by bootstraping.
+#' @param VariablesToNotGroupBy vector of column names by which we don't want to group the simulation. For example, if mutation rate (mu_driver_birth)
+#' are random, then we don't want to group the simulations by the variable mu_driver_birth, so we need to set VariablesToNotGroupBy=c("mu_driver_birth")
+#' This is more general than creating a boolean argument as CombinedMutationRate=TRUE/FALSE.
+#' 
+#' @return Dataframe with one row for each unique combination of parameter values and start_size 
+#' (i.e. it summarises over "seed"), and including columns containing the correlations between "waiting_time" 
+#' and each variable in col_names_list and the associated pValues for the two.sided test of the correlation coefficient.
+#' If the argument ReturnCI=TRUE, the 0.95 Confidence Intervals for the correlation coefficients are also computed.
+#' Argument VariablesToNotGroupBy allows to compute the correlation coefficients while not grouping simulations
+#' by variables contained into VariablesToNotGroupBy.
+#' 
+#' @import dplyr
+#' @importFrom stats var
+#' @export
+get_Variable_cor_summary <- function(summary,MainVariable,  col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL) {
+  
+  col_nums <- c(1:num_parameters, which(colnames(summary) == "start_size"))
+  
+  
+  if(MainVariable=="outcome"){
+    col_nums <-  c(col_nums, which(colnames(summary) == "gap"))
+  }
+  
+  
+  col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
+  
+  
+  if(! is.null(VariablesToNotGroupBy)){
+    
+    #if at least one variable of VariablesToNotGroupByis not in the colnames of summary return a warning
+    if(sum(! VariablesToNotGroupBy %in% colnames(sum_df))){
+      warning(paste0("Variable(s) ", VariablesToNotGroupBy[! VariablesToNotGroupBy %in% colnames(sum_df)], " of argument VariablesToNotGroupBy NOT in colnames of summary !"))
+    }
+    
+    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% VariablesToNotGroupBy)))]
+    
+  }
+  
+  col_nums<-sort(col_nums)
+  
+  summary <- summary %>% 
+    group_by_at(col_nums) %>% 
+    filter(gap == min(gap, na.rm = TRUE)) %>% # choice of gap value doesn't affect the result
+    filter(!is.na(get(MainVariable))) %>% 
+    filter(!is.infinite(get(MainVariable))) %>% 
+    filter(var(get(MainVariable)) > 0)
+  
+  cor_summary <- summary %>% 
+    summarise(mean_start_time = mean(start_time), 
+              mean_DriverDiversity = mean(DriverDiversity), 
+              mean_waiting_time = mean(waiting_time), 
+              meanToRename=mean(get(MainVariable)),
+              mean_autocor = mean(mean_autocor), 
+              num_seeds = n())
+  
+  if( paste0("mean_",MainVariable ) %in% colnames(cor_summary)){
+    #if MainVariable is a variable among "start_time", "DriverDiversity", "waiting_time", "autocor",
+    #then we would have duplication of columns, and this is prevented
+    cor_summary$meanToRename<-NULL
+  }else{
+    colnames(cor_summary)[which(colnames(cor_summary)=="meanToRename")]<-paste0("mean_",MainVariable )
+    
+  }
+  
+  result_names_list <- paste0("Cor_", col_names_list)
+  cor_summary_list <- list()
+  for(i in 1:length(col_names_list)){
+    
+    if(Verbose){
+      print(col_names_list[i])
+    }
+    
+    cor_summary_list[[i]] <- find_correlations(summary, eval(MainVariable), col_names_list[i], result_names_list[i], min_count,ReturnCI)
+    
+  }
+  for(i in 1:length(col_names_list)) cor_summary <- merge(cor_summary, cor_summary_list[[i]], all.x = TRUE)
+  
+  cor_summary <- arrange(cor_summary, K, migration_type, migration_edge_only, start_size)
+  
+  return(cor_summary)
+}
+
+
+#' Generate summary dataframe of correlations with the variable of interest "MainVariable" and the variables in col_names_list  at different "final size"
+#' 
+#' @param summary dataframe including columns named "seed", "Generation", "start_time", "start_size", "gap" and "waiting_time"
+#' @param col_names_list char vector of column names in the summary dataframe
+#' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
+#' @param min_count minimum number of items in each column (otherwise result will be NA)
+#' @param Verbose if TRUE, helpful to debug, print the name of the variables with which compute the correlation
+#' @param ReturnCI if true, also return the 0.95 level confidence interval computed by bootstraping.
+#' @param VariablesToNotGroupBy vector of column names by which we don't want to group the simulation. For example, if mutation rate (mu_driver_birth)
+#' are random, then we don't want to group the simulations by the variable mu_driver_birth, so we need to set VariablesToNotGroupBy=c("mu_driver_birth")
+#' This is more general than creating a boolean argument as CombinedMutationRate=TRUE/FALSE. 
+#' 
+#' @return Dataframe with one row for each unique combination of parameter values and start_size 
+#' (i.e. it summarises over "seed"), and including columns containing the correlations between "waiting_time" 
+#' and each variable in col_names_list and the associated pValues for the two.sided test of the correlation coefficient.
+#' If the argument ReturnCI=TRUE, the 0.95 Confidence Intervals for the correlation coefficients are also computed.
+#' Argument VariablesToNotGroupBy allows to compute the correlation coefficients while not grouping simulations
+#' by variables contained into VariablesToNotGroupBy.
+#' 
+#' @import dplyr
+#' @importFrom stats var
+#' @export
+get_Variable_cor_summary_FinalSize <- function(summary, MainVariable,  col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL) {
+  
+  col_nums <- c(1:num_parameters, which(colnames(summary) == "FinalSize"))
+  
+  if(MainVariable=="outcome"){
+    col_nums <-  c(col_nums, which(colnames(summary) == "gap"))
+  }
+  
+  
+  col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% c("seed"))))]
+  
+  if(! is.null(VariablesToNotGroupBy)){
+    
+    #if at least one variable of VariablesToNotGroupByis not in the colnames of summary return a warning
+    if(sum(! VariablesToNotGroupBy %in% colnames(sum_df))){
+      warning(paste0("Variable(s) ", VariablesToNotGroupBy[! VariablesToNotGroupBy %in% colnames(sum_df)], " of argument VariablesToNotGroupBy NOT in colnames of summary !"))
+    }
+    
+    col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% VariablesToNotGroupBy)))]
+    
+  }
+  
+  summary <- summary %>% 
+    group_by_at(col_nums) %>% 
+    filter(gap == min(gap, na.rm = TRUE)) %>% # choice of gap value doesn't affect the result
+    filter(!is.na(get(MainVariable))) %>% 
+    filter(!is.infinite(get(MainVariable)))  %>% 
+    filter(var(get(MainVariable))  > 0)
+  
+  cor_summary <- summary %>% 
+    summarise(mean_start_time = mean(start_time), 
+              mean_DriverDiversity = mean(DriverDiversity), 
+              mean_waiting_time = mean(waiting_time), 
+              meanToRename=mean(get(MainVariable)),
+              mean_autocor = mean(mean_autocor), 
+              num_seeds = n())
+  
+  
+  if( paste0("mean_",MainVariable ) %in% colnames(cor_summary)){
+    #if MainVariable is a variable among "start_time", "DriverDiversity", "waiting_time", "autocor",
+    #then we would have duplication of columns, and this is prevented
+    cor_summary$meanToRename<-NULL
+  }else{
+    colnames(cor_summary)[which(colnames(cor_summary)=="meanToRename")]<-paste0("mean_",MainVariable )
+    
+  }
+  
+  
+  result_names_list <- paste0("Cor_", col_names_list)
+  cor_summary_list <- list()
+  
+  for(i in 1:length(col_names_list)){
+    
+    if(Verbose){
+      print(col_names_list[i])
+    }
+    
+    cor_summary_list[[i]] <- find_correlations(summary, eval(MainVariable), col_names_list[i], result_names_list[i], min_count,ReturnCI)
+    
+  }
+  
+  for(i in 1:length(col_names_list)) cor_summary <- merge(cor_summary, cor_summary_list[[i]], all.x = TRUE)
+  
+  cor_summary <- arrange(cor_summary, K, migration_type, migration_edge_only, FinalSize)
+  
+  return(cor_summary)
+}
+

@@ -155,9 +155,8 @@ sweep_times <- function(phylo, threshold, min_pop = 0) {
 #' @param breaks Number of breaks for determining lag (used only if lag_type = "proportions"; default 10)
 #' @param lag_gens Lag in terms of generations (used only if lag_type = "generations"; default 500)
 #' 
-#' @return For each generation g in pop_df, excluding the first generation, the output vector quantifies 
-#' the change in genotype frequencies compared to generation g - lag_gens (by summing the squares of the 
-#' differences). The length of the output sequence is one less than the number of rows in the input dataframe.
+#' @return For each generation g in pop_df, the output vector quantifies the change in genotype frequencies 
+#' compared to generation g - lag_gens (by summing the squares of the differences).
 #' 
 #' @export
 #' @import dplyr
@@ -196,7 +195,7 @@ sweep_sequence <- function(pop_df, lag_type = "generations", breaks = 10, lag_ge
   #pop_df <- filter(pop_df, Generation >= min(pop_df$Generation, na.rm = TRUE) + (max(pop_df$Generation, na.rm = TRUE) - min(pop_df$Generation, na.rm = TRUE))/breaks)
   sum_df <- group_by(pop_df, Generation) %>% 
     summarise(sum_diff = sum(diff, na.rm=TRUE))
-  return(sum_df$sum_diff)[-1] # remove the first value, which is always zero
+  return(sum_df$sum_diff)
 }
 
 #' Get genotype frequencies in increasing order of size
@@ -271,6 +270,8 @@ quadratic_diversity <- function(value, freq, sigma, threshold = 0.1) {
 #' @export
 #' @import Rgraphviz
 #' @import dplyr
+#' @import graph
+#' @import Rgraphviz
 #' @importFrom grDevices dev.off
 #' @importFrom grDevices pdf
 #' 
@@ -358,7 +359,7 @@ count_drivers <- function(edges, node) {
 #' 
 #' @examples
 #' edges1 <- data.frame(Parent = c(0,1,1,2,2,3,3), Identity = 1:7, Population = c(2,10,5,10,20,10,3))
-#' metrics(edges1)
+#' count_drivers(edges1, 6)
 metrics <- function(data) {
   D <- inv_Simpson_index(data$Population)
   
