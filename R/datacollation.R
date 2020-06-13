@@ -545,7 +545,8 @@ all_output <- function(input_dir, include_diversities = TRUE, df_type = "output"
         }
         
       }
-    }     return(data.frame())
+    }
+    return(data.frame())
   }
   
   if(is.na(n_cores)){
