@@ -7,7 +7,7 @@
 metrics(data)
 }
 \arguments{
-\item{edges}{dataframe comprising an adjacency matrix, including Population}
+\item{data}{dataframe comprising an adjacency matrix, including Population}
 }
 \value{
 Vector containing average number of ancestors per node (n) and diversity (D)

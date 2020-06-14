@@ -274,6 +274,7 @@ quadratic_diversity <- function(value, freq, sigma, threshold = 0.1) {
 #' @import dplyr
 #' @importFrom grDevices dev.off
 #' @importFrom grDevices pdf
+#' @importFrom graph ftM2adjM
 #' 
 #' @examples
 #' edges1 <- data.frame(Parent = c(0,1,1,2,2,3,3), Identity = 1:7, Population = c(2,10,5,10,20,10,3))
@@ -351,7 +352,7 @@ count_drivers <- function(edges, node) {
 
 #' Calculate average number of ancestors per node (n) and diversity (D) for a phylogenetic tree
 #' 
-#' @param edges dataframe comprising an adjacency matrix, including Population
+#' @param data dataframe comprising an adjacency matrix, including Population
 #' 
 #' @return Vector containing average number of ancestors per node (n) and diversity (D)
 #' 

@@ -4,10 +4,12 @@
 \alias{muller_df_from_file}
 \title{Read a "phylo" dataframe and process it for plotting}
 \usage{
-muller_df_from_file(file)
+muller_df_from_file(file, cutoff = 0)
 }
 \arguments{
 \item{file}{file name including path}
+
+\item{cutoff}{Numeric cutoff; genotypes that never become more abundant than this value are omitted}
 }
 \value{
 a dataframe formatted for plotting

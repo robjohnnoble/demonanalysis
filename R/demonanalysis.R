@@ -16,12 +16,25 @@ apply_combinations <- function(vec, fn, ...){
   apply(tmp, 1, fn, ...) # the result of applying fn to each row of tmp
 }
 
+#' Apply a function to every combination of some sequences (parallelized version)
+#' 
+#' @param n_cores number of cores
+#' @param vec vector of final values of the sequences (initial values are always zero)
+#' @param fn function to apply to the values
+#' @param ... other arguments passed to fn
+#' 
+#' @return result of applying fn to every combination of vec values
+#' 
+#' @details Adding the argument type="FORK" to makeCluster solves the problem of variables and function scope
+#' (this option means that the function automatically knows all environment variables)
+#' !!!! Notice that this only works on mac and linux, else we would need to use clusterExport and clusterEvalQ
+#' something like: clusterExport(cl, list("all_output", "combine_dfs", "get_population_df", "fread"))
+#' !!!! to test if needed!!!!
+#' 
+#' @export
+#' 
+#' @import parallel
 apply_combinations_parallel <- function(n_cores, vec, fn, ...){
-  library(parallel)
-  # Adding the argument type="FORK" to makeCluster solves the problem of variables and function scope 
-  #(this option means that the function automatically knows all environment variables)
-  # !!!! Notice that this only works on mac and linux, else we would need to use « clusterExport » and «clusterEvalQ» : 
-  #something like : clusterExport(cl, list("all_output", "combine_dfs", "get_population_df", "fread"))!!!! to test if needed!!!!
   cl <- makeCluster(n_cores,  type="FORK")
   vecs <- mapply(seq, 0, vec, SIMPLIFY = FALSE) # a list of n sequences, where n = length(vec)
   tmp <- do.call(expand.grid, vecs) # a data frame where each row is a permuation of values from the n sequences
@@ -213,6 +226,7 @@ grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FAL
 #' 
 #' @param path folder containing the input files
 #' @param trim how many rows and columns to remove from grids; if trim < 0 (default) then all rows and columns containing NA are removed
+#' @param include_genotype_plots whether to include genotype plots
 #' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
 #' @param output_filename name of output image file
 #' @param file_type either "pdf" or "png" (other values default to "pdf")
@@ -309,6 +323,17 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
 }
 
 #' Create a set of plots for Figure 2
+#' 
+#' @param path path to data file
+#' @param output_filename name of output image file
+#' @param file_type either "pdf" or "png" (other values default to "pdf")
+#' @param output_dir folder in which to save the image file; if NA then plots are displayed on screen instead
+#' @param trim how many rows and columns to remove from grids; if trim < 0 (default) then all rows and columns containing NA are removed
+#' @param cutoff Numeric cutoff; genotypes that never become more abundant than this value are omitted from Muller plots
+#' 
+#' @return either an image file or a plot displyed on screen
+#' 
+#' @export
 plot_figure2 <- function(path, output_filename = NA, file_type = "png", output_dir = NA, trim = -1, cutoff = 0) {
   if(substr(path, nchar(path), nchar(path)) != "/") path <- paste0(path, "/")
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
@@ -410,9 +435,16 @@ plot_allelecount_vs_origintime <- function (file_or_dataframe, log = FALSE, colo
   palette_named <- !min(sapply(palette, function(X) tryCatch(is.matrix(col2rgb(X)), 
                                                              error = function(e) FALSE)))
   df <- filter(df, Descendants > 0)
-  q <- ggplot(df[order(df$DriverIdentity),], aes_string("OriginTime", 
+  
+  if("DriverIdentity" %in% colnames(df)) {
+    q <- ggplot(df[order(df$DriverIdentity),], aes_string("OriginTime", 
                                                         "Descendants", size = "BirthRate", colour = colour_by)) + 
-    geom_point(alpha = 1) + theme_classic()
+      geom_point(alpha = 1) + theme_classic()
+  } else {
+    q <- ggplot(df[order(df$Identity),], aes_string("OriginTime", 
+                                                          "Descendants", size = "BirthRate", colour = colour_by)) + 
+      geom_point(alpha = 1) + theme_classic()
+  }
   if (!discrete) {
     q <- q + scale_color_distiller(palette = palette, direction = direction)
   }
@@ -557,6 +589,7 @@ plot_logit_freq_dist <- function(file_or_dataframe, generation = NA, ...) {
 #' 
 #' @param file_or_dataframe file or data frame containing columns "Frequency" and "Count"
 #' @param generation Generation at which to make the measurement (default NA corresponds to the final Generation)
+#' @param max_y max value of y-axis
 #' @param ... other parameters passed to plot
 #' 
 #' @return plot displyed on screen

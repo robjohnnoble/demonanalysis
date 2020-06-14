@@ -5,7 +5,8 @@
 \title{Create a set of grid and Muller plots}
 \usage{
 plot_all_images(path, output_filename = NA, file_type = "png",
-  output_dir = NA, trim = -1)
+  output_dir = NA, trim = -1, include_genotype_plots = TRUE,
+  cutoff = 0, min_birth_rate = NA, max_birth_rate = NA)
 }
 \arguments{
 \item{path}{folder containing the input files}
@@ -17,6 +18,14 @@ plot_all_images(path, output_filename = NA, file_type = "png",
 \item{output_dir}{folder in which to save the image file; if NA then plots are displayed on screen instead}
 
 \item{trim}{how many rows and columns to remove from grids; if trim < 0 (default) then all rows and columns containing NA are removed}
+
+\item{include_genotype_plots}{whether to include genotype plots}
+
+\item{cutoff}{Numeric cutoff; genotypes that never become more abundant than this value are omitted from Muller plots}
+
+\item{min_birth_rate}{minimum value for birth rate scale (set automatically by default)}
+
+\item{max_birth_rate}{maximum value for birth rate scale (set automatically by default)}
 }
 \value{
 either an image file or a plot displyed on screen

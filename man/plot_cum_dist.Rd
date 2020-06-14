@@ -11,6 +11,8 @@ plot_cum_dist(file_or_dataframe, generation = NA, max_y = NA, ...)
 
 \item{generation}{Generation at which to make the measurement (default NA corresponds to the final Generation)}
 
+\item{max_y}{max value of y-axis}
+
 \item{...}{other parameters passed to plot}
 }
 \value{

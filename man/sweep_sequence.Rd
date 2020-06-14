@@ -17,8 +17,10 @@ sweep_sequence(pop_df, lag_type = "generations", breaks = 10,
 \item{lag_gens}{Lag in terms of generations (used only if lag_type = "generations"; default 500)}
 }
 \value{
-For each generation g in pop_df, the output vector quantifies the change in genotype frequencies 
-compared to generation g - lag_gens (by summing the squares of the differences).
+For each generation g in pop_df, excluding the first generation, the output vector quantifies 
+the change in genotype frequencies compared to generation g - lag_gens (by summing the squares of the 
+differences). The length of the output sequence is the same as the number of rows in the input dataframe.
+The first value is always zero.
 }
 \description{
 Calculate how the genotype frequency distribution changes over time

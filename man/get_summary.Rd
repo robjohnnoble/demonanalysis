@@ -20,7 +20,7 @@ get_summary(data, start_size_range, gap_range, final_size, num_parameters)
 \value{
 a dataframe with one row for each unique combination of parameter values (including seed), 
 "gap" and "start_size", (i.e. it summarises over time) and which has added columns "start_time" 
-(proportional time until NumCells reached start_size), "end_time" (proportional time until NumCells 
+(generations until NumCells reached start_size), "end_time" (generations until NumCells 
 reached end_size), "waiting_time" (difference between start_time and end_time), and "outcome" 
 (NumCells after "gap")
 }
@@ -31,5 +31,5 @@ Get summary metrics for one or more simulations
 num_parameters = count_parameters(system.file("extdata", "", 
 package = "demonanalysis", mustWork = TRUE))
 comb_df <- combine_dfs(system.file("extdata", "", package = "demonanalysis", mustWork = TRUE))
-get_summary(comb_df, c(100, 300), c(0.35, 0.65), 1000, num_parameters)
+get_summary(comb_df, c(100, 300), c(10, 20), 1000, num_parameters)
 }

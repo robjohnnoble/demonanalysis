@@ -18,6 +18,7 @@ since Generation zero, relative to maxgen; SmoothNumCells is NumCells with loess
 SmoothRadius is the radius of a disc of area NumCells, after loess smoothing; 
 GrowthRate and RadiusGrowthRate are the rates of change of SmoothNumCells and SmoothRadius, 
 relative to Generation.
+Deal differently with dataframe containing the column "Treated".
 }
 \description{
 Add derived variables to a dataframe

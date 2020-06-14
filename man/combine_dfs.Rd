@@ -6,7 +6,7 @@
 \usage{
 combine_dfs(full_dir, include_diversities = TRUE, df_type = "output",
   max_generation = FALSE, vaf_cut_off = NA, generation = NA,
-  numcells = NA, num_parameters = NA)
+  numcells = NA, num_parameters = NA, ExitCode4 = FALSE)
 }
 \arguments{
 \item{full_dir}{base input directory name}
@@ -15,6 +15,8 @@ combine_dfs(full_dir, include_diversities = TRUE, df_type = "output",
 
 \item{df_type}{which dataframes to combine}
 
+\item{max_generation}{If TRUE then results are returned only for the final generation}
+
 \item{vaf_cut_off}{exclude genotypes with vaf lower than cut off (if df_type == "genotype_properties" or "driver_genotype_properties")}
 
 \item{generation}{Generation at which to filter (default NA corresponds to no filtering)}
@@ -22,6 +24,10 @@ combine_dfs(full_dir, include_diversities = TRUE, df_type = "output",
 \item{numcells}{Number of cells at which to filter (default NA corresponds to no filtering)}
 
 \item{num_parameters}{Number of parameters, accounting for the first set of columns in the dataframe (optional, but may improve speed)}
+
+\item{ExitCode4}{Allow to deal with simulations including treatment. Simulations for which the tumor die at the treatment time end with "Exit Code =4",
+we need to deal in a specific way (i.e need to remove the lines with Treated==1) with these simulations when combining the output
+(as these simulations have most columns containing missing valeus/NA after the treatment).}
 }
 \value{
 the combined dataframe

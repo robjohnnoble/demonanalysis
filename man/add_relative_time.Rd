@@ -7,7 +7,7 @@
 add_relative_time(df, start_size, num_parameters)
 }
 \arguments{
-\item{df}{dataframe with columns including "gen_adj", "NumCells" and "DriverEdgeDiversity"}
+\item{df}{dataframe with columns including "Generation", "NumCells" and "DriverEdgeDiversity"}
 
 \item{start_size}{value of NumCells at which new_time should be set to zero}
 
@@ -15,7 +15,7 @@ add_relative_time(df, start_size, num_parameters)
 }
 \value{
 the same dataframe with additional columns: "new_time" is the time elapsed since
-NumCells = start_size; "div0" is DriverEdgeDiversity when NumCells = start_size; 
+NumCells = start_size; "div0" is DriverDiversity when NumCells = start_size; 
 "rank_div0" is div0 rescaled to a rank between 0 and 1
 }
 \description{

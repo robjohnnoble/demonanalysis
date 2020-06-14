@@ -5,7 +5,23 @@
 \title{Create a set of plots for Figure 2}
 \usage{
 plot_figure2(path, output_filename = NA, file_type = "png",
-  output_dir = NA, trim = -1)
+  output_dir = NA, trim = -1, cutoff = 0)
+}
+\arguments{
+\item{path}{path to data file}
+
+\item{output_filename}{name of output image file}
+
+\item{file_type}{either "pdf" or "png" (other values default to "pdf")}
+
+\item{output_dir}{folder in which to save the image file; if NA then plots are displayed on screen instead}
+
+\item{trim}{how many rows and columns to remove from grids; if trim < 0 (default) then all rows and columns containing NA are removed}
+
+\item{cutoff}{Numeric cutoff; genotypes that never become more abundant than this value are omitted from Muller plots}
+}
+\value{
+either an image file or a plot displyed on screen
 }
 \description{
 Create a set of plots for Figure 2

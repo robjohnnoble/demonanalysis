@@ -289,6 +289,7 @@ filter_by_generation_or_numcells <- function(df, path, generation = NA, numcells
 #' @param full_dir base input directory name
 #' @param include_diversities boolean whether to include diversity metrics (if df_type == "output")
 #' @param df_type which dataframes to combine
+#' @param max_generation If TRUE then results are returned only for the final generation
 #' @param vaf_cut_off exclude genotypes with vaf lower than cut off (if df_type == "genotype_properties" or "driver_genotype_properties")
 #' @param generation Generation at which to filter (default NA corresponds to no filtering)
 #' @param numcells Number of cells at which to filter (default NA corresponds to no filtering)
@@ -341,24 +342,22 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
   df_pars <- fread(file_pars)
   
   if (df_type == "output"){
-    
-    if (df_type == "output"){
-      # procedure for 'traditional' df_out (output.dat)
-      if(include_diversities){
-        
-        df_div <- fread(file_div)
-        
-        if(ExitCode4){
-          
-          #first check that the data frame as the column "treated", else this will not work
-          if(! "Treated" %in% colnames(df_div)){
-            warning(paste0("file ",file_div, " does not contain the variable Treated, but ExitCode4=TRUE, which is incompatible !" ))
-          }
-          
-          df_div<-subset(df_div, df_div$Treated==0) #remove the last line corresponding to the update once no cells are remaining
-        }
-      } 
+    # procedure for 'traditional' df_out (output.dat)
+    if(include_diversities){
       
+      df_div <- fread(file_div)
+      
+      if(ExitCode4){
+        
+        #first check that the data frame as the column "treated", else this will not work
+        if(! "Treated" %in% colnames(df_div)){
+          warning(paste0("file ",file_div, " does not contain the variable Treated, but ExitCode4=TRUE, which is incompatible !" ))
+        }
+        
+        df_div<-subset(df_div, df_div$Treated==0) #remove the last line corresponding to the update once no cells are remaining
+      }
+    } 
+    
     df_driver_phylo <- fread(file_driver_phylo)
     
     if(ExitCode4){
@@ -379,9 +378,13 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
     
     if(include_diversities){
       temp <- merge(df_out, df_div, all = TRUE)
-
-      temp<-temp[order(Generation, Treated), ]#ensure that the output file is correctly ordered
-
+      
+      if("Treated" %in% colnames(temp)) {
+        temp<-temp[order(Generation, Treated), ]#ensure that the output file is correctly ordered
+      } else {
+        temp<-temp[order(Generation), ]#ensure that the output file is correctly ordered
+      }
+      
     }else{ 
       temp <- df_out
     }
@@ -400,12 +403,12 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
     # add sweep_seq columns (specific for output.dat?)
     sweep_seq <- sweep_sequence(pop_df, lag_type = "proportions", breaks = 10)
     temp <- mutate(temp, mean_autocor = mean(sweep_seq), 
-                     log_mean_autocor = log(mean(sweep_seq)), 
-                     sqrt_mean_autocor = sqrt(mean(sweep_seq)), 
-                     skewness = skewness(sweep_seq))
+                   log_mean_autocor = log(mean(sweep_seq)), 
+                   sqrt_mean_autocor = sqrt(mean(sweep_seq)), 
+                   skewness = skewness(sweep_seq))
   } else if (df_type %in% c("allele_counts", "driver_allele_counts", "genotype_counts", "driver_genotype_counts", "diversities")){
     temp <- fread(paste0(full_dir, "/output_", df_type, ".dat"))
-
+    
     # add parameter columns:
     if(nrow(temp) == 0){
       temp <- NULL
@@ -479,9 +482,11 @@ combine_dfs <- function(full_dir, include_diversities = TRUE, df_type = "output"
 #' @param input_dir base input directory name
 #' @param include_diversities boolean whether to include diversity metrics
 #' @param df_type which dataframes to combine
+#' @param max_generation If TRUE then results are returned only for the final generation
 #' @param vaf_cut_off exclude genotypes with vaf lower cut off from combined_df
 #' @param generation Generation at which to filter (default NA corresponds to no filtering)
 #' @param numcells Number of cells at which to filter (default NA corresponds to no filtering)
+#' @param n_cores Number of cores to use (default NA is not parallelized)
 #' @param ExitCode4 : if TRUE, this means that we want to include in the analysis the simulations whose error message is Exit Code 4. This 
 #' will call the function combine_dfs with argument ExitCode4=TRUE. 
 #' @return a combined dataframe
@@ -656,19 +661,19 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
 }
 
 
-#' Function to return the lower bound of the confidence interval of a Spearman's rank correlation coef???cient.
+#' Function to return the lower bound of the confidence interval of a Spearman's rank correlation coefficient.
 #' This function is created to work with find_correlations
 #' @param Var1 first variable of interest
 #' @param Var2 second variable of interest
 #' 
-#' @return lower bound of the confidence interval of a Spearman's rank correlation coef???cient, computed by bootpstraping, 
-#' with nrep = 500 the number of replicates for bootstraping and conf.level = 0.95 the con???dence level of the interval.
+#' @return lower bound of the confidence interval of a Spearman's rank correlation coefficient, computed by bootpstraping, 
+#' with nrep = 500 the number of replicates for bootstraping and conf.level = 0.95 the confidence level of the interval.
 #' return NA if no confidence interval has been computed, instead of NULL.
 #' 
 #' @importFrom RVAideMemoire spearman.ci
 corCI_low<-function(Var1, Var2){
 
-  cor.result<-spearman.ci(Var1, Var2, nrep = 500, conf.level = 0.95)#Computes the con???dence interval of a Spearman's rank correlation coef???cient by bootstraping.
+  cor.result<-spearman.ci(Var1, Var2, nrep = 500, conf.level = 0.95)#Computes the confidence interval of a Spearman's rank correlation coefficient by bootstraping.
   
   if(is.null(cor.result$conf.int)){
     return(NA)
@@ -679,19 +684,19 @@ corCI_low<-function(Var1, Var2){
 }
 
 
-#' Function to return the upper bound of the confidence interval of a Spearman's rank correlation coef???cient.
+#' Function to return the upper bound of the confidence interval of a Spearman's rank correlation coefficient.
 #' This function is created to work with find_correlations
 #' @param Var1 first variable of interest
 #' @param Var2 second variable of interest
 #' 
-#' @return upper bound of the confidence interval of a Spearman's rank correlation coef???cient, computed by bootpstraping, 
-#' with nrep = 500 the number of replicates for bootstraping and conf.level = 0.95 the con???dence level of the interval.
+#' @return upper bound of the confidence interval of a Spearman's rank correlation coefficient, computed by bootpstraping, 
+#' with nrep = 500 the number of replicates for bootstraping and conf.level = 0.95 the confidence level of the interval.
 #' return NA if no confidence interval has been computed, instead of NULL.
 #' 
 #' @importFrom RVAideMemoire spearman.ci
 corCI_high<-function(Var1, Var2){
   
-  cor.result<-spearman.ci(Var1, Var2, nrep = 500, conf.level = 0.95)#Computes the con???dence interval of a Spearman's rank correlation coef???cient by bootstraping.
+  cor.result<-spearman.ci(Var1, Var2, nrep = 500, conf.level = 0.95)#Computes the confidence interval of a Spearman's rank correlation coefficient by bootstraping.
   if(is.null(cor.result$conf.int)){
     return(NA)
   }else{
@@ -728,6 +733,7 @@ cor_pval<-function(Var1, Var2){
 #' @param factor2 char name of second column in the summary dataframe
 #' @param result_name char name to give the result
 #' @param min_count minimum number of items in each column (otherwise result will be NA)
+#' @param ReturnCI whether to return confidence intervals
 #' 
 #' @return Correlation between the two columns (or NA if either factor1 or factor2 contains NA, 
 #' or if all values of factor1 or factor2 are identical).
@@ -742,8 +748,10 @@ cor_pval<-function(Var1, Var2){
 #' @examples
 #' s1 <- data.frame(a = 1:3, b = 1:3 * (1 + rnorm(3) / 10))
 #' find_correlations(s1, "a", "b", "c", 3)
-#' find_correlations(s1, "a", "b", "c", 3, TRUE) # also return 0.95-CI on the spearman correlation coefficient
+#' # also return 0.95-CI on the spearman correlation coefficient:
+#' find_correlations(s1, "a", "b", "c", 3, TRUE)
 find_correlations <- function(summary, factor1, factor2, result_name, min_count, ReturnCI =FALSE ) {
+  
   output<-summary %>% 
     mutate_(variance = interp(~var(var1, na.rm = TRUE), var1 = as.name(factor2))) %>% 
     filter(variance > 0) %>% # to avoid warnings when all values of factor2 are identical
@@ -795,7 +803,7 @@ find_correlations <- function(summary, factor1, factor2, result_name, min_count,
 #' @export
 #' 
 #' @examples
-#' get_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), 16, min_count = 5)
+#' get_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), 15, min_count = 2)
 get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL ) {
   
   col_nums <- c(1:num_parameters, which(colnames(summary) == "gap"), which(colnames(summary) == "start_size"))
@@ -816,11 +824,13 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, 
     
   }
   
+  if(!"mean_autocor" %in% colnames(summary)) summary$mean_autocor <- NA
   
   summary <- summary %>% 
     group_by_at(col_nums) %>% 
     filter(!is.na(outcome)) %>% 
     filter(var(outcome) > 0)
+  
   cor_summary <- summary %>% 
     summarise(mean_start_time = mean(start_time), 
               mean_DriverDiversity = mean(DriverDiversity),
@@ -834,7 +844,6 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, 
     if(Verbose){
       print(col_names_list[i])
     }
-    
     cor_summary_list[[i]] <- find_correlations(summary, "outcome", col_names_list[i], result_names_list[i], min_count, ReturnCI)
   } 
   for(i in 1:length(col_names_list)) cor_summary <- merge(cor_summary, cor_summary_list[[i]], all.x = TRUE)
@@ -869,11 +878,11 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, 
 #' 
 #' @examples
 #' wait_cor_summary <- get_wait_cor_summary(sum_df, 
-#' c("DriverDiversity", "DriverEdgeDiversity"), 16, min_count = 5)
+#' c("DriverDiversity", "DriverEdgeDiversity"), 15, min_count = 2)
 #' depth_wait_cor_summary <- get_wait_cor_summary(sum_df, 
 #' c(paste0("DriverDiversityFrom1SamplesAtDepth", 0:10), 
 #' paste0("DriverDiversityFrom4SamplesAtDepth", 0:10)), 
-#' 16, min_count = 5)
+#' 15, min_count = 2)
 get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL  ) {
   col_nums <- c(1:num_parameters, which(colnames(summary) == "start_size"))
   
@@ -892,6 +901,8 @@ get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_co
     col_nums <- col_nums[which(! col_nums %in% (which(colnames(summary) %in% VariablesToNotGroupBy)))]
     
   }
+  
+  if(!"mean_autocor" %in% colnames(summary)) summary$mean_autocor <- NA
   
   
   summary <- summary %>% 
@@ -958,6 +969,7 @@ refresh_data_files <- function() {
 #' Generate summary dataframe of correlations with the variable of interest "MainVariable" and the variables in col_names_list at different "start size"
 #' 
 #' @param summary dataframe including columns named "seed", "Generation", "start_time", "start_size", "gap" and "waiting_time"
+#' @param MainVariable variable of interest
 #' @param col_names_list char vector of column names in the summary dataframe
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' @param min_count minimum number of items in each column (otherwise result will be NA)
@@ -1049,6 +1061,7 @@ get_Variable_cor_summary <- function(summary,MainVariable,  col_names_list, num_
 #' Generate summary dataframe of correlations with the variable of interest "MainVariable" and the variables in col_names_list  at different "final size"
 #' 
 #' @param summary dataframe including columns named "seed", "Generation", "start_time", "start_size", "gap" and "waiting_time"
+#' @param MainVariable variable of interest
 #' @param col_names_list char vector of column names in the summary dataframe
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' @param min_count minimum number of items in each column (otherwise result will be NA)
