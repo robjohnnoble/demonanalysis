@@ -24,6 +24,7 @@ Apply a function to every combination of some sequences (parallelized version)
 \details{
 Adding the argument type="FORK" to makeCluster solves the problem of variables and function scope
 (this option means that the function automatically knows all environment variables)
-!!!! Notice that this only works on mac and linux, else we would need to use ? clusterExport ? and ?clusterEvalQ? : 
-something like : clusterExport(cl, list("all_output", "combine_dfs", "get_population_df", "fread"))!!!! to test if needed!!!!
+!!!! Notice that this only works on mac and linux, else we would need to use clusterExport and clusterEvalQ
+something like: clusterExport(cl, list("all_output", "combine_dfs", "get_population_df", "fread"))
+!!!! to test if needed!!!!
 }
