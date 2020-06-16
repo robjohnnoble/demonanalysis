@@ -13,7 +13,8 @@
 apply_combinations <- function(vec, fn, ...){
   vecs <- mapply(seq, 0, vec, SIMPLIFY = FALSE) # a list of n sequences, where n = length(vec)
   tmp <- do.call(expand.grid, vecs) # a data frame where each row is a permuation of values from the n sequences
-  apply(tmp, 1, fn, ...) # the result of applying fn to each row of tmp
+  res <- apply(tmp, 1, fn, ...) # the result of applying fn to each row of tmp
+  return(res)
 }
 
 #' Apply a function to every combination of some sequences (parallelized version)

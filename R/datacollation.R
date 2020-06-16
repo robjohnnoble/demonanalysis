@@ -539,14 +539,14 @@ all_output <- function(input_dir, include_diversities = TRUE, df_type = "output"
       
       if(msg == "Exit code 0"){
         return(combine_dfs(full_dir, include_diversities, 
-                                    df_type, max_generation, vaf_cut_off, generation, numcells, num_parameters))
+                                    df_type, max_generation, vaf_cut_off, generation, numcells, num_parameters, ExitCode4=FALSE))
         
       }else if (msg == "Exit code 4"){
         # if some of the simulations got "Exit code 4" and that we want to include them into the analysis, i.e by using ExitCode4=TRUE,
         # then we need to call combine_dfs with argument ExitCode4=TRUE 
         if(ExitCode4){
           return(combine_dfs(full_dir, include_diversities, 
-                                      df_type, max_generation, vaf_cut_off, generation, numcells, num_parameters,ExitCode4=ExitCode4 ))
+                                      df_type, max_generation, vaf_cut_off, generation, numcells, num_parameters,ExitCode4=TRUE ))
         }
         
       }
