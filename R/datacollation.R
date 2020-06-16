@@ -529,7 +529,7 @@ all_output <- function(input_dir, include_diversities = TRUE, df_type = "output"
   print("Finished checking", quote = FALSE)
   
   num_parameters <- count_parameters(input_dir)
-  each_df <- function(x, res) {
+  each_df <- function(x) {
     full_dir <- make_dir(input_dir, pars, x)
     msg <- final_error_message(full_dir)
     print(paste0(full_dir, " ", msg), quote = FALSE)
