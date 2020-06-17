@@ -94,6 +94,8 @@ parameter_names_and_values <- function(input_dir) {
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' 
 #' @return The same dataframe with additional columns. For each simulation, 
+#' "SimulationsDefinition" uniquely identifies each simulation; 
+#' "JustBeforeTTT" and "JustAfterTTT" are binary indicators for treated tumours; 
 #' "maxgen" is the maximum value of Generation; "gen_adj" is the time elapsed
 #' since Generation zero, relative to maxgen; SmoothNumCells is NumCells with loess smoothing; 
 #' SmoothRadius is the radius of a disc of area NumCells, after loess smoothing; 
@@ -114,24 +116,37 @@ add_columns <- function(df, num_parameters) {
   # the following line ensures that each row of df is unique
   df<-unique(df)
   
-  
+  # add SimulationsDefinition column, which uniquely identifies each simulation:
+  SimulationsDefinition<-as.data.frame(df)
+  SimulationsDefinition<-unique(SimulationsDefinition[, which(colnames(SimulationsDefinition) %in% c("K", "mu_driver_birth", "s_driver_birth", "seed"))])
+  SimulationsDefinition<-SimulationsDefinition[with(SimulationsDefinition, order(mu_driver_birth,s_driver_birth, seed)), ]
+  SimulationsDefinition<-SimulationsDefinition %>% mutate(SimulationNumber = seq_along(SimulationsDefinition[, 1]))
+  df <- merge(df, SimulationsDefinition, by= c("K", "mu_driver_birth", "s_driver_birth", "seed"))
   
   if("Treated" %in% colnames(df)){
     
-    #ensure that added columns are added separately for data recorded before the treatment and data recorded after.
+    # add binary JustBeforeTTT and JustAfterTTT columns:
+    df <- df %>% 
+      mutate(JustAfterTTT_tmp = c(0, diff(df$Treated)), 
+             JustBeforeTTT_tmp = c(diff(df$Treated), 0)) %>% 
+      mutate(JustAfterTTT = ifelse(JustAfterTTT_tmp == 1, 1, 0), 
+             JustBeforeTTT = ifelse(JustBeforeTTT_tmp == 1, 1, 0))
+    df$JustAfterTTT_tmp <- NULL
+    df$JustBeforeTTT_tmp <- NULL
     
+    # add maxgen and gen_adj separately for data recorded before and after treatment:
     df <- df %>% group_by_at(c(1:num_parameters, which(colnames(df) =="Treated") )) %>% 
       mutate(maxgen = max(Generation, na.rm = TRUE)) %>% 
       mutate(gen_adj = Generation / maxgen) %>% 
       ungroup()
     
+    # add SmoothNumCells and SmoothRadius separately for data recorded before and after treatment:
     df <- df %>% group_by_at(c(1:num_parameters, which(colnames(df) =="Treated") )) %>%
       mutate(SmoothNumCells = 10^loess(log10(NumCells) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
       mutate(SmoothRadius = 10^loess(log10(sqrt(NumCells/pi)) ~ log10(Generation + 1), span = 0.75)$fitted) %>% 
       ungroup()
     
-    
-    
+    # add GrowthRate and RadiusGrowthRate separately for data recorded before and after treatment:
     df <- df %>%  group_by_at(c(1:num_parameters, which(colnames(df) =="Treated") ))%>% 
       mutate(GrowthRate = (SmoothNumCells - lag(SmoothNumCells, 1)) / (Generation - lag(Generation, 1))) %>% 
       mutate(RadiusGrowthRate = (SmoothRadius - lag(SmoothRadius, 1)) / (Generation - lag(Generation, 1))) %>% 
