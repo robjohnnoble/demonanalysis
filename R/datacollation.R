@@ -608,6 +608,9 @@ count_seeds <- function(data, num_parameters) {
 #' reached end_size), "waiting_time" (difference between start_time and end_time), and "outcome" 
 #' (NumCells after "gap")
 #' 
+#' @details The special value start_size = -2 means we should use the measurement recorded just before treatment;
+#' start_size = -1 means we should use the measurement recorded just after treatment
+#' 
 #' @import dplyr
 #' @export
 #' 
@@ -621,19 +624,50 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
   data <- data %>% group_by_at(1:num_parameters)
   for(start_size in start_size_range) {
     for(gap in gap_range) {
-      if(start_size < final_size) {
-        new_summary1 <- data %>% 
-          filter(NumCells >= start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
-          summarise(start_time = min(Generation, na.rm = TRUE))
+      # start_size = -2 means we should use the measurement recorded just before treatment;
+      # start_size = -1 means we should use the measurement recorded just after treatment
+      if(start_size < 0) {
+        # get start_time:
+        if(start_size == -2) {
+          new_summary1 <- data %>% 
+            filter(JustBeforeTTT == 1) %>% 
+            summarise(start_time = min(Generation, na.rm = TRUE))
+        } else if(start_size == -1) {
+          new_summary1 <- data %>% 
+            filter(JustAfterTTT == 1) %>% 
+            summarise(start_time = min(Generation, na.rm = TRUE))
+        }
+        # get end_time:
         new_summary2 <- data %>% 
-          filter(NumCells >= final_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
-          summarise(end_time = min(Generation, na.rm = TRUE))
+          filter((NumCells >= final_size | NumCells == 0), !is.na(DriverDiversity), !is.na(NumClones), Treated == 1) %>% 
+          summarise(end_time = ifelse(max(NumCells == 0), Inf, min(Generation, na.rm = TRUE)))
+        # merge and then remove intermediate results that are no longer needed:
         new_summary12 <- merge(new_summary1, new_summary2, all.x = TRUE)
         remove(new_summary1)
         remove(new_summary2)
+        # get waiting_time:
         new_summary12 <- new_summary12 %>% 
           mutate(waiting_time = end_time - start_time)
       }
+      # start_size is achieved during tumour growth:
+      else if(start_size < final_size) {
+        # get start_time:
+        new_summary1 <- data %>% 
+          filter(NumCells >= start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
+          summarise(start_time = min(Generation, na.rm = TRUE))
+        # get end_time:
+        new_summary2 <- data %>% 
+          filter(NumCells >= final_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
+          summarise(end_time = min(Generation, na.rm = TRUE))
+        # merge and then remove intermediate results that are no longer needed:
+        new_summary12 <- merge(new_summary1, new_summary2, all.x = TRUE)
+        remove(new_summary1)
+        remove(new_summary2)
+        # get waiting_time:
+        new_summary12 <- new_summary12 %>% 
+          mutate(waiting_time = end_time - start_time)
+      }
+      # start_size is never achieved:
       else {
         new_summary12 <- data %>% 
           filter(NumCells >= start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
