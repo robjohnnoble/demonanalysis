@@ -637,6 +637,8 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
           filter(NumCells >= final_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
           summarise(end_time = min(Generation, na.rm = TRUE))
         new_summary12 <- merge(new_summary1, new_summary2, all.x = TRUE)
+        remove(new_summary1)
+        remove(new_summary2)
         new_summary12 <- new_summary12 %>% 
           mutate(waiting_time = end_time - start_time)
       }
@@ -653,11 +655,15 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
         filter(NumCells > start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
         summarise(outcome = max(NumCells, na.rm = TRUE))
       new_summary3$outcome <- ifelse(new_summary3$outcome == new_summary3a$outcome, NA, new_summary3$outcome)
+      remove(new_summary3a)
       new_summary4 <- data %>% 
         filter(NumCells > start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
         filter(Generation == min(Generation, na.rm = TRUE)) %>%
         mutate(gap = gap, start_size = start_size)
       summary <- rbind(summary, merge(merge(new_summary12, new_summary3, all.x = TRUE), new_summary4, all.x = TRUE))
+      remove(new_summary12)
+      remove(new_summary3)
+      remove(new_summary4)
     }
   }
   summary <- summary %>% 
