@@ -13,6 +13,7 @@ add_columns(df, num_parameters)
 }
 \value{
 The same dataframe with additional columns. For each simulation, 
+"JustBeforeTTT" and "JustAfterTTT" are binary indicators for treated tumours; 
 "maxgen" is the maximum value of Generation; "gen_adj" is the time elapsed
 since Generation zero, relative to maxgen; SmoothNumCells is NumCells with loess smoothing; 
 SmoothRadius is the radius of a disc of area NumCells, after loess smoothing; 

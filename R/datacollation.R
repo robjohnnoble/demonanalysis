@@ -94,7 +94,6 @@ parameter_names_and_values <- function(input_dir) {
 #' @param num_parameters number of parameters, accounting for the first set of columns in the dataframe
 #' 
 #' @return The same dataframe with additional columns. For each simulation, 
-#' "SimulationsDefinition" uniquely identifies each simulation; 
 #' "JustBeforeTTT" and "JustAfterTTT" are binary indicators for treated tumours; 
 #' "maxgen" is the maximum value of Generation; "gen_adj" is the time elapsed
 #' since Generation zero, relative to maxgen; SmoothNumCells is NumCells with loess smoothing; 
@@ -115,13 +114,6 @@ add_columns <- function(df, num_parameters) {
   
   # the following line ensures that each row of df is unique
   df<-unique(df)
-  
-  # add SimulationsDefinition column, which uniquely identifies each simulation:
-  SimulationsDefinition<-as.data.frame(df)
-  SimulationsDefinition<-unique(SimulationsDefinition[, which(colnames(SimulationsDefinition) %in% c("K", "mu_driver_birth", "s_driver_birth", "seed"))])
-  SimulationsDefinition<-SimulationsDefinition[with(SimulationsDefinition, order(mu_driver_birth,s_driver_birth, seed)), ]
-  SimulationsDefinition<-SimulationsDefinition %>% mutate(SimulationNumber = seq_along(SimulationsDefinition[, 1]))
-  df <- merge(df, SimulationsDefinition, by= c("K", "mu_driver_birth", "s_driver_birth", "seed"))
   
   if("Treated" %in% colnames(df)){
     
