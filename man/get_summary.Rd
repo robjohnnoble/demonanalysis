@@ -27,6 +27,10 @@ reached end_size), "waiting_time" (difference between start_time and end_time), 
 \description{
 Get summary metrics for one or more simulations
 }
+\details{
+The special value start_size = -2 means we should use the measurement recorded just before treatment;
+start_size = -1 means we should use the measurement recorded just after treatment
+}
 \examples{
 num_parameters = count_parameters(system.file("extdata", "", 
 package = "demonanalysis", mustWork = TRUE))
