@@ -165,6 +165,7 @@ add_columns <- function(df, num_parameters) {
   len1 <- length(df[is.na(df$GrowthRate), "GrowthRate"])
   len2 <- length(df[!is.na(df$GrowthRate) & is.na(lag(df$GrowthRate, 1)), "GrowthRate"])
   if(len1 == len2) {
+    print(paste("lengths are "), len1, len2)
     df[is.na(df$GrowthRate), "GrowthRate"] <- df[!is.na(df$GrowthRate) & is.na(lag(df$GrowthRate, 1)), "GrowthRate"]
     print("Lengths are OK")
   } else {
