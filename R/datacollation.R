@@ -631,11 +631,22 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
         if(start_size == -2) {
           new_summary1 <- data %>% 
             filter(JustBeforeTTT == 1 | (ExitCode4 == TRUE & NumCells >= final_size)) %>% 
-            summarise(start_time = min(Generation, na.rm = TRUE), ExitCode4 = ExitCode4[1])
+            summarise(start_time = min(Generation, na.rm = TRUE), ExitCode4 = first(ExitCode4))
+          
+          new_summary4 <- data %>% 
+            filter(JustBeforeTTT == 1 | (ExitCode4 == TRUE & NumCells >= final_size)) %>% 
+            filter(Generation == min(Generation, na.rm = TRUE)) %>%
+            mutate(gap = gap, start_size = start_size)
+          
         } else if(start_size == -1) {
           new_summary1 <- data %>% 
             filter(JustAfterTTT == 1 | (ExitCode4 == TRUE & NumCells >= final_size)) %>% 
-            summarise(start_time = min(Generation, na.rm = TRUE), ExitCode4 = ExitCode4[1])
+            summarise(start_time = min(Generation, na.rm = TRUE), ExitCode4 = first(ExitCode4))
+          
+          new_summary4 <- data %>% 
+            filter(JustAfterTTT == 1 | (ExitCode4 == TRUE & NumCells >= final_size)) %>% 
+            filter(Generation == min(Generation, na.rm = TRUE)) %>%
+            mutate(gap = gap, start_size = start_size)
         }
         # get end_time:
         new_summary2 <- data %>% 
@@ -648,7 +659,6 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
         # get waiting_time:
         new_summary12 <- new_summary12 %>% 
           mutate(waiting_time = end_time - start_time)
-        return(new_summary12)
       }
       # start_size is achieved during tumour growth:
       else if(start_size < final_size) {
@@ -660,6 +670,7 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
         new_summary2 <- data %>% 
           filter(NumCells >= final_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
           summarise(end_time = min(Generation, na.rm = TRUE))
+        
         # merge and then remove intermediate results that are no longer needed:
         new_summary12 <- merge(new_summary1, new_summary2, all.x = TRUE)
         remove(new_summary1)
@@ -674,27 +685,39 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
           filter(NumCells >= start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
           summarise(waiting_time = NA, start_time = NA, end_time = NA)
       }
-      new_summary3 <- data %>% 
-        filter(NumCells > start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
-        filter(Generation < min(Generation, na.rm = TRUE) + gap) %>% 
-        summarise(outcome = max(NumCells, na.rm = TRUE))
-      new_summary3a <- data %>% 
-        filter(NumCells > start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
-        summarise(outcome = max(NumCells, na.rm = TRUE))
-      new_summary3$outcome <- ifelse(new_summary3$outcome == new_summary3a$outcome, NA, new_summary3$outcome)
-      remove(new_summary3a)
-      new_summary4 <- data %>% 
-        filter(NumCells > start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
-        filter(Generation == min(Generation, na.rm = TRUE)) %>%
-        mutate(gap = gap, start_size = start_size)
-      summary <- rbind(summary, merge(merge(new_summary12, new_summary3, all.x = TRUE), new_summary4, all.x = TRUE))
-      remove(new_summary12)
-      remove(new_summary3)
-      remove(new_summary4)
+      
+      if(start_size > 0) {
+        # get outcome column:
+        new_summary3 <- data %>% 
+          filter(NumCells > start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
+          filter(Generation < min(Generation, na.rm = TRUE) + gap) %>% 
+          summarise(outcome = max(NumCells, na.rm = TRUE))
+        new_summary3a <- data %>% 
+          filter(NumCells > start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
+          summarise(outcome = max(NumCells, na.rm = TRUE))
+        new_summary3$outcome <- ifelse(new_summary3$outcome == new_summary3a$outcome, NA, new_summary3$outcome)
+        
+        remove(new_summary3a)
+        
+        new_summary4 <- data %>% 
+          filter(NumCells > start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
+          filter(Generation == min(Generation, na.rm = TRUE)) %>%
+          mutate(gap = gap, start_size = start_size)
+        
+        summary <- rbind(summary, merge(merge(new_summary12, new_summary3, all.x = TRUE), new_summary4, all.x = TRUE))
+        
+        remove(new_summary12)
+        remove(new_summary3)
+        remove(new_summary4)
+      }
+      else {
+        mutate(new_summary12, outcome = NA)
+        summary <- rbind(summary, merge(new_summary12, new_summary4, all.x = TRUE))
+      }
     }
   }
-  summary <- summary %>% 
-    mutate(Ratio = DriverEdgeDiversity / DriverDiversity)
+  # summary <- summary %>% 
+  #   mutate(Ratio = DriverEdgeDiversity / DriverDiversity)
   
   # check number of rows:
   count1 <- dim(summary)[1]
