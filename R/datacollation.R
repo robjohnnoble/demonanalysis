@@ -697,12 +697,12 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
           summarise(outcome = max(NumCells, na.rm = TRUE))
         new_summary3$outcome <- ifelse(new_summary3$outcome == new_summary3a$outcome, NA, new_summary3$outcome)
         
-        remove(new_summary3a)
-        
         new_summary4 <- data %>% 
           filter(NumCells > start_size, !is.na(DriverDiversity), !is.na(NumClones)) %>% 
           filter(Generation == min(Generation, na.rm = TRUE)) %>%
           mutate(gap = gap, start_size = start_size)
+        
+        remove(new_summary3a)
         
         summary <- rbind(summary, merge(merge(new_summary12, new_summary3, all.x = TRUE), new_summary4, all.x = TRUE))
         
@@ -716,8 +716,8 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
       }
     }
   }
-  # summary <- summary %>% 
-  #   mutate(Ratio = DriverEdgeDiversity / DriverDiversity)
+  summary <- summary %>%
+    mutate(Ratio = DriverEdgeDiversity / DriverDiversity)
   
   # check number of rows:
   count1 <- dim(summary)[1]
