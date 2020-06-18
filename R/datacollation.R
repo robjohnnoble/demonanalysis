@@ -727,6 +727,7 @@ get_summary <- function(data, start_size_range, gap_range, final_size, num_param
   # report number of replicates per parameter set:
   print("Number of seeds:", quote = FALSE)
   print(count_seeds(summary, num_parameters))
+  print("Done get_summary")
   
   return(summary)
 }
