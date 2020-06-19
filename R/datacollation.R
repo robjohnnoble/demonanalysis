@@ -830,7 +830,7 @@ find_correlations <- function(summary, factor1, factor2, result_name, min_count,
   
   output<-summary %>% 
     mutate_(variance = interp(~var(var1, na.rm = TRUE), var1 = as.name(factor2))) %>% 
-    filter(variance > 0) %>% # to avoid warnings when all values of factor2 are identical
+    filter(pmin(variance, 1e6) > 0) %>% # to avoid warnings when all values of factor2 are identical
     mutate_(count1 = interp(~length(var1), var1 = as.name(factor1)), 
             count2 = interp(~length(var2), var2 = as.name(factor2))) %>% 
     filter(count1 >= min_count, count2 >= min_count) 
@@ -905,7 +905,7 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, 
   summary <- summary %>% 
     group_by_at(col_nums) %>% 
     filter(!is.na(outcome)) %>% 
-    filter(var(outcome) > 0)
+    filter(var(pmin(outcome, 1e6)) > 0)
   
   cor_summary <- summary %>% 
     summarise(mean_start_time = mean(start_time), 
@@ -985,7 +985,7 @@ get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_co
     group_by_at(col_nums) %>% 
     filter(gap == min(gap, na.rm = TRUE)) %>% # choice of gap value doesn't affect the result
     filter(!is.na(waiting_time)) %>% 
-    filter(var(waiting_time) > 0)
+    filter(var(pmin(waiting_time, 1e6)) > 0)
   cor_summary <- summary %>% 
     summarise(mean_start_time = mean(start_time), 
               mean_DriverDiversity = mean(DriverDiversity), 
@@ -1096,7 +1096,7 @@ get_Variable_cor_summary <- function(summary,MainVariable,  col_names_list, num_
     filter(gap == min(gap, na.rm = TRUE)) %>% # choice of gap value doesn't affect the result
     filter(!is.na(get(MainVariable))) %>% 
     filter(!is.infinite(get(MainVariable))) %>% 
-    filter(var(get(MainVariable)) > 0)
+    filter(var(pmin(get(MainVariable), 1e6)) > 0)
   
   cor_summary <- summary %>% 
     summarise(mean_start_time = mean(start_time), 
@@ -1184,7 +1184,7 @@ get_Variable_cor_summary_FinalSize <- function(summary, MainVariable,  col_names
     filter(gap == min(gap, na.rm = TRUE)) %>% # choice of gap value doesn't affect the result
     filter(!is.na(get(MainVariable))) %>% 
     filter(!is.infinite(get(MainVariable)))  %>% 
-    filter(var(get(MainVariable))  > 0)
+    filter(var(pmin(get(MainVariable), 1e6)) > 0)
   
   cor_summary <- summary %>% 
     summarise(mean_start_time = mean(start_time), 
