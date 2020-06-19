@@ -5,7 +5,7 @@
 \title{Function to return the p.value of a two.sided test, using the spearman correlation coefficient for the test
 This function is created to work with find_correlations}
 \usage{
-cor_pval(Var1, Var2)
+cor_pval(Var1, Var2, method = "spearman")
 }
 \arguments{
 \item{Var1}{first variable of interest}

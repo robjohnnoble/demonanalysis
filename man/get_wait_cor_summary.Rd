@@ -5,7 +5,8 @@
 \title{Generate summary dataframe of correlations with "waiting_time"}
 \usage{
 get_wait_cor_summary(summary, col_names_list, num_parameters, min_count,
-  Verbose = FALSE, ReturnCI = FALSE, VariablesToNotGroupBy = NULL)
+  Verbose = FALSE, ReturnCI = FALSE, VariablesToNotGroupBy = NULL,
+  method = "spearman")
 }
 \arguments{
 \item{summary}{dataframe including columns named "seed", "Generation", "start_time", "start_size", "gap" and "waiting_time"}

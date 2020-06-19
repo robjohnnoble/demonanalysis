@@ -5,7 +5,8 @@
 \title{Generate summary dataframe of correlations with "outcome"}
 \usage{
 get_cor_summary(summary, col_names_list, num_parameters, min_count,
-  Verbose = FALSE, ReturnCI = FALSE, VariablesToNotGroupBy = NULL)
+  Verbose = FALSE, ReturnCI = FALSE, VariablesToNotGroupBy = NULL,
+  method = "spearman")
 }
 \arguments{
 \item{summary}{dataframe including columns named "seed", "Generation", "start_size", "start_time" and "outcome"}

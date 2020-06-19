@@ -5,7 +5,7 @@
 \title{Generic function to find a correlation between two columns of a dataframe}
 \usage{
 find_correlations(summary, factor1, factor2, result_name, min_count,
-  ReturnCI = FALSE)
+  ReturnCI = FALSE, method = "spearman")
 }
 \arguments{
 \item{summary}{dataframe}

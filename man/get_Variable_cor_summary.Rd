@@ -6,7 +6,7 @@
 \usage{
 get_Variable_cor_summary(summary, MainVariable, col_names_list,
   num_parameters, min_count, Verbose = FALSE, ReturnCI = FALSE,
-  VariablesToNotGroupBy = NULL)
+  VariablesToNotGroupBy = NULL, method = "spearman")
 }
 \arguments{
 \item{summary}{dataframe including columns named "seed", "Generation", "start_time", "start_size", "gap" and "waiting_time"}
