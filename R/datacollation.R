@@ -792,8 +792,8 @@ corCI_high<-function(Var1, Var2){
 #' 
 #' @importFrom stats cor.test
 #' 
-cor_pval<-function(Var1, Var2){
-  cor.result<-cor.test(Var1,Var2,  method = "spearman", alternative = "two.sided", exact=FALSE)
+cor_pval<-function(Var1, Var2, method = "spearman"){
+  cor.result<-cor.test(Var1,Var2,  method = method, alternative = "two.sided", exact=FALSE)
   if(is.null(cor.result$p.value)){
     return(NA)
   }else{
@@ -826,7 +826,7 @@ cor_pval<-function(Var1, Var2){
 #' find_correlations(s1, "a", "b", "c", 3)
 #' # also return 0.95-CI on the spearman correlation coefficient:
 #' find_correlations(s1, "a", "b", "c", 3, TRUE)
-find_correlations <- function(summary, factor1, factor2, result_name, min_count, ReturnCI =FALSE ) {
+find_correlations <- function(summary, factor1, factor2, result_name, min_count, ReturnCI =FALSE, method = "spearman") {
   
   output<-summary %>% 
     mutate_(variance = interp(~var(var1, na.rm = TRUE), var1 = as.name(factor2))) %>% 
@@ -837,14 +837,14 @@ find_correlations <- function(summary, factor1, factor2, result_name, min_count,
   
   if(ReturnCI){
     output<-output %>% 
-    summarise_(temp_name = interp(~cor(var1, var2, method = "spearman", use="na.or.complete"), var1 = as.name(factor1), var2 = as.name(factor2)),#  use="na.or.complete" ensure that missing values are handled by casewise deletion, and if there are no complete cases, that gives NA.
+    summarise_(temp_name = interp(~cor(var1, var2, method = method, use="na.or.complete"), var1 = as.name(factor1), var2 = as.name(factor2)),#  use="na.or.complete" ensure that missing values are handled by casewise deletion, and if there are no complete cases, that gives NA.
                temp_name_pval = interp(~cor_pval(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2)),
                temp_name_cilow = interp(~corCI_low(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2)),
                temp_name_cihigh = interp(~corCI_high(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2))) %>%
       rename_(.dots = setNames(c("temp_name", "temp_name_pval","temp_name_cilow", "temp_name_cihigh") , paste0(result_name,  c("", "_pVal", "_CI_low", "_CI_high")) ))
   }else{
     output<-output %>% 
-      summarise_(temp_name = interp(~cor(var1, var2, method = "spearman", use="na.or.complete"), var1 = as.name(factor1), var2 = as.name(factor2)),#  use="na.or.complete" ensure that missing values are handled by casewise deletion, and if there are no complete cases, that gives NA.
+      summarise_(temp_name = interp(~cor(var1, var2, method = method, use="na.or.complete"), var1 = as.name(factor1), var2 = as.name(factor2)),#  use="na.or.complete" ensure that missing values are handled by casewise deletion, and if there are no complete cases, that gives NA.
                  temp_name_pval = interp(~cor_pval(var1, var2), var1 = as.name(factor1), var2 = as.name(factor2))) %>%
       rename_(.dots = setNames(c("temp_name", "temp_name_pval") , paste0(result_name,  c("", "_pVal")) ))
     
@@ -880,7 +880,7 @@ find_correlations <- function(summary, factor1, factor2, result_name, min_count,
 #' 
 #' @examples
 #' get_cor_summary(sum_df, c("DriverDiversity", "DriverEdgeDiversity"), 15, min_count = 2)
-get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL ) {
+get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL, method = "spearman") {
   
   col_nums <- c(1:num_parameters, which(colnames(summary) == "gap"), which(colnames(summary) == "start_size"))
   
@@ -920,7 +920,7 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, 
     if(Verbose){
       print(col_names_list[i])
     }
-    cor_summary_list[[i]] <- find_correlations(summary, "outcome", col_names_list[i], result_names_list[i], min_count, ReturnCI)
+    cor_summary_list[[i]] <- find_correlations(summary, "outcome", col_names_list[i], result_names_list[i], min_count, ReturnCI, method = method)
   } 
   for(i in 1:length(col_names_list)) cor_summary <- merge(cor_summary, cor_summary_list[[i]], all.x = TRUE)
   
@@ -959,7 +959,7 @@ get_cor_summary <- function(summary, col_names_list, num_parameters, min_count, 
 #' c(paste0("DriverDiversityFrom1SamplesAtDepth", 0:10), 
 #' paste0("DriverDiversityFrom4SamplesAtDepth", 0:10)), 
 #' 15, min_count = 2)
-get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL  ) {
+get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL , method = "spearman" ) {
   col_nums <- c(1:num_parameters, which(colnames(summary) == "start_size"))
   
   col_nums <- col_nums[col_nums != which(colnames(summary) == "seed")]
@@ -1000,7 +1000,7 @@ get_wait_cor_summary <- function(summary, col_names_list, num_parameters, min_co
       print(col_names_list[i])
     }
     
-    cor_summary_list[[i]] <- find_correlations(summary, "waiting_time", col_names_list[i], result_names_list[i], min_count, ReturnCI)
+    cor_summary_list[[i]] <- find_correlations(summary, "waiting_time", col_names_list[i], result_names_list[i], min_count, ReturnCI, method = method)
     
   }
   for(i in 1:length(col_names_list)) cor_summary <- merge(cor_summary, cor_summary_list[[i]], all.x = TRUE)
@@ -1065,7 +1065,7 @@ refresh_data_files <- function() {
 #' @import dplyr
 #' @importFrom stats var
 #' @export
-get_Variable_cor_summary <- function(summary,MainVariable,  col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL) {
+get_Variable_cor_summary <- function(summary,MainVariable,  col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL, method = "spearman") {
   
   col_nums <- c(1:num_parameters, which(colnames(summary) == "start_size"))
   
@@ -1123,7 +1123,7 @@ get_Variable_cor_summary <- function(summary,MainVariable,  col_names_list, num_
       print(col_names_list[i])
     }
     
-    cor_summary_list[[i]] <- find_correlations(summary, eval(MainVariable), col_names_list[i], result_names_list[i], min_count,ReturnCI)
+    cor_summary_list[[i]] <- find_correlations(summary, eval(MainVariable), col_names_list[i], result_names_list[i], min_count,ReturnCI, method = method)
     
   }
   for(i in 1:length(col_names_list)) cor_summary <- merge(cor_summary, cor_summary_list[[i]], all.x = TRUE)
@@ -1157,7 +1157,7 @@ get_Variable_cor_summary <- function(summary,MainVariable,  col_names_list, num_
 #' @import dplyr
 #' @importFrom stats var
 #' @export
-get_Variable_cor_summary_FinalSize <- function(summary, MainVariable,  col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL) {
+get_Variable_cor_summary_FinalSize <- function(summary, MainVariable,  col_names_list, num_parameters, min_count, Verbose=FALSE,ReturnCI=FALSE, VariablesToNotGroupBy=NULL, method = "spearman") {
   
   col_nums <- c(1:num_parameters, which(colnames(summary) == "FinalSize"))
   
@@ -1214,7 +1214,7 @@ get_Variable_cor_summary_FinalSize <- function(summary, MainVariable,  col_names
       print(col_names_list[i])
     }
     
-    cor_summary_list[[i]] <- find_correlations(summary, eval(MainVariable), col_names_list[i], result_names_list[i], min_count,ReturnCI)
+    cor_summary_list[[i]] <- find_correlations(summary, eval(MainVariable), col_names_list[i], result_names_list[i], min_count,ReturnCI, method = method)
     
   }
   
