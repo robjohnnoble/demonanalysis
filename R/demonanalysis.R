@@ -199,7 +199,7 @@ prob_successful_migration <- function(mat) {
 grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FALSE, legend_title = "") {
   if(length(image_df) == 1) return(ggplot(data.frame()) + theme_classic())
   h2 <- ggplot(image_df, aes(x, y, fill = z)) + 
-    geom_raster() +
+    geom_tile() +
     theme(legend.position = ifelse(add_legend, "right", "none")) + 
     theme(axis.line=element_blank(),axis.text.x=element_blank(),
           axis.text.y=element_blank(),axis.ticks=element_blank(),
@@ -208,7 +208,7 @@ grid_plot <- function(image_df, palette = NA, discrete = FALSE, add_legend = FAL
           panel.grid.minor=element_blank(),plot.background=element_blank())
   if(discrete) {
     if(!is.na(palette[1])) h2 <- h2 + scale_fill_manual(name = legend_title, values = palette, na.value="white") +
-      scale_color_manual(values = palette, na.value="white")
+        scale_color_manual(values = palette, na.value="white")
   }
   else {
     if(is.na(palette[1])) {
@@ -274,9 +274,9 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
   h3 <- Muller_plot(Muller_df, colour_by = "BirthRate", add_legend = TRUE) + 
     scale_fill_distiller(palette = "RdBu", direction = -1, 
                          limits = c(min_birth_rate, max_birth_rate)) #+ 
-    #theme(line = element_blank(), rect = element_blank()) + 
-    #scale_x_continuous(breaks = c(0, round(max(Muller_df$Generation)))) + 
-    #scale_y_continuous(breaks = NULL)
+  #theme(line = element_blank(), rect = element_blank()) + 
+  #scale_x_continuous(breaks = c(0, round(max(Muller_df$Generation)))) + 
+  #scale_y_continuous(breaks = NULL)
   
   if(include_genotype_plots) {
     image_df <- image_df_from_grid_file(paste0(path, "output_driversgrid.dat"), trim)
@@ -303,7 +303,7 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
   if(include_genotype_plots) {
     if(!is.na(output_filename) & !is.na(output_dir)) {
       if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1000, height = 1000, res = 100)
-      else pdf(paste0(output_dir,output_filename,".pdf"), width = 10, height = 10)
+      else pdf(paste0(output_dir,output_filename,".pdf"), width = 7, height = 7)
     }
     lay <- rbind(c(1,1,2),
                  c(3,3,3),
@@ -313,7 +313,7 @@ plot_all_images <- function(path, output_filename = NA, file_type = "png", outpu
   } else {
     if(!is.na(output_filename) & !is.na(output_dir)) {
       if(file_type == "png") png(paste0(output_dir,output_filename,".png"), width = 1000, height = 180, res = 100)
-      else pdf(paste0(output_dir,output_filename,".pdf"), width = 10, height = 1.8)
+      else pdf(paste0(output_dir,output_filename,".pdf"), width = 7, height = 12.6)
     }
     lay <- rbind(c(1,2,3))
     print(grid.arrange(h3, g2, g3, layout_matrix = lay))
@@ -352,7 +352,7 @@ plot_figure2 <- function(path, output_filename = NA, file_type = "png", output_d
   names(dd.col) <- dd
   
   h1 <- Muller_plot(Muller_df, colour_by = "col_index", palette = dd.col)
-
+  
   image_df <- image_df_from_grid_file(paste0(path, "output_driversgrid.dat"), trim)
   image_df[which(image_df$z > 0), "z"] <- as.character(image_df[which(image_df$z > 0), "z"] %% 25 + 1)
   g1 <- grid_plot(image_df, palette = dd.col, discrete = TRUE)
@@ -399,7 +399,7 @@ plot_figure2 <- function(path, output_filename = NA, file_type = "png", output_d
 #' package = "demonanalysis", mustWork = TRUE), colour_by = "DriverMutations", 
 #' palette = c("black", "blue", "grey", "red"), discrete = TRUE)
 plot_allelecount_vs_origintime <- function (file_or_dataframe, log = FALSE, colour_by = "BirthRate", 
-                                               palette = NA, discrete = FALSE, print_plot = TRUE) 
+                                            palette = NA, discrete = FALSE, print_plot = TRUE) 
 {
   if ("data.frame" %in% class(file_or_dataframe)) 
     df <- file_or_dataframe
@@ -439,11 +439,11 @@ plot_allelecount_vs_origintime <- function (file_or_dataframe, log = FALSE, colo
   
   if("DriverIdentity" %in% colnames(df)) {
     q <- ggplot(df[order(df$DriverIdentity),], aes_string("OriginTime", 
-                                                        "Descendants", size = "BirthRate", colour = colour_by)) + 
+                                                          "Descendants", size = "BirthRate", colour = colour_by)) + 
       geom_point(alpha = 1) + theme_classic()
   } else {
     q <- ggplot(df[order(df$Identity),], aes_string("OriginTime", 
-                                                          "Descendants", size = "BirthRate", colour = colour_by)) + 
+                                                    "Descendants", size = "BirthRate", colour = colour_by)) + 
       geom_point(alpha = 1) + theme_classic()
   }
   if (!discrete) {
@@ -805,7 +805,7 @@ plot_all_charts <- function(path_or_dflist, output_filename = NA, file_type = "p
     # plot 3:
     if(is.na(max_size)) plot_first_inc_moment(df1$Frequency, df1$Count, xlab = paste0(axis_lab[i], " frequency"), condense = "continuous")
     else plot_first_inc_moment(df1$Size, df1$Count, xlab = paste0(axis_lab2[i], " size"), max_size = max_size, condense = "discrete")
-
+    
     # plot 4:
     plot_cum_dist(df1, generation = "nofilter", xlab = paste0("inverse ", axis_lab[i], " frequency"))
   }
@@ -832,8 +832,8 @@ plot_mutation_waves <- function (df)
   start_ind <- which(colnames(df) == "CellsWith1Drivers")
   end_ind <- dim(df)[2]
   plot(CellsWith0Drivers ~ Generation, data = df, type = "l", 
-    ylim = c(10, max(df$NumCells)), log = "y", xlab = "Cell generations", 
-    ylab = "Number of cells", col="brown")
+       ylim = c(10, max(df$NumCells)), log = "y", xlab = "Cell generations", 
+       ylab = "Number of cells", col="brown")
   title("Mutation waves")
   for (i in start_ind:end_ind) lines(df[, i] ~ df$Generation, col = i)
 }
@@ -1044,7 +1044,7 @@ driver_geno_div_df_batch <- function(input_dir) {
 #' package = "demonanalysis", mustWork = TRUE))
 #' plot_driver_geno_div(sum_df)
 plot_driver_geno_div <- function(sum_df, output_filename = NA, file_type = "png", output_dir = NA, log_y = FALSE, 
-                                       facet1 = "migration_type", facet2 = "migration_edge_only", height = 1, width = 1, ymax = 100, selected_seed = NA) {
+                                 facet1 = "migration_type", facet2 = "migration_edge_only", height = 1, width = 1, ymax = 100, selected_seed = NA) {
   if(!is.na(output_dir)) if(substr(output_dir, nchar(output_dir), nchar(output_dir)) != "/") output_dir <- paste0(output_dir, "/")
   
   g1 <- ggplot(sum_df, aes(x = Generation, y = Diversity, group = interaction(K, migration_type, migration_edge_only, seed, s_driver_birth), colour = factor(K))) + 
