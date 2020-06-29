@@ -9,31 +9,22 @@ To plot charts of variant allele frequencies and genotype sizes use `plot_all_ch
 
 To plot Muller plots and grids use `plot_all_images`.
 
-## From a batch of simulations run on Euler
+## From a batch of simulations run on a cluster
 
 ### Updating
 
-To pull the latest github version into an Euler folder (using terminal):
+To pull the latest github version into a cluster folder (using terminal):
 
 ```
-cd /cluster/work/bewi/members/lebidm_nobelr/demonanalysis/
+cd XXX # replace XXX with the path to the cluster folder
 git pull https://github.com/robjohnnoble/demonanalysis
 ```
 
-To install that version on an Euler profile (using R):
+To install that version on a cluster profile (using R):
 
 ``` r
 library(devtools)
-install("/cluster/work/bewi/members/lebidm_nobelr/demonanalysis")
-```
-
-### Launch R on Euler
-
-```
-module load new
-module load r/3.4.0
-R
-setwd("/cluster/work/bewi/members/lebidm_nobelr/demon")
+install("XXX/demonanalysis") # replace XXX with the path to the cluster folder
 ```
 
 ### Set up
@@ -103,26 +94,6 @@ summary <- get_summary(data, start_size_range, gap_range, final_size, num_parame
 cor_summary <- get_cor_summary(summary, c("DriverDiversity", "DriverEdgeDiversity"), num_parameters = num_parameters, min_count = 5) # summary dataframe of correlations with "outcome", including all cells
 wait_cor_summary <- get_wait_cor_summary(summary, c("DriverDiversity", "DriverEdgeDiversity"), num_parameters = num_parameters, min_count = 5) # summary dataframe of correlations with "waiting_time", including all cells
 depth_wait_cor_summary <- get_wait_cor_summary(summary, c(paste0("DriverDiversityFrom1SamplesAtDepth", 0:10), paste0("DriverDiversityFrom4SamplesAtDepth", 0:10)), num_parameters, min_count = 5) # summary dataframe of correlations with "waiting_time" for different biopsy protocols
-```
-
-### Write data
-
-``` r
-write.csv(data, paste0(output_dir_data, "/data.csv"), row.names = FALSE)
-```
-
-### Read data
-
-``` r
-library(readr)
-data <- read_csv(paste0(output_dir_data, "/data.csv"), guess_max = 1E4) # large value of guess_max improves guessing of column types
-```
-
-### Copy plots from Euler
-
-```
-cd /Users/rnoble/Documents/MontpellierDocuments/Models/Demon/EulerPlots/April_6th_batch1/Charts
-scp -r rnoble@euler.ethz.ch:/cluster/work/bewi/members/lebidm_nobelr/demon/plots/April_6th_batch1/chart* ./
 ```
 
 
